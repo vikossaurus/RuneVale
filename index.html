@@ -1,0 +1,2833 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini RPG</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    user-select:none;
+}
+
+body{
+    margin:0;
+    overflow:hidden;
+    background:#111;
+    font-family:Arial,sans-serif;
+    color:white;
+}
+
+canvas{
+    display:block;
+    background:#4d8045;
+    cursor:crosshair;
+}
+
+/* ================= HUD ================= */
+
+#hud{
+    position:fixed;
+    top:10px;
+    left:10px;
+    width:260px;
+    padding:12px;
+    background:rgba(0,0,0,.78);
+    border:2px solid #555;
+    border-radius:10px;
+    z-index:10;
+}
+
+.stat{
+    margin:5px 0;
+}
+
+.bar{
+    width:100%;
+    height:12px;
+    background:#333;
+    border-radius:6px;
+    overflow:hidden;
+    margin-top:3px;
+}
+
+#hpBar{
+    height:100%;
+    background:#e63946;
+    width:100%;
+}
+
+#xpBar{
+    height:100%;
+    background:#4cc9f0;
+    width:0%;
+}
+
+#hud button{
+    width:100%;
+    margin-top:7px;
+    padding:8px;
+    border:0;
+    border-radius:6px;
+    cursor:pointer;
+    background:#333;
+    color:white;
+}
+
+#hud button:hover{
+    background:#555;
+}
+
+/* ================= MENSAGEM ================= */
+
+#message{
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(0,0,0,.8);
+    padding:10px 18px;
+    border-radius:8px;
+    color:#ffd166;
+    font-weight:bold;
+    z-index:20;
+    pointer-events:none;
+}
+
+/* ================= INVENTÁRIO ================= */
+
+#inventory{
+    display:none;
+    position:fixed;
+    right:20px;
+    top:20px;
+    width:280px;
+    background:rgba(20,20,20,.95);
+    border:2px solid #777;
+    border-radius:12px;
+    padding:15px;
+    z-index:30;
+}
+
+#inventory h2{
+    margin-top:0;
+}
+
+.item{
+    padding:10px;
+    margin:6px 0;
+    background:#292929;
+    border-radius:7px;
+}
+
+/* ================= SHOP ================= */
+
+#shop{
+    display:none;
+    position:fixed;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:330px;
+    background:rgba(20,20,20,.97);
+    border:3px solid #d9a441;
+    border-radius:14px;
+    padding:20px;
+    z-index:40;
+}
+
+.shopItem{
+    background:#292929;
+    padding:12px;
+    margin:8px 0;
+    border-radius:8px;
+}
+
+.shopItem button{
+    margin-top:7px;
+    width:100%;
+    padding:8px;
+    border:0;
+    border-radius:6px;
+    background:#d9a441;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.shopItem button:hover{
+    background:#f0bd4f;
+}
+
+.close{
+    background:#9b2226 !important;
+    color:white;
+}
+
+/* ================= MORTE ================= */
+
+#death{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.8);
+    z-index:100;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+}
+
+#death h1{
+    color:#e63946;
+    font-size:50px;
+}
+
+#death button{
+    padding:12px 25px;
+    border:0;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:18px;
+}
+
+/* ================= CONTROLOS ================= */
+
+#controls{
+    position:fixed;
+    bottom:10px;
+    left:10px;
+    padding:8px 12px;
+    background:rgba(0,0,0,.65);
+    border-radius:8px;
+    font-size:13px;
+    z-index:10;
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="game"></canvas>
+
+<!-- ================= HUD ================= -->
+
+<div id="hud">
+
+    <b>⚔️ MINI RPG</b>
+
+    <div class="stat">
+        ❤️ HP:
+        <span id="hpText">100/100</span>
+
+        <div class="bar">
+            <div id="hpBar"></div>
+        </div>
+    </div>
+
+    <div class="stat">
+        ⭐ XP:
+        <span id="xpText">0/100</span>
+
+        <div class="bar">
+            <div id="xpBar"></div>
+        </div>
+    </div>
+
+    <div class="stat">
+        🆙 Nível:
+        <span id="level">1</span>
+    </div>
+
+    <div class="stat">
+        💰 Ouro:
+        <span id="gold">25</span>
+    </div>
+
+    <div class="stat">
+        ⚔️ Dano:
+        <span id="damage">5</span>
+    </div>
+
+    <div class="stat">
+        👾 Mobs vivos:
+        <span id="mobCount">35</span>
+    </div>
+
+    <button onclick="toggleInventory()">
+        🎒 Inventário
+    </button>
+
+    <button onclick="returnToSpawn()">
+        🏠 Voltar ao Spawn
+    </button>
+
+</div>
+
+<!-- ================= MENSAGEM ================= -->
+
+<div id="message"></div>
+
+<!-- ================= INVENTÁRIO ================= -->
+
+<div id="inventory">
+
+    <h2>🎒 Inventário</h2>
+
+    <div class="item">
+        🗡️ <b>Mini Espada de Bosta</b><br>
+        Dano base: +5
+    </div>
+
+    <div class="item">
+        🧪 Poções:
+        <span id="potionCount">3</span>
+    </div>
+
+    <div class="item">
+        🪵 Escudo de Madeira
+    </div>
+
+    <div class="item">
+        💰 Ouro:
+        <span id="inventoryGold">25</span>
+    </div>
+
+    <button onclick="toggleInventory()">
+        Fechar
+    </button>
+
+</div>
+
+<!-- ================= SHOP ================= -->
+
+<div id="shop">
+
+    <h2>🛒 Loja do Mestre</h2>
+
+    <p>
+        💰 Ouro:
+        <b id="shopGold">25</b>
+    </p>
+
+    <div class="shopItem">
+
+        🧪 <b>Poção</b>
+
+        <br>
+
+        Recupera 30 HP.
+
+        <br>
+
+        <b>10 ouro</b>
+
+        <button onclick="buyPotion()">
+            Comprar
+        </button>
+
+    </div>
+
+    <div class="shopItem">
+
+        ⚔️ <b>Espada de Ferro</b>
+
+        <br>
+
+        +10 dano.
+
+        <br>
+
+        <b>50 ouro</b>
+
+        <button onclick="buySword()">
+            Comprar
+        </button>
+
+    </div>
+
+    <div class="shopItem">
+
+        🛡️ <b>Escudo</b>
+
+        <br>
+
+        +20 HP máximo.
+
+        <br>
+
+        <b>40 ouro</b>
+
+        <button onclick="buyShield()">
+            Comprar
+        </button>
+
+    </div>
+
+    <button
+        class="close"
+        onclick="closeShop()"
+    >
+        Fechar
+    </button>
+
+</div>
+
+<!-- ================= MORTE ================= -->
+
+<div id="death">
+
+    <h1>💀 MORRESTE</h1>
+
+    <p>Voltaste ao spawn.</p>
+
+    <button onclick="returnToSpawn()">
+        🏠 Voltar
+    </button>
+
+</div>
+
+<!-- ================= CONTROLOS ================= -->
+
+<div id="controls">
+
+    🖱️ Clique no chão = andar |
+    🖱️ Clique num mob = atacar |
+    WASD = mover |
+    I = inventário |
+    E = loja
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   CANVAS
+========================================================= */
+
+const canvas =
+    document.getElementById("game");
+
+const ctx =
+    canvas.getContext("2d");
+
+ctx.imageSmoothingEnabled = false;
+
+
+function resize(){
+
+    canvas.width =
+        window.innerWidth;
+
+    canvas.height =
+        window.innerHeight;
+
+}
+
+resize();
+
+window.addEventListener(
+    "resize",
+    resize
+);
+
+
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const TILE = 40;
+
+const SPAWN = {
+    x:0,
+    y:0
+};
+
+
+/* =========================================================
+   PLAYER
+========================================================= */
+
+const player = {
+
+    x:SPAWN.x,
+    y:SPAWN.y,
+
+    size:26,
+
+    speed:4,
+
+    hp:100,
+
+    maxHp:100,
+
+    level:1,
+
+    xp:0,
+
+    xpNeeded:100,
+
+    gold:25,
+
+    damage:5,
+
+    potions:3,
+
+    hasSword:false,
+
+    hasShield:false,
+
+    attackCooldown:0,
+
+    target:null,
+
+    moveTarget:null
+
+};
+
+
+/* =========================================================
+   INPUT
+========================================================= */
+
+const keys = {};
+
+
+document.addEventListener(
+    "keydown",
+    e => {
+
+        keys[
+            e.key.toLowerCase()
+        ] = true;
+
+
+        if(
+            e.key === " " ||
+            e.key.startsWith("Arrow")
+        ){
+
+            e.preventDefault();
+
+        }
+
+
+        if(
+            e.key.toLowerCase() === "i"
+        ){
+
+            toggleInventory();
+
+        }
+
+
+        if(
+            e.key.toLowerCase() === "e"
+        ){
+
+            interact();
+
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keyup",
+    e => {
+
+        keys[
+            e.key.toLowerCase()
+        ] = false;
+
+    }
+);
+
+
+/* =========================================================
+   MAPA PROCEDURAL
+========================================================= */
+
+function randomHash(x,y){
+
+    const n =
+        Math.sin(
+            x * 127.1 +
+            y * 311.7
+        ) * 43758.5453;
+
+    return n -
+        Math.floor(n);
+
+}
+
+
+function getTile(x,y){
+
+    const distanceFromSpawn =
+        Math.sqrt(
+            x*x +
+            y*y
+        );
+
+
+    /*
+        Área inicial segura
+    */
+
+    if(
+        distanceFromSpawn < 6
+    ){
+
+        return "grass";
+
+    }
+
+
+    const r =
+        randomHash(x,y);
+
+
+    if(r < 0.07){
+
+        return "water";
+
+    }
+
+
+    if(r < 0.13){
+
+        return "tree";
+
+    }
+
+
+    if(r < 0.18){
+
+        return "rock";
+
+    }
+
+
+    return "grass";
+
+}
+
+
+function worldBlocked(x,y){
+
+    const tx =
+        Math.floor(
+            x / TILE
+        );
+
+    const ty =
+        Math.floor(
+            y / TILE
+        );
+
+
+    const tile =
+        getTile(
+            tx,
+            ty
+        );
+
+
+    return (
+        tile === "water" ||
+        tile === "tree" ||
+        tile === "rock"
+    );
+
+}
+
+
+function canMove(x,y){
+
+    const s =
+        player.size / 2;
+
+
+    return (
+
+        !worldBlocked(
+            x-s,
+            y-s
+        )
+
+        &&
+
+        !worldBlocked(
+            x+s,
+            y-s
+        )
+
+        &&
+
+        !worldBlocked(
+            x-s,
+            y+s
+        )
+
+        &&
+
+        !worldBlocked(
+            x+s,
+            y+s
+        )
+
+    );
+
+}
+
+
+/* =========================================================
+   NPC
+========================================================= */
+
+const npc = {
+
+    x:120,
+
+    y:0,
+
+    name:"Mestre"
+
+};
+
+
+/* =========================================================
+   MOBS
+========================================================= */
+
+const mobs = [];
+
+
+const mobStats = {
+
+    slime:{
+        hp:30,
+        damage:2,
+        xp:20,
+        speed:.45
+    },
+
+    goblin:{
+        hp:45,
+        damage:3,
+        xp:30,
+        speed:.55
+    },
+
+    bat:{
+        hp:25,
+        damage:4,
+        xp:25,
+        speed:.8
+    },
+
+    orc:{
+        hp:80,
+        damage:6,
+        xp:50,
+        speed:.35
+    },
+
+    wolf:{
+        hp:55,
+        damage:5,
+        xp:40,
+        speed:.7
+    }
+
+};
+
+
+function createMobs(){
+
+    mobs.length = 0;
+
+
+    const types = Object.keys(
+        mobStats
+    );
+
+
+    for(
+        let i=0;
+        i<35;
+        i++
+    ){
+
+        let tx;
+        let ty;
+
+
+        do{
+
+            tx =
+                Math.floor(
+                    (Math.random()-.5)*80
+                );
+
+            ty =
+                Math.floor(
+                    (Math.random()-.5)*80
+                );
+
+        }while(
+
+            Math.abs(tx)<8 &&
+            Math.abs(ty)<8
+
+        );
+
+
+        const type =
+            types[
+                Math.floor(
+                    Math.random()*
+                    types.length
+                )
+            ];
+
+
+        const stats =
+            mobStats[type];
+
+
+        mobs.push({
+
+            x:
+                tx*TILE+20,
+
+            y:
+                ty*TILE+20,
+
+            type:type,
+
+            hp:stats.hp,
+
+            maxHp:stats.hp,
+
+            damage:stats.damage,
+
+            xp:stats.xp,
+
+            speed:stats.speed,
+
+            alive:true,
+
+            respawn:0
+
+        });
+
+    }
+
+}
+
+createMobs();
+
+
+/* =========================================================
+   DISTÂNCIA
+========================================================= */
+
+function distance(a,b){
+
+    return Math.hypot(
+        a.x-b.x,
+        a.y-b.y
+    );
+
+}
+
+
+/* =========================================================
+   CLIQUE
+========================================================= */
+
+canvas.addEventListener(
+    "mousedown",
+    e => {
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+
+        const mouseX =
+            e.clientX -
+            rect.left;
+
+
+        const mouseY =
+            e.clientY -
+            rect.top;
+
+
+        const camera =
+            getCamera();
+
+
+        const worldX =
+            mouseX +
+            camera.x;
+
+
+        const worldY =
+            mouseY +
+            camera.y;
+
+
+        let clickedMob = null;
+
+
+        /*
+            Verificar mobs
+        */
+
+        for(
+            const mob of mobs
+        ){
+
+            if(!mob.alive){
+
+                continue;
+
+            }
+
+
+            const d =
+                Math.hypot(
+                    worldX-mob.x,
+                    worldY-mob.y
+                );
+
+
+            if(d < 30){
+
+                clickedMob =
+                    mob;
+
+                break;
+
+            }
+
+        }
+
+
+        /*
+            CLICOU NO MOB
+        */
+
+        if(clickedMob){
+
+            player.target =
+                clickedMob;
+
+            player.moveTarget =
+                null;
+
+
+            showMessage(
+                "🎯 Alvo: " +
+                clickedMob.type
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+            CLICOU NO CHÃO
+        */
+
+        player.target =
+            null;
+
+
+        player.moveTarget = {
+
+            x:worldX,
+
+            y:worldY
+
+        };
+
+    }
+);
+
+
+/* =========================================================
+   MOVIMENTO ATÉ PONTO
+========================================================= */
+
+function moveToPoint(x,y){
+
+    let dx =
+        x-player.x;
+
+    let dy =
+        y-player.y;
+
+
+    const len =
+        Math.hypot(
+            dx,
+            dy
+        );
+
+
+    if(len < 5){
+
+        player.moveTarget =
+            null;
+
+        return;
+
+    }
+
+
+    dx /= len;
+
+    dy /= len;
+
+
+    const nx =
+        player.x +
+        dx*player.speed;
+
+
+    const ny =
+        player.y +
+        dy*player.speed;
+
+
+    if(
+        canMove(
+            nx,
+            player.y
+        )
+    ){
+
+        player.x = nx;
+
+    }
+
+
+    if(
+        canMove(
+            player.x,
+            ny
+        )
+    ){
+
+        player.y = ny;
+
+    }
+
+}
+
+
+/* =========================================================
+   MOVIMENTO DO PLAYER
+========================================================= */
+
+function updatePlayer(){
+
+    /*
+        Se tem alvo,
+        aproxima-se automaticamente.
+    */
+
+    if(
+        player.target &&
+        player.target.alive
+    ){
+
+        const target =
+            player.target;
+
+
+        const d =
+            distance(
+                player,
+                target
+            );
+
+
+        if(d > 65){
+
+            moveToPoint(
+                target.x,
+                target.y
+            );
+
+        }
+
+
+        return;
+
+    }
+
+
+    /*
+        Movimento por clique
+    */
+
+    if(
+        player.moveTarget
+    ){
+
+        moveToPoint(
+            player.moveTarget.x,
+            player.moveTarget.y
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+        WASD
+    */
+
+    let dx=0;
+    let dy=0;
+
+
+    if(
+        keys["w"] ||
+        keys["arrowup"]
+    ){
+
+        dy--;
+
+    }
+
+
+    if(
+        keys["s"] ||
+        keys["arrowdown"]
+    ){
+
+        dy++;
+
+    }
+
+
+    if(
+        keys["a"] ||
+        keys["arrowleft"]
+    ){
+
+        dx--;
+
+    }
+
+
+    if(
+        keys["d"] ||
+        keys["arrowright"]
+    ){
+
+        dx++;
+
+    }
+
+
+    if(dx || dy){
+
+        const len =
+            Math.hypot(
+                dx,
+                dy
+            );
+
+
+        dx /= len;
+
+        dy /= len;
+
+
+        const nx =
+            player.x +
+            dx*player.speed;
+
+
+        const ny =
+            player.y +
+            dy*player.speed;
+
+
+        if(
+            canMove(
+                nx,
+                player.y
+            )
+        ){
+
+            player.x=nx;
+
+        }
+
+
+        if(
+            canMove(
+                player.x,
+                ny
+            )
+        ){
+
+            player.y=ny;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   COMBATE
+========================================================= */
+
+function updateCombat(){
+
+    if(
+        !player.target ||
+        !player.target.alive
+    ){
+
+        player.target =
+            null;
+
+        return;
+
+    }
+
+
+    const mob =
+        player.target;
+
+
+    const d =
+        distance(
+            player,
+            mob
+        );
+
+
+    /*
+        Ainda longe
+    */
+
+    if(d > 70){
+
+        return;
+
+    }
+
+
+    /*
+        Ataque automático
+    */
+
+    if(
+        player.attackCooldown <= 0
+    ){
+
+        player.attackCooldown =
+            30;
+
+
+        mob.hp -=
+            player.damage;
+
+
+        showMessage(
+            "⚔️ -" +
+            player.damage +
+            " " +
+            mob.type
+        );
+
+
+        if(
+            mob.hp <= 0
+        ){
+
+            killMob(mob);
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   MATAR MOB
+========================================================= */
+
+function killMob(mob){
+
+    mob.alive =
+        false;
+
+
+    mob.respawn =
+        600;
+
+
+    const gold =
+        5 +
+        Math.floor(
+            Math.random()*10
+        );
+
+
+    player.gold +=
+        gold;
+
+
+    gainXP(
+        mob.xp
+    );
+
+
+    showMessage(
+        "💀 " +
+        mob.type +
+        " derrotado! +" +
+        mob.xp +
+        " XP +" +
+        gold +
+        " ouro"
+    );
+
+
+    if(
+        player.target === mob
+    ){
+
+        player.target =
+            null;
+
+    }
+
+}
+
+
+/* =========================================================
+   ATUALIZAR MOBS
+========================================================= */
+
+function updateMobs(){
+
+    for(
+        const mob of mobs
+    ){
+
+        /*
+            Respawn
+        */
+
+        if(
+            !mob.alive
+        ){
+
+            mob.respawn--;
+
+
+            if(
+                mob.respawn <= 0
+            ){
+
+                mob.hp =
+                    mob.maxHp;
+
+                mob.alive =
+                    true;
+
+            }
+
+
+            continue;
+
+        }
+
+
+        /*
+            IA
+        */
+
+        const d =
+            distance(
+                player,
+                mob
+            );
+
+
+        if(
+            d < 300
+        ){
+
+            let dx =
+                player.x -
+                mob.x;
+
+
+            let dy =
+                player.y -
+                mob.y;
+
+
+            const len =
+                Math.hypot(
+                    dx,
+                    dy
+                );
+
+
+            if(len > 0){
+
+                dx /= len;
+
+                dy /= len;
+
+
+                const nx =
+                    mob.x +
+                    dx*mob.speed;
+
+
+                const ny =
+                    mob.y +
+                    dy*mob.speed;
+
+
+                if(
+                    !worldBlocked(
+                        nx,
+                        mob.y
+                    )
+                ){
+
+                    mob.x =
+                        nx;
+
+                }
+
+
+                if(
+                    !worldBlocked(
+                        mob.x,
+                        ny
+                    )
+                ){
+
+                    mob.y =
+                        ny;
+
+                }
+
+            }
+
+
+            /*
+                Ataque do mob
+            */
+
+            if(
+                d < 32 &&
+                Math.random() < .025
+            ){
+
+                player.hp -=
+                    mob.damage;
+
+
+                showMessage(
+                    "💥 -" +
+                    mob.damage +
+                    " HP"
+                );
+
+
+                if(
+                    player.hp <= 0
+                ){
+
+                    die();
+
+                }
+
+            }
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   XP
+========================================================= */
+
+function gainXP(amount){
+
+    player.xp +=
+        amount;
+
+
+    while(
+        player.xp >=
+        player.xpNeeded
+    ){
+
+        player.xp -=
+            player.xpNeeded;
+
+
+        player.level++;
+
+
+        player.xpNeeded +=
+            50;
+
+
+        player.maxHp +=
+            20;
+
+
+        player.hp =
+            player.maxHp;
+
+
+        player.damage +=
+            2;
+
+
+        showMessage(
+            "🎉 NÍVEL " +
+            player.level +
+            "!"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   MORTE
+========================================================= */
+
+function die(){
+
+    player.hp=0;
+
+    player.target=null;
+
+    player.moveTarget=null;
+
+
+    document.getElementById(
+        "death"
+    ).style.display =
+        "flex";
+
+}
+
+
+function closeDeath(){
+
+    document.getElementById(
+        "death"
+    ).style.display =
+        "none";
+
+}
+
+
+/* =========================================================
+   SPAWN
+========================================================= */
+
+function returnToSpawn(){
+
+    player.x =
+        SPAWN.x;
+
+    player.y =
+        SPAWN.y;
+
+
+    player.hp =
+        player.maxHp;
+
+
+    player.target =
+        null;
+
+
+    player.moveTarget =
+        null;
+
+
+    closeDeath();
+
+
+    showMessage(
+        "🏠 Voltaste ao Spawn!"
+    );
+
+}
+
+
+/* =========================================================
+   NPC
+========================================================= */
+
+function interact(){
+
+    if(
+        distance(
+            player,
+            npc
+        ) < 80
+    ){
+
+        openShop();
+
+    }
+
+}
+
+
+/* =========================================================
+   SHOP
+========================================================= */
+
+function openShop(){
+
+    document.getElementById(
+        "shop"
+    ).style.display =
+        "block";
+
+
+    updateShop();
+
+}
+
+
+function closeShop(){
+
+    document.getElementById(
+        "shop"
+    ).style.display =
+        "none";
+
+}
+
+
+function updateShop(){
+
+    document.getElementById(
+        "shopGold"
+    ).innerText =
+        player.gold;
+
+}
+
+
+function buyPotion(){
+
+    if(
+        player.gold < 10
+    ){
+
+        showMessage(
+            "❌ Ouro insuficiente!"
+        );
+
+        return;
+
+    }
+
+
+    player.gold -=
+        10;
+
+
+    player.potions++;
+
+
+    showMessage(
+        "🧪 Compraste uma poção!"
+    );
+
+
+    updateShop();
+
+    updateHUD();
+
+}
+
+
+function buySword(){
+
+    if(
+        player.hasSword
+    ){
+
+        showMessage(
+            "❌ Já tens a espada!"
+        );
+
+        return;
+
+    }
+
+
+    if(
+        player.gold < 50
+    ){
+
+        showMessage(
+            "❌ Precisas de 50 ouro!"
+        );
+
+        return;
+
+    }
+
+
+    player.gold -=
+        50;
+
+
+    player.damage +=
+        10;
+
+
+    player.hasSword =
+        true;
+
+
+    showMessage(
+        "⚔️ Espada de Ferro equipada!"
+    );
+
+
+    updateShop();
+
+    updateHUD();
+
+}
+
+
+function buyShield(){
+
+    if(
+        player.hasShield
+    ){
+
+        showMessage(
+            "❌ Já tens o escudo!"
+        );
+
+        return;
+
+    }
+
+
+    if(
+        player.gold < 40
+    ){
+
+        showMessage(
+            "❌ Precisas de 40 ouro!"
+        );
+
+        return;
+
+    }
+
+
+    player.gold -=
+        40;
+
+
+    player.maxHp +=
+        20;
+
+
+    player.hp +=
+        20;
+
+
+    player.hasShield =
+        true;
+
+
+    showMessage(
+        "🛡️ Escudo equipado!"
+    );
+
+
+    updateShop();
+
+    updateHUD();
+
+}
+
+
+/* =========================================================
+   POÇÃO
+========================================================= */
+
+function usePotion(){
+
+    if(
+        player.potions <= 0
+    ){
+
+        showMessage(
+            "❌ Não tens poções!"
+        );
+
+        return;
+
+    }
+
+
+    if(
+        player.hp >=
+        player.maxHp
+    ){
+
+        showMessage(
+            "❤️ Já tens HP máximo!"
+        );
+
+        return;
+
+    }
+
+
+    player.potions--;
+
+
+    player.hp =
+        Math.min(
+            player.maxHp,
+            player.hp+30
+        );
+
+
+    showMessage(
+        "🧪 +30 HP"
+    );
+
+
+    updateHUD();
+
+}
+
+
+/* =========================================================
+   INVENTÁRIO
+========================================================= */
+
+function toggleInventory(){
+
+    const inv =
+        document.getElementById(
+            "inventory"
+        );
+
+
+    if(
+        inv.style.display ===
+        "block"
+    ){
+
+        inv.style.display =
+            "none";
+
+    }else{
+
+        inv.style.display =
+            "block";
+
+    }
+
+
+    document.getElementById(
+        "potionCount"
+    ).innerText =
+        player.potions;
+
+
+    document.getElementById(
+        "inventoryGold"
+    ).innerText =
+        player.gold;
+
+}
+
+
+/* =========================================================
+   MENSAGENS
+========================================================= */
+
+let messageTimer=0;
+
+
+function showMessage(text){
+
+    document.getElementById(
+        "message"
+    ).innerText =
+        text;
+
+
+    messageTimer =
+        100;
+
+}
+
+
+/* =========================================================
+   HUD
+========================================================= */
+
+function updateHUD(){
+
+    document.getElementById(
+        "hpText"
+    ).innerText =
+        Math.max(
+            0,
+            player.hp
+        ) +
+        "/" +
+        player.maxHp;
+
+
+    document.getElementById(
+        "hpBar"
+    ).style.width =
+        (
+            player.hp /
+            player.maxHp *
+            100
+        ) +
+        "%";
+
+
+    document.getElementById(
+        "xpText"
+    ).innerText =
+        player.xp +
+        "/" +
+        player.xpNeeded;
+
+
+    document.getElementById(
+        "xpBar"
+    ).style.width =
+        (
+            player.xp /
+            player.xpNeeded *
+            100
+        ) +
+        "%";
+
+
+    document.getElementById(
+        "level"
+    ).innerText =
+        player.level;
+
+
+    document.getElementById(
+        "gold"
+    ).innerText =
+        player.gold;
+
+
+    document.getElementById(
+        "damage"
+    ).innerText =
+        player.damage;
+
+
+    document.getElementById(
+        "potionCount"
+    ).innerText =
+        player.potions;
+
+
+    document.getElementById(
+        "inventoryGold"
+    ).innerText =
+        player.gold;
+
+
+    document.getElementById(
+        "mobCount"
+    ).innerText =
+        mobs.filter(
+            m => m.alive
+        ).length;
+
+}
+
+
+/* =========================================================
+   CÂMARA
+========================================================= */
+
+function getCamera(){
+
+    return {
+
+        x:
+            player.x -
+            canvas.width/2,
+
+        y:
+            player.y -
+            canvas.height/2
+
+    };
+
+}
+
+
+/* =========================================================
+   DESENHAR MUNDO
+========================================================= */
+
+function drawWorld(){
+
+    const camera =
+        getCamera();
+
+
+    const startX =
+        Math.floor(
+            camera.x/TILE
+        )-2;
+
+
+    const endX =
+        Math.ceil(
+            (
+                camera.x+
+                canvas.width
+            )/TILE
+        )+2;
+
+
+    const startY =
+        Math.floor(
+            camera.y/TILE
+        )-2;
+
+
+    const endY =
+        Math.ceil(
+            (
+                camera.y+
+                canvas.height
+            )/TILE
+        )+2;
+
+
+    for(
+        let y=startY;
+        y<=endY;
+        y++
+    ){
+
+        for(
+            let x=startX;
+            x<=endX;
+            x++
+        ){
+
+            const px =
+                x*TILE -
+                camera.x;
+
+
+            const py =
+                y*TILE -
+                camera.y;
+
+
+            const tile =
+                getTile(
+                    x,
+                    y
+                );
+
+
+            /*
+                GRAMA
+            */
+
+            if(
+                tile === "grass"
+            ){
+
+                ctx.fillStyle =
+                    ((x+y)&1)
+                    ? "#609653"
+                    : "#5a8e4d";
+
+
+                ctx.fillRect(
+                    px,
+                    py,
+                    TILE,
+                    TILE
+                );
+
+            }
+
+
+            /*
+                ÁGUA
+            */
+
+            if(
+                tile === "water"
+            ){
+
+                ctx.fillStyle =
+                    "#3275a8";
+
+
+                ctx.fillRect(
+                    px,
+                    py,
+                    TILE,
+                    TILE
+                );
+
+
+                ctx.fillStyle =
+                    "rgba(255,255,255,.12)";
+
+
+                ctx.fillRect(
+                    px+5,
+                    py+10,
+                    20,
+                    2
+                );
+
+            }
+
+
+            /*
+                ÁRVORE
+            */
+
+            if(
+                tile === "tree"
+            ){
+
+                ctx.fillStyle =
+                    "#4b3621";
+
+
+                ctx.fillRect(
+                    px+17,
+                    py+20,
+                    7,
+                    18
+                );
+
+
+                ctx.fillStyle =
+                    "#235c2b";
+
+
+                ctx.beginPath();
+
+
+                ctx.arc(
+                    px+20,
+                    py+17,
+                    17,
+                    0,
+                    Math.PI*2
+                );
+
+
+                ctx.fill();
+
+            }
+
+
+            /*
+                ROCHA
+            */
+
+            if(
+                tile === "rock"
+            ){
+
+                ctx.fillStyle =
+                    "#777";
+
+
+                ctx.beginPath();
+
+
+                ctx.arc(
+                    px+20,
+                    py+23,
+                    13,
+                    0,
+                    Math.PI*2
+                );
+
+
+                ctx.fill();
+
+            }
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   NPC
+========================================================= */
+
+function drawNPC(){
+
+    const camera =
+        getCamera();
+
+
+    const x =
+        npc.x -
+        camera.x;
+
+
+    const y =
+        npc.y -
+        camera.y;
+
+
+    /*
+        Corpo
+    */
+
+    ctx.fillStyle =
+        "#9b5de5";
+
+
+    ctx.fillRect(
+        x-14,
+        y-5,
+        28,
+        25
+    );
+
+
+    /*
+        Cabeça
+    */
+
+    ctx.fillStyle =
+        "#ffd6a5";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        x,
+        y-13,
+        10,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+        Chapéu
+    */
+
+    ctx.fillStyle =
+        "#542e8a";
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        x-15,
+        y-18
+    );
+
+
+    ctx.lineTo(
+        x,
+        y-40
+    );
+
+
+    ctx.lineTo(
+        x+15,
+        y-18
+    );
+
+
+    ctx.fill();
+
+
+    /*
+        Nome
+    */
+
+    ctx.fillStyle =
+        "white";
+
+
+    ctx.font =
+        "bold 13px Arial";
+
+
+    ctx.textAlign =
+        "center";
+
+
+    ctx.fillText(
+        "🛒 SHOP",
+        x,
+        y-48
+    );
+
+}
+
+
+/* =========================================================
+   DESENHAR MOBS
+========================================================= */
+
+function drawMobs(){
+
+    const camera =
+        getCamera();
+
+
+    for(
+        const mob of mobs
+    ){
+
+        if(
+            !mob.alive
+        ){
+
+            continue;
+
+        }
+
+
+        /*
+            Não desenhar mobs muito longe
+        */
+
+        if(
+
+            Math.abs(
+                mob.x-player.x
+            ) > 900
+
+            ||
+
+            Math.abs(
+                mob.y-player.y
+            ) > 700
+
+        ){
+
+            continue;
+
+        }
+
+
+        const x =
+            mob.x -
+            camera.x;
+
+
+        const y =
+            mob.y -
+            camera.y;
+
+
+        let color =
+            "#ef476f";
+
+
+        if(
+            mob.type === "slime"
+        ){
+
+            color =
+                "#70e000";
+
+        }
+
+
+        if(
+            mob.type === "goblin"
+        ){
+
+            color =
+                "#588157";
+
+        }
+
+
+        if(
+            mob.type === "bat"
+        ){
+
+            color =
+                "#6a4c93";
+
+        }
+
+
+        if(
+            mob.type === "orc"
+        ){
+
+            color =
+                "#386641";
+
+        }
+
+
+        if(
+            mob.type === "wolf"
+        ){
+
+            color =
+                "#777";
+
+        }
+
+
+        /*
+            ALVO
+        */
+
+        if(
+            player.target === mob
+        ){
+
+            ctx.strokeStyle =
+                "#ffd166";
+
+
+            ctx.lineWidth=3;
+
+
+            ctx.beginPath();
+
+
+            ctx.arc(
+                x,
+                y,
+                25,
+                0,
+                Math.PI*2
+            );
+
+
+            ctx.stroke();
+
+        }
+
+
+        /*
+            CORPO
+        */
+
+        ctx.fillStyle =
+            color;
+
+
+        ctx.beginPath();
+
+
+        ctx.arc(
+            x,
+            y,
+            mob.type === "orc"
+                ? 20
+                : 15,
+            0,
+            Math.PI*2
+        );
+
+
+        ctx.fill();
+
+
+        /*
+            Olhos
+        */
+
+        ctx.fillStyle =
+            "white";
+
+
+        ctx.fillRect(
+            x-7,
+            y-4,
+            4,
+            4
+        );
+
+
+        ctx.fillRect(
+            x+4,
+            y-4,
+            4,
+            4
+        );
+
+
+        /*
+            Barra de HP
+        */
+
+        ctx.fillStyle =
+            "#222";
+
+
+        ctx.fillRect(
+            x-20,
+            y-30,
+            40,
+            6
+        );
+
+
+        ctx.fillStyle =
+            "#e63946";
+
+
+        ctx.fillRect(
+            x-20,
+            y-30,
+            40 *
+            (
+                mob.hp/
+                mob.maxHp
+            ),
+            6
+        );
+
+
+        /*
+            Nome
+        */
+
+        ctx.fillStyle =
+            "white";
+
+
+        ctx.font =
+            "11px Arial";
+
+
+        ctx.textAlign =
+            "center";
+
+
+        ctx.fillText(
+            mob.type,
+            x,
+            y+30
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PLAYER
+========================================================= */
+
+function drawPlayer(){
+
+    const camera =
+        getCamera();
+
+
+    const x =
+        player.x -
+        camera.x;
+
+
+    const y =
+        player.y -
+        camera.y;
+
+
+    /*
+        Sombra
+    */
+
+    ctx.fillStyle =
+        "rgba(0,0,0,.25)";
+
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        x,
+        y+17,
+        16,
+        6,
+        0,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+        Corpo
+    */
+
+    ctx.fillStyle =
+        "#3498db";
+
+
+    ctx.fillRect(
+        x-13,
+        y-5,
+        26,
+        24
+    );
+
+
+    /*
+        Cabeça
+    */
+
+    ctx.fillStyle =
+        "#ffd6a5";
+
+
+    ctx.fillRect(
+        x-9,
+        y-18,
+        18,
+        15
+    );
+
+
+    /*
+        Cabelo
+    */
+
+    ctx.fillStyle =
+        "#542e2e";
+
+
+    ctx.fillRect(
+        x-9,
+        y-19,
+        18,
+        5
+    );
+
+
+    /*
+        Espada
+    */
+
+    ctx.strokeStyle =
+        "#ddd";
+
+
+    ctx.lineWidth=4;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        x+10,
+        y+4
+    );
+
+
+    ctx.lineTo(
+        x+22,
+        y-8
+    );
+
+
+    ctx.stroke();
+
+
+    /*
+        Indicador se tiver alvo
+    */
+
+    if(
+        player.target &&
+        player.target.alive
+    ){
+
+        ctx.strokeStyle =
+            "#ffd166";
+
+
+        ctx.lineWidth=2;
+
+
+        ctx.beginPath();
+
+
+        ctx.arc(
+            x,
+            y,
+            24,
+            0,
+            Math.PI*2
+        );
+
+
+        ctx.stroke();
+
+    }
+
+}
+
+
+/* =========================================================
+   GAME LOOP
+========================================================= */
+
+function gameLoop(){
+
+    updatePlayer();
+
+
+    updateCombat();
+
+
+    updateMobs();
+
+
+    if(
+        player.attackCooldown > 0
+    ){
+
+        player.attackCooldown--;
+
+    }
+
+
+    if(
+        messageTimer > 0
+    ){
+
+        messageTimer--;
+
+    }else{
+
+        document.getElementById(
+            "message"
+        ).innerText =
+            "";
+
+    }
+
+
+    updateHUD();
+
+
+    /*
+        Limpar
+    */
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    /*
+        Desenhar
+    */
+
+    drawWorld();
+
+    drawNPC();
+
+    drawMobs();
+
+    drawPlayer();
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =========================================================
+   INICIAR
+========================================================= */
+
+updateHUD();
+
+gameLoop();
+
+</script>
+
+</body>
+</html>
