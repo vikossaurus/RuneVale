@@ -2,520 +2,2583 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini RPG</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RuneVale</title>
 
 <style>
-
 *{
     box-sizing:border-box;
-    user-select:none;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
 }
 
 body{
-    margin:0;
-    overflow:hidden;
-    background:#111;
     font-family:Arial,sans-serif;
+    background:#090914;
     color:white;
+    overflow-x:hidden;
 }
 
-canvas{
-    display:block;
-    background:#4d8045;
-    cursor:crosshair;
+button,a{
+    font-family:inherit;
 }
 
-/* ================= HUD ================= */
+/* ================= NAV ================= */
 
-#hud{
+nav{
+    height:70px;
+    background:#111122;
+    border-bottom:1px solid #302c52;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 6%;
     position:fixed;
-    top:10px;
-    left:10px;
-    width:260px;
-    padding:12px;
-    background:rgba(0,0,0,.78);
-    border:2px solid #555;
+    top:0;
+    left:0;
+    right:0;
+    z-index:1000;
+}
+
+.logo{
+    color:#ffd84d;
+    font-size:25px;
+    font-weight:bold;
+}
+
+.nav-links{
+    display:flex;
+    gap:25px;
+    align-items:center;
+}
+
+.nav-links a{
+    color:#ddd;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.nav-links a:hover{
+    color:#ffd84d;
+}
+
+.play-nav{
+    background:#ffd84d;
+    color:#111!important;
+    padding:11px 18px;
     border-radius:10px;
-    z-index:10;
 }
 
-.stat{
-    margin:5px 0;
-}
-
-.bar{
-    width:100%;
-    height:12px;
-    background:#333;
-    border-radius:6px;
-    overflow:hidden;
-    margin-top:3px;
-}
-
-#hpBar{
-    height:100%;
-    background:#e63946;
-    width:100%;
-}
-
-#xpBar{
-    height:100%;
-    background:#4cc9f0;
-    width:0%;
-}
-
-#hud button{
-    width:100%;
-    margin-top:7px;
-    padding:8px;
-    border:0;
-    border-radius:6px;
-    cursor:pointer;
-    background:#333;
-    color:white;
-}
-
-#hud button:hover{
-    background:#555;
-}
-
-/* ================= MENSAGEM ================= */
-
-#message{
-    position:fixed;
-    top:20px;
-    left:50%;
-    transform:translateX(-50%);
-    background:rgba(0,0,0,.8);
-    padding:10px 18px;
-    border-radius:8px;
-    color:#ffd166;
-    font-weight:bold;
-    z-index:20;
-    pointer-events:none;
-}
-
-/* ================= INVENTÁRIO ================= */
-
-#inventory{
+.menu-button{
     display:none;
-    position:fixed;
-    right:20px;
-    top:20px;
-    width:280px;
-    background:rgba(20,20,20,.95);
-    border:2px solid #777;
-    border-radius:12px;
+    background:none;
+    border:0;
+    color:white;
+    font-size:30px;
+    cursor:pointer;
+}
+
+.mobile-menu{
+    display:none;
+    position:absolute;
+    top:70px;
+    left:0;
+    right:0;
+    background:#111122;
+    border-bottom:1px solid #302c52;
     padding:15px;
-    z-index:30;
 }
 
-#inventory h2{
-    margin-top:0;
+.mobile-menu.active{
+    display:block;
 }
 
-.item{
-    padding:10px;
-    margin:6px 0;
-    background:#292929;
-    border-radius:7px;
-}
-
-/* ================= SHOP ================= */
-
-#shop{
-    display:none;
-    position:fixed;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    width:330px;
-    background:rgba(20,20,20,.97);
-    border:3px solid #d9a441;
-    border-radius:14px;
-    padding:20px;
-    z-index:40;
-}
-
-.shopItem{
-    background:#292929;
-    padding:12px;
-    margin:8px 0;
+.mobile-menu a{
+    display:block;
+    padding:15px;
+    color:white;
+    text-decoration:none;
     border-radius:8px;
 }
 
-.shopItem button{
-    margin-top:7px;
-    width:100%;
-    padding:8px;
-    border:0;
-    border-radius:6px;
-    background:#d9a441;
-    cursor:pointer;
+.mobile-menu a:hover{
+    background:#20203a;
+}
+
+.mobile-play{
+    background:#ffd84d!important;
+    color:#111!important;
+    text-align:center;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+    min-height:100vh;
+    padding:150px 8% 80px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #31235c 0%,
+            #111122 35%,
+            #090914 75%
+        );
+}
+
+.hero-content{
+    max-width:850px;
+}
+
+.hero h1{
+    font-size:80px;
+    color:#ffd84d;
+    text-shadow:0 0 35px #8b5cf6;
+    margin-bottom:20px;
+}
+
+.hero p{
+    font-size:21px;
+    color:#c9c9d8;
+    line-height:1.6;
+    margin-bottom:35px;
+}
+
+.big-play{
+    display:inline-block;
+    background:#ffd84d;
+    color:#111;
+    padding:18px 38px;
+    border-radius:14px;
+    font-size:21px;
+    font-weight:bold;
+    text-decoration:none;
+    box-shadow:0 0 25px #ffd84d55;
+    transition:.2s;
+}
+
+.big-play:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 40px #ffd84d88;
+}
+
+/* ================= SECTIONS ================= */
+
+section{
+    padding:90px 8%;
+}
+
+.section-title{
+    text-align:center;
+    color:#ffd84d;
+    font-size:38px;
+    margin-bottom:45px;
+}
+
+.features{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:25px;
+}
+
+.card{
+    background:#141426;
+    border:1px solid #302c52;
+    border-radius:18px;
+    padding:30px;
+    text-align:center;
+    transition:.2s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+    border-color:#ffd84d;
+}
+
+.card h3{
+    margin:15px 0;
+    color:#ffd84d;
+}
+
+.card p{
+    color:#aaaabd;
+    line-height:1.5;
+}
+
+.controls{
+    max-width:800px;
+    margin:auto;
+}
+
+.control{
+    display:flex;
+    justify-content:space-between;
+    padding:18px 20px;
+    margin:10px 0;
+    background:#141426;
+    border:1px solid #302c52;
+    border-radius:12px;
+}
+
+.key{
+    color:#ffd84d;
     font-weight:bold;
 }
 
-.shopItem button:hover{
-    background:#f0bd4f;
+.support{
+    text-align:center;
+    background:#0d0d1b;
 }
 
-.close{
-    background:#9b2226 !important;
+.kofi{
+    display:inline-block;
+    margin-top:20px;
+    padding:16px 30px;
+    border-radius:12px;
+    background:#ff5e7d;
     color:white;
+    text-decoration:none;
+    font-weight:bold;
 }
 
-/* ================= MORTE ================= */
+footer{
+    text-align:center;
+    padding:30px;
+    color:#777;
+    background:#080810;
+}
 
-#death{
+/* ================= GAME ================= */
+
+#gameScreen{
     display:none;
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,.8);
-    z-index:100;
+    background:#070b0a;
+    z-index:2000;
+}
+
+#gameCanvas{
+    display:block;
+    width:100%;
+    height:100%;
+    background:#152516;
+    cursor:crosshair;
+}
+
+#hud{
+    position:absolute;
+    top:15px;
+    left:15px;
+    z-index:10;
+
+    background:#111c15dd;
+    border:1px solid #7c6230;
+    border-radius:12px;
+
+    padding:12px;
+    min-width:225px;
+
+    box-shadow:0 5px 25px #0008;
+}
+
+#hud div{
+    margin:4px 0;
+}
+
+.hp{
+    color:#ff6666;
+}
+
+.xp{
+    color:#70c8ff;
+}
+
+/* XP BAR */
+
+.xpBar{
+    width:100%;
+    height:7px;
+    background:#252535;
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:6px;
+}
+
+#xpBarFill{
+    height:100%;
+    width:0%;
+    background:#70c8ff;
+    transition:.2s;
+}
+
+/* GAME BUTTONS */
+
+#gameButtons{
+    position:absolute;
+    top:15px;
+    right:15px;
+    z-index:10;
+
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+}
+
+.gameBtn{
+    background:#151525dd;
+    color:white;
+    border:1px solid #80652e;
+    border-radius:9px;
+    padding:10px 13px;
+    cursor:pointer;
+    transition:.15s;
+}
+
+.gameBtn:hover{
+    background:#2b2942;
+    transform:translateY(-2px);
+}
+
+/* INVENTORY */
+
+#inventory{
+    display:none;
+
+    position:absolute;
+    top:70px;
+    right:15px;
+
+    width:290px;
+
+    background:#11121eee;
+    border:1px solid #80652e;
+    border-radius:14px;
+
+    padding:20px;
+    z-index:20;
+
+    box-shadow:0 10px 40px #0009;
+}
+
+#inventory h2{
+    color:#ffd84d;
+    margin-bottom:15px;
+}
+
+.item{
+    background:#202031;
+    padding:12px;
+    border-radius:8px;
+    margin:7px 0;
+}
+
+.item button{
+    float:right;
+    background:#ffd84d;
+    border:0;
+    padding:5px 8px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+/* SHOP */
+
+#shop{
+    display:none;
+
+    position:absolute;
+    top:70px;
+    left:15px;
+
+    width:300px;
+
+    background:#11121eee;
+    border:1px solid #80652e;
+    border-radius:14px;
+
+    padding:20px;
+    z-index:20;
+
+    box-shadow:0 10px 40px #0009;
+}
+
+#shop h2{
+    color:#ffd84d;
+    margin-bottom:15px;
+}
+
+.shopItem{
+    background:#202031;
+    margin:8px 0;
+    padding:12px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:.15s;
+}
+
+.shopItem:hover{
+    background:#303047;
+    transform:translateX(3px);
+}
+
+/* DEATH */
+
+#death{
+    display:none;
+
+    position:absolute;
+    inset:0;
+
+    background:#000c;
+
+    z-index:50;
+
     align-items:center;
     justify-content:center;
     flex-direction:column;
 }
 
 #death h1{
-    color:#e63946;
-    font-size:50px;
+    color:#ff5555;
+    font-size:60px;
+    text-shadow:0 0 20px #f00;
 }
 
 #death button{
-    padding:12px 25px;
+    margin-top:20px;
+    padding:14px 25px;
+
     border:0;
-    border-radius:8px;
+    border-radius:10px;
+
+    background:#ffd84d;
     cursor:pointer;
-    font-size:18px;
+    font-weight:bold;
 }
 
-/* ================= CONTROLOS ================= */
+/* HELP */
 
-#controls{
-    position:fixed;
-    bottom:10px;
-    left:10px;
-    padding:8px 12px;
-    background:rgba(0,0,0,.65);
-    border-radius:8px;
+#gameHelp{
+    position:absolute;
+    bottom:15px;
+    left:15px;
+
+    background:#111c15cc;
+    padding:10px;
+    border-radius:10px;
+
+    color:#ccc;
     font-size:13px;
-    z-index:10;
 }
 
+/* DAMAGE TEXT */
+
+.damageText{
+    position:absolute;
+    color:#ffdf5e;
+    font-weight:bold;
+    pointer-events:none;
+}
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+    .nav-links{
+        display:none;
+    }
+
+    .menu-button{
+        display:block;
+    }
+
+    .hero h1{
+        font-size:52px;
+    }
+
+    .hero p{
+        font-size:17px;
+    }
+
+    .features{
+        grid-template-columns:1fr;
+    }
+
+    section{
+        padding:70px 5%;
+    }
+
+    #hud{
+        font-size:12px;
+        min-width:180px;
+    }
+
+    #gameHelp{
+        display:none;
+    }
+
+    #gameButtons{
+        top:auto;
+        bottom:10px;
+        right:10px;
+    }
+
+    .gameBtn{
+        padding:8px 10px;
+    }
+}
 </style>
 </head>
 
 <body>
 
-<canvas id="game"></canvas>
+<!-- ================================================= -->
+<!-- NAV -->
+<!-- ================================================= -->
 
-<!-- ================= HUD ================= -->
+<nav>
 
-<div id="hud">
-
-    <b>⚔️ MINI RPG</b>
-
-    <div class="stat">
-        ❤️ HP:
-        <span id="hpText">100/100</span>
-
-        <div class="bar">
-            <div id="hpBar"></div>
-        </div>
+    <div class="logo">
+        ⚔️ RuneVale
     </div>
 
-    <div class="stat">
-        ⭐ XP:
-        <span id="xpText">0/100</span>
+    <div class="nav-links">
 
-        <div class="bar">
-            <div id="xpBar"></div>
-        </div>
-    </div>
+        <a href="#features">
+            Features
+        </a>
 
-    <div class="stat">
-        🆙 Nível:
-        <span id="level">1</span>
-    </div>
+        <a href="#controls">
+            Controls
+        </a>
 
-    <div class="stat">
-        💰 Ouro:
-        <span id="gold">25</span>
-    </div>
+        <a
+            href="https://ko-fi.com/vikos"
+            target="_blank"
+        >
+            ❤️ Support
+        </a>
 
-    <div class="stat">
-        ⚔️ Dano:
-        <span id="damage">5</span>
-    </div>
-
-    <div class="stat">
-        👾 Mobs vivos:
-        <span id="mobCount">35</span>
-    </div>
-
-    <button onclick="toggleInventory()">
-        🎒 Inventário
-    </button>
-
-    <button onclick="returnToSpawn()">
-        🏠 Voltar ao Spawn
-    </button>
-
-</div>
-
-<!-- ================= MENSAGEM ================= -->
-
-<div id="message"></div>
-
-<!-- ================= INVENTÁRIO ================= -->
-
-<div id="inventory">
-
-    <h2>🎒 Inventário</h2>
-
-    <div class="item">
-        🗡️ <b>Mini Espada de Bosta</b><br>
-        Dano base: +5
-    </div>
-
-    <div class="item">
-        🧪 Poções:
-        <span id="potionCount">3</span>
-    </div>
-
-    <div class="item">
-        🪵 Escudo de Madeira
-    </div>
-
-    <div class="item">
-        💰 Ouro:
-        <span id="inventoryGold">25</span>
-    </div>
-
-    <button onclick="toggleInventory()">
-        Fechar
-    </button>
-
-</div>
-
-<!-- ================= SHOP ================= -->
-
-<div id="shop">
-
-    <h2>🛒 Loja do Mestre</h2>
-
-    <p>
-        💰 Ouro:
-        <b id="shopGold">25</b>
-    </p>
-
-    <div class="shopItem">
-
-        🧪 <b>Poção</b>
-
-        <br>
-
-        Recupera 30 HP.
-
-        <br>
-
-        <b>10 ouro</b>
-
-        <button onclick="buyPotion()">
-            Comprar
-        </button>
-
-    </div>
-
-    <div class="shopItem">
-
-        ⚔️ <b>Espada de Ferro</b>
-
-        <br>
-
-        +10 dano.
-
-        <br>
-
-        <b>50 ouro</b>
-
-        <button onclick="buySword()">
-            Comprar
-        </button>
-
-    </div>
-
-    <div class="shopItem">
-
-        🛡️ <b>Escudo</b>
-
-        <br>
-
-        +20 HP máximo.
-
-        <br>
-
-        <b>40 ouro</b>
-
-        <button onclick="buyShield()">
-            Comprar
-        </button>
+        <a
+            href="#"
+            class="play-nav"
+            onclick="startGame();return false;"
+        >
+            ▶ PLAY
+        </a>
 
     </div>
 
     <button
-        class="close"
-        onclick="closeShop()"
+        class="menu-button"
+        onclick="toggleMenu()"
     >
-        Fechar
+        ☰
     </button>
 
-</div>
+    <div
+        id="mobileMenu"
+        class="mobile-menu"
+    >
 
-<!-- ================= MORTE ================= -->
+        <a
+            href="#features"
+            onclick="closeMenu()"
+        >
+            ⚔️ Features
+        </a>
 
-<div id="death">
+        <a
+            href="#controls"
+            onclick="closeMenu()"
+        >
+            🎮 Controls
+        </a>
 
-    <h1>💀 MORRESTE</h1>
+        <a
+            href="https://ko-fi.com/vikos"
+            target="_blank"
+        >
+            ❤️ Support
+        </a>
 
-    <p>Voltaste ao spawn.</p>
+        <a
+            href="#"
+            class="mobile-play"
+            onclick="startGame();return false;"
+        >
+            ▶ PLAY RUNEVALE
+        </a>
 
-    <button onclick="returnToSpawn()">
-        🏠 Voltar
-    </button>
+    </div>
 
-</div>
+</nav>
 
-<!-- ================= CONTROLOS ================= -->
 
-<div id="controls">
+<!-- ================================================= -->
+<!-- HERO -->
+<!-- ================================================= -->
 
-    🖱️ Clique no chão = andar |
-    🖱️ Clique num mob = atacar |
-    WASD = mover |
-    I = inventário |
-    E = loja
+<header class="hero">
+
+    <div class="hero-content">
+
+        <h1>
+            RuneVale
+        </h1>
+
+        <p>
+            Um RPG 2D de fantasia onde exploras,
+            lutas contra monstros, ganhas XP,
+            compras equipamentos e tornas-te mais forte.
+        </p>
+
+        <a
+            href="#"
+            class="big-play"
+            onclick="startGame();return false;"
+        >
+            ⚔️ JOGAR AGORA
+        </a>
+
+    </div>
+
+</header>
+
+
+<!-- ================================================= -->
+<!-- FEATURES -->
+<!-- ================================================= -->
+
+<section id="features">
+
+    <h2 class="section-title">
+        ⚔️ Features
+    </h2>
+
+    <div class="features">
+
+        <div class="card">
+            <div style="font-size:45px">
+                🗺️
+            </div>
+
+            <h3>
+                Mundo
+            </h3>
+
+            <p>
+                Explora um mundo procedural
+                com água, florestas, pedras
+                e zonas diferentes.
+            </p>
+        </div>
+
+
+        <div class="card">
+            <div style="font-size:45px">
+                👹
+            </div>
+
+            <h3>
+                Monstros
+            </h3>
+
+            <p>
+                Enfrenta Slimes, Goblins,
+                Morcegos, Lobos e Orcs.
+            </p>
+        </div>
+
+
+        <div class="card">
+            <div style="font-size:45px">
+                ⚔️
+            </div>
+
+            <h3>
+                Combate
+            </h3>
+
+            <p>
+                Clica num inimigo para o selecionar
+                e o personagem aproxima-se automaticamente.
+            </p>
+        </div>
+
+
+        <div class="card">
+            <div style="font-size:45px">
+                📈
+            </div>
+
+            <h3>
+                Level Up
+            </h3>
+
+            <p>
+                Ganha XP, sobe de nível,
+                aumenta HP e dano.
+            </p>
+        </div>
+
+
+        <div class="card">
+            <div style="font-size:45px">
+                🎒
+            </div>
+
+            <h3>
+                Inventário
+            </h3>
+
+            <p>
+                Usa poções e equipa armas
+                melhores.
+            </p>
+        </div>
+
+
+        <div class="card">
+            <div style="font-size:45px">
+                🏪
+            </div>
+
+            <h3>
+                Loja
+            </h3>
+
+            <p>
+                Compra equipamentos usando
+                o ouro que ganhas.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- CONTROLS -->
+<!-- ================================================= -->
+
+<section id="controls">
+
+    <h2 class="section-title">
+        🎮 Controls
+    </h2>
+
+    <div class="controls">
+
+        <div class="control">
+            <span>
+                Movimento
+            </span>
+
+            <span class="key">
+                W A S D
+            </span>
+        </div>
+
+        <div class="control">
+            <span>
+                Andar
+            </span>
+
+            <span class="key">
+                Clique
+            </span>
+        </div>
+
+        <div class="control">
+            <span>
+                Atacar
+            </span>
+
+            <span class="key">
+                Clique no inimigo
+            </span>
+        </div>
+
+        <div class="control">
+            <span>
+                Inventário
+            </span>
+
+            <span class="key">
+                I
+            </span>
+        </div>
+
+        <div class="control">
+            <span>
+                Loja
+            </span>
+
+            <span class="key">
+                E
+            </span>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- SUPPORT -->
+<!-- ================================================= -->
+
+<section class="support">
+
+    <h2 class="section-title">
+        ❤️ Support RuneVale
+    </h2>
+
+    <p>
+        Gostas do projeto?
+        Podes apoiar o desenvolvimento.
+    </p>
+
+    <a
+        class="kofi"
+        href="https://ko-fi.com/vikos"
+        target="_blank"
+    >
+        ☕ Apoiar no Ko-fi
+    </a>
+
+</section>
+
+
+<footer>
+
+    RuneVale © 2026 — Made with ❤️
+
+</footer>
+
+
+<!-- ================================================= -->
+<!-- GAME -->
+<!-- ================================================= -->
+
+<div id="gameScreen">
+
+    <canvas id="gameCanvas"></canvas>
+
+
+    <!-- HUD -->
+
+    <div id="hud">
+
+        <div class="hp">
+            ❤️ HP:
+            <span id="hp">100</span>/<span id="maxHp">100</span>
+        </div>
+
+        <div class="xp">
+            ✨ XP:
+            <span id="xp">0</span>/<span id="xpMax">100</span>
+        </div>
+
+        <div class="xpBar">
+            <div id="xpBarFill"></div>
+        </div>
+
+        <div>
+            ⭐ Level:
+            <span id="level">1</span>
+        </div>
+
+        <div>
+            💰 Gold:
+            <span id="gold">50</span>
+        </div>
+
+        <div>
+            ⚔️ Damage:
+            <span id="damage">5</span>
+        </div>
+
+        <div>
+            👹 Mobs:
+            <span id="mobCount">0</span>
+        </div>
+
+    </div>
+
+
+    <!-- BUTTONS -->
+
+    <div id="gameButtons">
+
+        <button
+            class="gameBtn"
+            onclick="toggleInventory()"
+        >
+            🎒 Inventory
+        </button>
+
+        <button
+            class="gameBtn"
+            onclick="toggleShop()"
+        >
+            🏪 Shop
+        </button>
+
+        <button
+            class="gameBtn"
+            onclick="returnSpawn()"
+        >
+            🏠 Spawn
+        </button>
+
+        <button
+            class="gameBtn"
+            onclick="exitGame()"
+        >
+            🚪 Exit
+        </button>
+
+    </div>
+
+
+    <!-- INVENTORY -->
+
+    <div id="inventory">
+
+        <h2>
+            🎒 Inventário
+        </h2>
+
+        <div class="item">
+
+            🗡️ Mini Espada de Bosta
+
+            <button onclick="equipMini()">
+                Equipar
+            </button>
+
+        </div>
+
+        <div class="item">
+
+            ⚔️ Espada de Ferro
+
+            <button onclick="buySword()">
+                Comprar
+            </button>
+
+        </div>
+
+        <div class="item">
+
+            🧪 Poção
+
+            <button onclick="usePotion()">
+                Usar
+            </button>
+
+        </div>
+
+        <p style="margin-top:15px;color:#aaa">
+
+            Equipamento:
+            <b id="weaponName">
+                Mini Espada de Bosta
+            </b>
+
+        </p>
+
+    </div>
+
+
+    <!-- SHOP -->
+
+    <div id="shop">
+
+        <h2>
+            🏪 Loja
+        </h2>
+
+        <div
+            class="shopItem"
+            onclick="buyPotion()"
+        >
+            🧪 Poção — 10 Gold
+        </div>
+
+        <div
+            class="shopItem"
+            onclick="buyIronSword()"
+        >
+            ⚔️ Espada de Ferro — 100 Gold
+        </div>
+
+        <div
+            class="shopItem"
+            onclick="buyShield()"
+        >
+            🛡️ Escudo — 75 Gold
+        </div>
+
+    </div>
+
+
+    <!-- HELP -->
+
+    <div id="gameHelp">
+
+        WASD = mover |
+        Clique = andar/atacar |
+        I = inventário |
+        E = loja
+
+    </div>
+
+
+    <!-- DEATH -->
+
+    <div id="death">
+
+        <h1>
+            💀 MORRESTE
+        </h1>
+
+        <button onclick="respawn()">
+            🔄 Voltar ao Spawn
+        </button>
+
+    </div>
 
 </div>
 
 
 <script>
 
-/* =========================================================
-   CANVAS
-========================================================= */
+/* ================================================= */
+/* MENU */
+/* ================================================= */
+
+function toggleMenu(){
+
+    document
+        .getElementById("mobileMenu")
+        .classList.toggle("active");
+
+}
+
+
+function closeMenu(){
+
+    document
+        .getElementById("mobileMenu")
+        .classList.remove("active");
+
+}
+
+
+/* ================================================= */
+/* CANVAS */
+/* ================================================= */
 
 const canvas =
-    document.getElementById("game");
+    document.getElementById("gameCanvas");
 
 const ctx =
     canvas.getContext("2d");
 
-ctx.imageSmoothingEnabled = false;
-
+let W=0;
+let H=0;
 
 function resize(){
 
-    canvas.width =
+    W =
+        canvas.width =
         window.innerWidth;
 
-    canvas.height =
+    H =
+        canvas.height =
         window.innerHeight;
 
 }
-
-resize();
 
 window.addEventListener(
     "resize",
     resize
 );
 
+resize();
 
-/* =========================================================
-   CONFIG
-========================================================= */
 
-const TILE = 40;
+/* ================================================= */
+/* GAME STATE */
+/* ================================================= */
 
-const SPAWN = {
+let gameRunning=false;
+
+let player={
+
+    x:0,
+    y:0,
+
+    size:18,
+
+    hp:100,
+    maxHp:100,
+
+    damage:5,
+
+    level:1,
+
+    xp:0,
+    xpMax:100,
+
+    gold:50,
+
+    speed:3,
+
+    weapon:
+        "Mini Espada de Bosta"
+
+};
+
+
+let camera={
     x:0,
     y:0
 };
 
 
-/* =========================================================
-   PLAYER
-========================================================= */
+let target=null;
 
-const player = {
+let destination=null;
 
-    x:SPAWN.x,
-    y:SPAWN.y,
+let mobs=[];
 
-    size:26,
+let particles=[];
 
-    speed:4,
-
-    hp:100,
-
-    maxHp:100,
-
-    level:1,
-
-    xp:0,
-
-    xpNeeded:100,
-
-    gold:25,
-
-    damage:5,
-
-    potions:3,
-
-    hasSword:false,
-
-    hasShield:false,
-
-    attackCooldown:0,
-
-    target:null,
-
-    moveTarget:null
-
-};
+let damageNumbers=[];
 
 
-/* =========================================================
-   INPUT
-========================================================= */
+/* ================================================= */
+/* ANIMATION STATE */
+/* ================================================= */
 
-const keys = {};
+let animTime=0;
+
+let playerDirection="down";
+
+let playerMoving=false;
+
+let playerAttackAnim=0;
+
+let playerHurtAnim=0;
+
+let lastPlayerX=0;
+let lastPlayerY=0;
 
 
-document.addEventListener(
-    "keydown",
-    e => {
+/* ================================================= */
+/* MOB TYPES */
+/* ================================================= */
 
-        keys[
-            e.key.toLowerCase()
-        ] = true;
+const mobTypes=[
+
+    {
+        name:"Slime",
+        emoji:"🟢",
+        hp:25,
+        damage:4,
+        xp:15,
+        gold:5
+    },
+
+    {
+        name:"Goblin",
+        emoji:"👺",
+        hp:40,
+        damage:7,
+        xp:25,
+        gold:10
+    },
+
+    {
+        name:"Bat",
+        emoji:"🦇",
+        hp:30,
+        damage:6,
+        xp:20,
+        gold:8
+    },
+
+    {
+        name:"Wolf",
+        emoji:"🐺",
+        hp:50,
+        damage:9,
+        xp:35,
+        gold:15
+    },
+
+    {
+        name:"Orc",
+        emoji:"👹",
+        hp:80,
+        damage:13,
+        xp:60,
+        gold:25
+    }
+
+];
+
+
+/* ================================================= */
+/* SPAWN MOBS */
+/* ================================================= */
+
+function spawnMob(){
+
+    const type =
+        mobTypes[
+            Math.floor(
+                Math.random() *
+                mobTypes.length
+            )
+        ];
+
+    const angle =
+        Math.random() *
+        Math.PI *
+        2;
+
+    const distance =
+        500 +
+        Math.random()*1300;
+
+    mobs.push({
+
+        x:
+            player.x +
+            Math.cos(angle) *
+            distance,
+
+        y:
+            player.y +
+            Math.sin(angle) *
+            distance,
+
+        type:type,
+
+        hp:type.hp,
+
+        maxHp:type.hp,
+
+        attackTimer:
+            Math.random()*50,
+
+        dead:false,
+
+        animOffset:
+            Math.random()*10
+
+    });
+
+}
+
+
+function createMobs(){
+
+    mobs=[];
+
+    for(
+        let i=0;
+        i<35;
+        i++
+    ){
+
+        spawnMob();
+
+    }
+
+}
+
+
+/* ================================================= */
+/* TERRAIN */
+/* ================================================= */
+
+function terrainAt(x,y){
+
+    const v =
+
+        Math.sin(x*0.012) +
+
+        Math.cos(y*0.015) +
+
+        Math.sin(
+            (x+y)*0.007
+        );
+
+    if(v>2)
+        return "water";
+
+    if(v>1.2)
+        return "forest";
+
+    if(v<-1.2)
+        return "rock";
+
+    return "grass";
+
+}
+
+
+/* ================================================= */
+/* WORLD */
+/* ================================================= */
+
+function drawWorld(){
+
+    const tile=50;
+
+    const startX =
+        Math.floor(
+            (camera.x-W/2)/tile
+        )-2;
+
+    const endX =
+        Math.ceil(
+            (camera.x+W/2)/tile
+        )+2;
+
+    const startY =
+        Math.floor(
+            (camera.y-H/2)/tile
+        )-2;
+
+    const endY =
+        Math.ceil(
+            (camera.y+H/2)/tile
+        )+2;
+
+
+    for(
+        let x=startX;
+        x<=endX;
+        x++
+    ){
+
+        for(
+            let y=startY;
+            y<=endY;
+            y++
+        ){
+
+            const type =
+                terrainAt(
+                    x*tile,
+                    y*tile
+                );
+
+
+            if(type==="water")
+                ctx.fillStyle="#254f72";
+
+            else if(type==="forest")
+                ctx.fillStyle="#1d542d";
+
+            else if(type==="rock")
+                ctx.fillStyle="#505354";
+
+            else
+                ctx.fillStyle="#2d7035";
+
+
+            const sx =
+                x*tile -
+                camera.x +
+                W/2;
+
+            const sy =
+                y*tile -
+                camera.y +
+                H/2;
+
+
+            ctx.fillRect(
+                sx,
+                sy,
+                tile+1,
+                tile+1
+            );
+
+
+            /* grass details */
+
+            if(type==="grass"){
+
+                ctx.fillStyle="#398342";
+
+                for(let i=0;i<2;i++){
+
+                    const px =
+                        sx +
+                        10 +
+                        Math.sin(
+                            x*3+y+i
+                        )*15;
+
+                    const py =
+                        sy +
+                        10 +
+                        Math.cos(
+                            y*4+x+i
+                        )*15;
+
+                    ctx.fillRect(
+                        px,
+                        py,
+                        2,
+                        5
+                    );
+
+                }
+
+            }
+
+
+            /* trees */
+
+            if(type==="forest"){
+
+                ctx.fillStyle="#12391e";
+
+                ctx.beginPath();
+
+                ctx.arc(
+                    sx+25,
+                    sy+27,
+                    14,
+                    0,
+                    Math.PI*2
+                );
+
+                ctx.fill();
+
+                ctx.fillStyle="#59391e";
+
+                ctx.fillRect(
+                    sx+22,
+                    sy+27,
+                    6,
+                    15
+                );
+
+            }
+
+
+            /* rocks */
+
+            if(type==="rock"){
+
+                ctx.fillStyle="#777";
+
+                ctx.beginPath();
+
+                ctx.arc(
+                    sx+25,
+                    sy+28,
+                    10,
+                    0,
+                    Math.PI*2
+                );
+
+                ctx.fill();
+
+            }
+
+        }
+
+    }
+
+}
+
+
+/* ================================================= */
+/* NPC */
+/* ================================================= */
+
+function drawNPC(){
+
+    const sx =
+        120-camera.x+W/2;
+
+    const sy =
+        -camera.y+H/2;
+
+    const bob =
+        Math.sin(
+            animTime*2
+        )*2;
+
+
+    ctx.save();
+
+    ctx.translate(
+        sx,
+        sy+bob
+    );
+
+
+    /* shadow */
+
+    ctx.fillStyle="rgba(0,0,0,.35)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        17,
+        15,
+        5,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /* body */
+
+    ctx.fillStyle="#6c4ca3";
+
+    ctx.fillRect(
+        -11,
+        -5,
+        22,
+        22
+    );
+
+
+    /* robe */
+
+    ctx.fillStyle="#38245e";
+
+    ctx.fillRect(
+        -14,
+        4,
+        28,
+        14
+    );
+
+
+    /* head */
+
+    ctx.fillStyle="#e8b48d";
+
+    ctx.fillRect(
+        -9,
+        -22,
+        18,
+        18
+    );
+
+
+    /* hat */
+
+    ctx.fillStyle="#27213e";
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        -15,-20
+    );
+
+    ctx.lineTo(
+        0,-37
+    );
+
+    ctx.lineTo(
+        15,-20
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    ctx.restore();
+
+
+    ctx.font="13px Arial";
+
+    ctx.textAlign="center";
+
+    ctx.fillStyle="#ffd84d";
+
+    ctx.fillText(
+        "Mercador",
+        sx,
+        sy+36
+    );
+
+}
+
+
+/* ================================================= */
+/* PLAYER */
+/* ================================================= */
+
+function drawPlayer(){
+
+    const x=W/2;
+
+    const baseY=H/2;
+
+    const bob =
+        playerMoving
+        ? Math.sin(animTime*8)*3
+        : Math.sin(animTime*2)*1.5;
+
+
+    const legMove =
+        playerMoving
+        ? Math.sin(animTime*8)*4
+        : 0;
+
+
+    const attack =
+        playerAttackAnim>0;
+
+
+    ctx.save();
+
+    ctx.translate(
+        x,
+        baseY+bob
+    );
+
+
+    /* hurt flash */
+
+    if(playerHurtAnim>0){
+
+        ctx.globalAlpha =
+            playerHurtAnim%4<2
+            ? .35
+            : 1;
+
+        playerHurtAnim--;
+
+    }
+
+
+    /* shadow */
+
+    ctx.fillStyle="rgba(0,0,0,.4)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        22,
+        17,
+        6,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /* legs */
+
+    ctx.fillStyle="#25253b";
+
+    ctx.fillRect(
+        -9+legMove,
+        7,
+        7,
+        14
+    );
+
+    ctx.fillRect(
+        2-legMove,
+        7,
+        7,
+        14
+    );
+
+
+    /* boots */
+
+    ctx.fillStyle="#111";
+
+    ctx.fillRect(
+        -11+legMove,
+        17,
+        9,
+        6
+    );
+
+    ctx.fillRect(
+        2-legMove,
+        17,
+        9,
+        6
+    );
+
+
+    /* cape */
+
+    ctx.fillStyle="#a72d4a";
+
+    ctx.fillRect(
+        -15,
+        -7,
+        6,
+        20
+    );
+
+    ctx.fillRect(
+        9,
+        -7,
+        6,
+        20
+    );
+
+
+    /* body armor */
+
+    ctx.fillStyle="#493b82";
+
+    ctx.fillRect(
+        -12,
+        -10,
+        24,
+        21
+    );
+
+
+    /* armor highlight */
+
+    ctx.fillStyle="#6555a4";
+
+    ctx.fillRect(
+        -8,
+        -7,
+        16,
+        9
+    );
+
+
+    /* belt */
+
+    ctx.fillStyle="#c89b3c";
+
+    ctx.fillRect(
+        -12,
+        4,
+        24,
+        4
+    );
+
+
+    /* belt buckle */
+
+    ctx.fillStyle="#ffe28a";
+
+    ctx.fillRect(
+        -3,
+        4,
+        6,
+        5
+    );
+
+
+    /* head */
+
+    ctx.fillStyle="#f0bd91";
+
+    ctx.fillRect(
+        -9,
+        -28,
+        18,
+        18
+    );
+
+
+    /* hair */
+
+    ctx.fillStyle="#3a2418";
+
+    ctx.fillRect(
+        -10,
+        -30,
+        20,
+        7
+    );
+
+    ctx.fillRect(
+        -10,
+        -25,
+        4,
+        9
+    );
+
+
+    /* eyes */
+
+    ctx.fillStyle="#111";
+
+    if(playerDirection==="left"){
+
+        ctx.fillRect(
+            -6,
+            -20,
+            3,
+            3
+        );
+
+    }
+    else if(playerDirection==="right"){
+
+        ctx.fillRect(
+            3,
+            -20,
+            3,
+            3
+        );
+
+    }
+    else{
+
+        ctx.fillRect(
+            -5,
+            -20,
+            3,
+            3
+        );
+
+        ctx.fillRect(
+            3,
+            -20,
+            3,
+            3
+        );
+
+    }
+
+
+    /* arms */
+
+    ctx.fillStyle="#f0bd91";
+
+    ctx.fillRect(
+        -18,
+        -5,
+        7,
+        13
+    );
+
+    ctx.fillRect(
+        11,
+        -5,
+        7,
+        13
+    );
+
+
+    /* sword animation */
+
+    let swordAngle=0;
+
+    if(attack){
+
+        swordAngle =
+            -1.5 +
+            Math.sin(
+                (10-playerAttackAnim)
+                *0.65
+            )*2.5;
+
+    }
+
+
+    ctx.save();
+
+    ctx.translate(
+        17,
+        1
+    );
+
+    ctx.rotate(
+        swordAngle
+    );
+
+
+    /* blade */
+
+    ctx.fillStyle="#e9f5ff";
+
+    ctx.fillRect(
+        0,
+        -23,
+        5,
+        25
+    );
+
+
+    /* blade shine */
+
+    ctx.fillStyle="#fff";
+
+    ctx.fillRect(
+        1,
+        -22,
+        2,
+        20
+    );
+
+
+    /* guard */
+
+    ctx.fillStyle="#ffd84d";
+
+    ctx.fillRect(
+        -3,
+        2,
+        11,
+        4
+    );
+
+
+    /* handle */
+
+    ctx.fillStyle="#684329";
+
+    ctx.fillRect(
+        1,
+        6,
+        5,
+        9
+    );
+
+
+    ctx.restore();
+
+
+    /* attack slash */
+
+    if(attack){
+
+        ctx.strokeStyle=
+            "rgba(255,255,255,.8)";
+
+        ctx.lineWidth=4;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            4,
+            0,
+            32,
+            -1.2,
+            0.7
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    ctx.restore();
+
+
+    if(playerAttackAnim>0)
+        playerAttackAnim--;
+
+}
+
+
+/* ================================================= */
+/* MOBS */
+/* ================================================= */
+
+function drawMobs(){
+
+    for(const mob of mobs){
+
+        if(mob.dead)
+            continue;
+
+
+        const sx =
+            mob.x-camera.x+W/2;
+
+        const sy =
+            mob.y-camera.y+H/2;
 
 
         if(
-            e.key === " " ||
-            e.key.startsWith("Arrow")
-        ){
+            sx<-100 ||
+            sx>W+100 ||
+            sy<-100 ||
+            sy>H+100
+        )
+            continue;
 
-            e.preventDefault();
+
+        let bounce=0;
+
+        let scale=1;
+
+        const t =
+            animTime +
+            mob.animOffset;
+
+
+        /* SLIME */
+
+        if(mob.type.name==="Slime"){
+
+            bounce =
+                Math.abs(
+                    Math.sin(t*5)
+                )*5;
+
+            scale =
+                1+
+                Math.sin(t*5)*.08;
 
         }
 
 
+        /* BAT */
+
+        if(mob.type.name==="Bat"){
+
+            bounce =
+                Math.sin(t*8)*8;
+
+        }
+
+
+        /* WOLF */
+
+        if(mob.type.name==="Wolf"){
+
+            bounce =
+                Math.sin(t*6)*2;
+
+        }
+
+
+        /* GOBLIN */
+
+        if(mob.type.name==="Goblin"){
+
+            bounce =
+                Math.sin(t*3)*2;
+
+        }
+
+
+        /* ORC */
+
+        if(mob.type.name==="Orc"){
+
+            bounce =
+                Math.sin(t*2)*1.5;
+
+        }
+
+
+        ctx.save();
+
+        ctx.translate(
+            sx,
+            sy-bounce
+        );
+
+        ctx.scale(
+            scale,
+            scale
+        );
+
+
+        /* target circle */
+
+        if(target===mob){
+
+            const pulse =
+                27+
+                Math.sin(animTime*6)*3;
+
+            ctx.strokeStyle="#ffd84d";
+
+            ctx.lineWidth=3;
+
+            ctx.beginPath();
+
+            ctx.arc(
+                0,
+                0,
+                pulse,
+                0,
+                Math.PI*2
+            );
+
+            ctx.stroke();
+
+        }
+
+
+        /* shadow */
+
+        ctx.fillStyle=
+            "rgba(0,0,0,.35)";
+
+        ctx.beginPath();
+
+        ctx.ellipse(
+            0,
+            18,
+            17,
+            6,
+            0,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+
+        /*
+           Desenha cada monstro
+        */
+
+        if(mob.type.name==="Slime"){
+
+            ctx.fillStyle="#45e06f";
+
+            ctx.beginPath();
+
+            ctx.arc(
+                0,
+                0,
+                18,
+                Math.PI,
+                0
+            );
+
+            ctx.lineTo(
+                18,
+                12
+            );
+
+            ctx.lineTo(
+                -18,
+                12
+            );
+
+            ctx.closePath();
+
+            ctx.fill();
+
+            /* eyes */
+
+            ctx.fillStyle="#111";
+
+            ctx.fillRect(
+                -8,
+                -2,
+                4,
+                5
+            );
+
+            ctx.fillRect(
+                4,
+                -2,
+                4,
+                5
+            );
+
+        }
+
+
+        else if(mob.type.name==="Goblin"){
+
+            /* body */
+
+            ctx.fillStyle="#5e9e46";
+
+            ctx.fillRect(
+                -14,
+                -3,
+                28,
+                24
+            );
+
+            /* ears */
+
+            ctx.fillStyle="#79b84a";
+
+            ctx.beginPath();
+
+            ctx.moveTo(-10,-15);
+
+            ctx.lineTo(-27,-23);
+
+            ctx.lineTo(-15,-3);
+
+            ctx.closePath();
+
+            ctx.fill();
+
+            ctx.beginPath();
+
+            ctx.moveTo(10,-15);
+
+            ctx.lineTo(27,-23);
+
+            ctx.lineTo(15,-3);
+
+            ctx.closePath();
+
+            ctx.fill();
+
+            /* head */
+
+            ctx.fillStyle="#79b84a";
+
+            ctx.fillRect(
+                -13,
+                -20,
+                26,
+                22
+            );
+
+            /* eyes */
+
+            ctx.fillStyle="#111";
+
+            ctx.fillRect(
+                -8,
+                -12,
+                5,
+                5
+            );
+
+            ctx.fillRect(
+                3,
+                -12,
+                5,
+                5
+            );
+
+        }
+
+
+        else if(mob.type.name==="Bat"){
+
+            const wing =
+                Math.sin(t*10)*8;
+
+            ctx.fillStyle="#7255a5";
+
+            /* body */
+
+            ctx.beginPath();
+
+            ctx.ellipse(
+                0,
+                0,
+                9,
+                15,
+                0,
+                0,
+                Math.PI*2
+            );
+
+            ctx.fill();
+
+            /* wings */
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                -5,
+                -3
+            );
+
+            ctx.lineTo(
+                -28,
+                -13-wing
+            );
+
+            ctx.lineTo(
+                -20,
+                10
+            );
+
+            ctx.closePath();
+
+            ctx.fill();
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                5,
+                -3
+            );
+
+            ctx.lineTo(
+                28,
+                -13-wing
+            );
+
+            ctx.lineTo(
+                20,
+                10
+            );
+
+            ctx.closePath();
+
+            ctx.fill();
+
+        }
+
+
+        else if(mob.type.name==="Wolf"){
+
+            ctx.fillStyle="#aaa";
+
+            /* body */
+
+            ctx.beginPath();
+
+            ctx.ellipse(
+                0,
+                3,
+                20,
+                13,
+                0,
+                0,
+                Math.PI*2
+            );
+
+            ctx.fill();
+
+            /* head */
+
+            ctx.beginPath();
+
+            ctx.arc(
+                17,
+                -8,
+                12,
+                0,
+                Math.PI*2
+            );
+
+            ctx.fill();
+
+            /* ears */
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                10,-15
+            );
+
+            ctx.lineTo(
+                12,-28
+            );
+
+            ctx.lineTo(
+                18,-17
+            );
+
+            ctx.closePath();
+
+            ctx.fill();
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                22,-16
+            );
+
+            ctx.lineTo(
+                28,-27
+            );
+
+            ctx.lineTo(
+                30,-12
+            );
+
+            ctx.closePath();
+
+            ctx.fill();
+
+            /* eye */
+
+            ctx.fillStyle="#111";
+
+            ctx.fillRect(
+                20,
+                -10,
+                4,
+                4
+            );
+
+        }
+
+
+        else if(mob.type.name==="Orc"){
+
+            /* body */
+
+            ctx.fillStyle="#687d39";
+
+            ctx.fillRect(
+                -17,
+                -2,
+                34,
+                25
+            );
+
+            /* head */
+
+            ctx.fillStyle="#829b45";
+
+            ctx.fillRect(
+                -17,
+                -24,
+                34,
+                25
+            );
+
+            /* ears */
+
+            ctx.fillStyle="#6d8538";
+
+            ctx.fillRect(
+                -23,
+                -16,
+                7,
+                12
+            );
+
+            ctx.fillRect(
+                16,
+                -16,
+                7,
+                12
+            );
+
+            /* eyes */
+
+            ctx.fillStyle="#111";
+
+            ctx.fillRect(
+                -10,
+                -14,
+                6,
+                5
+            );
+
+            ctx.fillRect(
+                5,
+                -14,
+                6,
+                5
+            );
+
+            /* tusks */
+
+            ctx.fillStyle="#fff";
+
+            ctx.fillRect(
+                -9,
+                -1,
+                5,
+                8
+            );
+
+            ctx.fillRect(
+                4,
+                -1,
+                5,
+                8
+            );
+
+        }
+
+
+        ctx.restore();
+
+
+        /* HP BAR */
+
+        ctx.fillStyle="#300";
+
+        ctx.fillRect(
+            sx-22,
+            sy-42,
+            44,
+            5
+        );
+
+        ctx.fillStyle="#e33";
+
+        ctx.fillRect(
+            sx-22,
+            sy-42,
+            44*
+            (mob.hp/mob.maxHp),
+            5
+        );
+
+    }
+
+}
+
+
+/* ================================================= */
+/* PLAYER MOVEMENT */
+/* ================================================= */
+
+let keys={};
+
+window.addEventListener(
+    "keydown",
+    e=>{
+
+        keys[
+            e.key.toLowerCase()
+        ]=true;
+
+
         if(
-            e.key.toLowerCase() === "i"
+            e.key.toLowerCase()==="i"
         ){
 
             toggleInventory();
@@ -524,10 +2587,10 @@ document.addEventListener(
 
 
         if(
-            e.key.toLowerCase() === "e"
+            e.key.toLowerCase()==="e"
         ){
 
-            interact();
+            toggleShop();
 
         }
 
@@ -535,383 +2598,75 @@ document.addEventListener(
 );
 
 
-document.addEventListener(
+window.addEventListener(
     "keyup",
-    e => {
+    e=>{
 
         keys[
             e.key.toLowerCase()
-        ] = false;
+        ]=false;
 
     }
 );
 
 
-/* =========================================================
-   MAPA PROCEDURAL
-========================================================= */
-
-function randomHash(x,y){
-
-    const n =
-        Math.sin(
-            x * 127.1 +
-            y * 311.7
-        ) * 43758.5453;
-
-    return n -
-        Math.floor(n);
-
-}
-
-
-function getTile(x,y){
-
-    const distanceFromSpawn =
-        Math.sqrt(
-            x*x +
-            y*y
-        );
-
-
-    /*
-        Área inicial segura
-    */
-
-    if(
-        distanceFromSpawn < 6
-    ){
-
-        return "grass";
-
-    }
-
-
-    const r =
-        randomHash(x,y);
-
-
-    if(r < 0.07){
-
-        return "water";
-
-    }
-
-
-    if(r < 0.13){
-
-        return "tree";
-
-    }
-
-
-    if(r < 0.18){
-
-        return "rock";
-
-    }
-
-
-    return "grass";
-
-}
-
-
-function worldBlocked(x,y){
-
-    const tx =
-        Math.floor(
-            x / TILE
-        );
-
-    const ty =
-        Math.floor(
-            y / TILE
-        );
-
-
-    const tile =
-        getTile(
-            tx,
-            ty
-        );
-
-
-    return (
-        tile === "water" ||
-        tile === "tree" ||
-        tile === "rock"
-    );
-
-}
-
-
-function canMove(x,y){
-
-    const s =
-        player.size / 2;
-
-
-    return (
-
-        !worldBlocked(
-            x-s,
-            y-s
-        )
-
-        &&
-
-        !worldBlocked(
-            x+s,
-            y-s
-        )
-
-        &&
-
-        !worldBlocked(
-            x-s,
-            y+s
-        )
-
-        &&
-
-        !worldBlocked(
-            x+s,
-            y+s
-        )
-
-    );
-
-}
-
-
-/* =========================================================
-   NPC
-========================================================= */
-
-const npc = {
-
-    x:120,
-
-    y:0,
-
-    name:"Mestre"
-
-};
-
-
-/* =========================================================
-   MOBS
-========================================================= */
-
-const mobs = [];
-
-
-const mobStats = {
-
-    slime:{
-        hp:30,
-        damage:2,
-        xp:20,
-        speed:.45
-    },
-
-    goblin:{
-        hp:45,
-        damage:3,
-        xp:30,
-        speed:.55
-    },
-
-    bat:{
-        hp:25,
-        damage:4,
-        xp:25,
-        speed:.8
-    },
-
-    orc:{
-        hp:80,
-        damage:6,
-        xp:50,
-        speed:.35
-    },
-
-    wolf:{
-        hp:55,
-        damage:5,
-        xp:40,
-        speed:.7
-    }
-
-};
-
-
-function createMobs(){
-
-    mobs.length = 0;
-
-
-    const types = Object.keys(
-        mobStats
-    );
-
-
-    for(
-        let i=0;
-        i<35;
-        i++
-    ){
-
-        let tx;
-        let ty;
-
-
-        do{
-
-            tx =
-                Math.floor(
-                    (Math.random()-.5)*80
-                );
-
-            ty =
-                Math.floor(
-                    (Math.random()-.5)*80
-                );
-
-        }while(
-
-            Math.abs(tx)<8 &&
-            Math.abs(ty)<8
-
-        );
-
-
-        const type =
-            types[
-                Math.floor(
-                    Math.random()*
-                    types.length
-                )
-            ];
-
-
-        const stats =
-            mobStats[type];
-
-
-        mobs.push({
-
-            x:
-                tx*TILE+20,
-
-            y:
-                ty*TILE+20,
-
-            type:type,
-
-            hp:stats.hp,
-
-            maxHp:stats.hp,
-
-            damage:stats.damage,
-
-            xp:stats.xp,
-
-            speed:stats.speed,
-
-            alive:true,
-
-            respawn:0
-
-        });
-
-    }
-
-}
-
-createMobs();
-
-
-/* =========================================================
-   DISTÂNCIA
-========================================================= */
-
-function distance(a,b){
-
-    return Math.hypot(
-        a.x-b.x,
-        a.y-b.y
-    );
-
-}
-
-
-/* =========================================================
-   CLIQUE
-========================================================= */
+/* ================================================= */
+/* CLICK COMBAT */
+/* ================================================= */
 
 canvas.addEventListener(
-    "mousedown",
-    e => {
+    "click",
+    e=>{
+
+        if(!gameRunning)
+            return;
+
 
         const rect =
             canvas.getBoundingClientRect();
 
 
-        const mouseX =
-            e.clientX -
+        const mx =
+            e.clientX-
             rect.left;
 
 
-        const mouseY =
-            e.clientY -
+        const my =
+            e.clientY-
             rect.top;
 
 
-        const camera =
-            getCamera();
-
-
         const worldX =
-            mouseX +
+            mx-
+            W/2+
             camera.x;
 
 
         const worldY =
-            mouseY +
+            my-
+            H/2+
             camera.y;
 
 
-        let clickedMob = null;
+        let clicked=null;
 
 
-        /*
-            Verificar mobs
-        */
+        for(const mob of mobs){
 
-        for(
-            const mob of mobs
-        ){
-
-            if(!mob.alive){
-
+            if(mob.dead)
                 continue;
-
-            }
 
 
             const d =
                 Math.hypot(
-                    worldX-mob.x,
-                    worldY-mob.y
+                    mob.x-worldX,
+                    mob.y-worldY
                 );
 
 
-            if(d < 30){
+            if(d<35){
 
-                clickedMob =
-                    mob;
+                clicked=mob;
 
                 break;
 
@@ -920,552 +2675,428 @@ canvas.addEventListener(
         }
 
 
-        /*
-            CLICOU NO MOB
-        */
+        if(clicked){
 
-        if(clickedMob){
+            target=clicked;
 
-            player.target =
-                clickedMob;
-
-            player.moveTarget =
-                null;
-
-
-            showMessage(
-                "🎯 Alvo: " +
-                clickedMob.type
-            );
-
-
-            return;
+            destination=null;
 
         }
+        else{
 
+            target=null;
 
-        /*
-            CLICOU NO CHÃO
-        */
+            destination={
+                x:worldX,
+                y:worldY
+            };
 
-        player.target =
-            null;
-
-
-        player.moveTarget = {
-
-            x:worldX,
-
-            y:worldY
-
-        };
+        }
 
     }
 );
 
 
-/* =========================================================
-   MOVIMENTO ATÉ PONTO
-========================================================= */
+/* ================================================= */
+/* UPDATE */
+/* ================================================= */
 
-function moveToPoint(x,y){
+function update(){
 
-    let dx =
-        x-player.x;
-
-    let dy =
-        y-player.y;
-
-
-    const len =
-        Math.hypot(
-            dx,
-            dy
-        );
-
-
-    if(len < 5){
-
-        player.moveTarget =
-            null;
-
+    if(!gameRunning)
         return;
 
-    }
+
+    /* animation */
+
+    animTime+=0.12;
 
 
-    dx /= len;
+    playerMoving =
+        Math.abs(
+            player.x-lastPlayerX
+        )>.05 ||
 
-    dy /= len;
-
-
-    const nx =
-        player.x +
-        dx*player.speed;
-
-
-    const ny =
-        player.y +
-        dy*player.speed;
+        Math.abs(
+            player.y-lastPlayerY
+        )>.05;
 
 
-    if(
-        canMove(
-            nx,
-            player.y
-        )
-    ){
+    lastPlayerX=player.x;
 
-        player.x = nx;
-
-    }
+    lastPlayerY=player.y;
 
 
-    if(
-        canMove(
-            player.x,
-            ny
-        )
-    ){
+    /* direction */
 
-        player.y = ny;
+    if(keys["w"])
+        playerDirection="up";
 
-    }
+    if(keys["s"])
+        playerDirection="down";
 
-}
+    if(keys["a"])
+        playerDirection="left";
 
+    if(keys["d"])
+        playerDirection="right";
 
-/* =========================================================
-   MOVIMENTO DO PLAYER
-========================================================= */
-
-function updatePlayer(){
-
-    /*
-        Se tem alvo,
-        aproxima-se automaticamente.
-    */
-
-    if(
-        player.target &&
-        player.target.alive
-    ){
-
-        const target =
-            player.target;
-
-
-        const d =
-            distance(
-                player,
-                target
-            );
-
-
-        if(d > 65){
-
-            moveToPoint(
-                target.x,
-                target.y
-            );
-
-        }
-
-
-        return;
-
-    }
-
-
-    /*
-        Movimento por clique
-    */
-
-    if(
-        player.moveTarget
-    ){
-
-        moveToPoint(
-            player.moveTarget.x,
-            player.moveTarget.y
-        );
-
-
-        return;
-
-    }
-
-
-    /*
-        WASD
-    */
 
     let dx=0;
     let dy=0;
 
 
-    if(
-        keys["w"] ||
-        keys["arrowup"]
-    ){
+    /* WASD */
 
+    if(keys["w"])
         dy--;
 
-    }
-
-
-    if(
-        keys["s"] ||
-        keys["arrowdown"]
-    ){
-
+    if(keys["s"])
         dy++;
 
-    }
-
-
-    if(
-        keys["a"] ||
-        keys["arrowleft"]
-    ){
-
+    if(keys["a"])
         dx--;
 
-    }
-
-
-    if(
-        keys["d"] ||
-        keys["arrowright"]
-    ){
-
+    if(keys["d"])
         dx++;
 
-    }
 
-
-    if(dx || dy){
+    if(dx||dy){
 
         const len =
-            Math.hypot(
-                dx,
-                dy
-            );
+            Math.hypot(dx,dy);
 
 
-        dx /= len;
+        player.x +=
+            dx/len*
+            player.speed;
 
-        dy /= len;
-
-
-        const nx =
-            player.x +
-            dx*player.speed;
-
-
-        const ny =
-            player.y +
-            dy*player.speed;
+        player.y +=
+            dy/len*
+            player.speed;
 
 
-        if(
-            canMove(
-                nx,
-                player.y
-            )
-        ){
+        target=null;
 
-            player.x=nx;
+        destination=null;
+
+    }
+
+
+    /* CLICK MOVEMENT */
+
+    if(destination){
+
+        const dx =
+            destination.x-
+            player.x;
+
+        const dy =
+            destination.y-
+            player.y;
+
+        const d =
+            Math.hypot(dx,dy);
+
+
+        if(d>5){
+
+            player.x +=
+                dx/d*
+                player.speed;
+
+            player.y +=
+                dy/d*
+                player.speed;
+
+
+            if(Math.abs(dx)>Math.abs(dy)){
+
+                playerDirection =
+                    dx>0
+                    ?"right"
+                    :"left";
+
+            }
+            else{
+
+                playerDirection =
+                    dy>0
+                    ?"down"
+                    :"up";
+
+            }
+
+        }
+        else{
+
+            destination=null;
 
         }
 
+    }
 
-        if(
-            canMove(
-                player.x,
-                ny
-            )
-        ){
 
-            player.y=ny;
+    /* AUTO COMBAT */
+
+    if(
+        target &&
+        !target.dead
+    ){
+
+        const dx =
+            target.x-
+            player.x;
+
+        const dy =
+            target.y-
+            player.y;
+
+        const d =
+            Math.hypot(dx,dy);
+
+
+        if(d>50){
+
+            player.x +=
+                dx/d*
+                player.speed;
+
+            player.y +=
+                dy/d*
+                player.speed;
+
+
+            if(Math.abs(dx)>Math.abs(dy)){
+
+                playerDirection =
+                    dx>0
+                    ?"right"
+                    :"left";
+
+            }
+            else{
+
+                playerDirection =
+                    dy>0
+                    ?"down"
+                    :"up";
+
+            }
 
         }
+        else{
+
+            attackMob(target);
+
+        }
+
+    }
+
+
+    camera.x=player.x;
+
+    camera.y=player.y;
+
+
+    updateMobs();
+
+    updateParticles();
+
+    updateDamageNumbers();
+
+    updateHUD();
+
+}
+
+
+/* ================================================= */
+/* ATTACK */
+/* ================================================= */
+
+let attackCooldown=0;
+
+
+function attackMob(mob){
+
+    if(attackCooldown>0)
+        return;
+
+
+    attackCooldown=35;
+
+    playerAttackAnim=10;
+
+
+    mob.hp-=player.damage;
+
+
+    createHitParticles(
+        mob.x,
+        mob.y
+    );
+
+
+    createDamageNumber(
+        mob.x,
+        mob.y,
+        player.damage
+    );
+
+
+    if(mob.hp<=0){
+
+        killMob(mob);
 
     }
 
 }
 
 
-/* =========================================================
-   COMBATE
-========================================================= */
-
-function updateCombat(){
-
-    if(
-        !player.target ||
-        !player.target.alive
-    ){
-
-        player.target =
-            null;
-
-        return;
-
-    }
-
-
-    const mob =
-        player.target;
-
-
-    const d =
-        distance(
-            player,
-            mob
-        );
-
-
-    /*
-        Ainda longe
-    */
-
-    if(d > 70){
-
-        return;
-
-    }
-
-
-    /*
-        Ataque automático
-    */
-
-    if(
-        player.attackCooldown <= 0
-    ){
-
-        player.attackCooldown =
-            30;
-
-
-        mob.hp -=
-            player.damage;
-
-
-        showMessage(
-            "⚔️ -" +
-            player.damage +
-            " " +
-            mob.type
-        );
-
-
-        if(
-            mob.hp <= 0
-        ){
-
-            killMob(mob);
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   MATAR MOB
-========================================================= */
+/* ================================================= */
+/* KILL */
+/* ================================================= */
 
 function killMob(mob){
 
-    mob.alive =
-        false;
+    mob.dead=true;
+
+    player.xp+=
+        mob.type.xp;
+
+    player.gold+=
+        mob.type.gold;
 
 
-    mob.respawn =
-        600;
-
-
-    const gold =
-        5 +
-        Math.floor(
-            Math.random()*10
-        );
-
-
-    player.gold +=
-        gold;
-
-
-    gainXP(
-        mob.xp
+    createDeathParticles(
+        mob.x,
+        mob.y
     );
 
 
-    showMessage(
-        "💀 " +
-        mob.type +
-        " derrotado! +" +
-        mob.xp +
-        " XP +" +
-        gold +
-        " ouro"
+    target=null;
+
+
+    checkLevel();
+
+
+    setTimeout(
+        ()=>{
+
+            const index=
+                mobs.indexOf(mob);
+
+
+            if(index!==-1){
+
+                mobs.splice(
+                    index,
+                    1
+                );
+
+            }
+
+
+            spawnMob();
+
+        },
+        700
     );
 
+}
 
-    if(
-        player.target === mob
+
+/* ================================================= */
+/* LEVEL */
+/* ================================================= */
+
+function checkLevel(){
+
+    while(
+        player.xp>=
+        player.xpMax
     ){
 
-        player.target =
-            null;
+        player.xp-=
+            player.xpMax;
+
+
+        player.level++;
+
+
+        player.xpMax=
+            Math.floor(
+                player.xpMax*
+                1.35
+            );
+
+
+        player.maxHp+=15;
+
+        player.hp=
+            player.maxHp;
+
+        player.damage+=2;
+
+
+        createLevelParticles();
 
     }
 
 }
 
 
-/* =========================================================
-   ATUALIZAR MOBS
-========================================================= */
+/* ================================================= */
+/* MOB ATTACKS */
+/* ================================================= */
 
 function updateMobs(){
 
-    for(
-        const mob of mobs
-    ){
-
-        /*
-            Respawn
-        */
-
-        if(
-            !mob.alive
-        ){
-
-            mob.respawn--;
+    if(attackCooldown>0)
+        attackCooldown--;
 
 
-            if(
-                mob.respawn <= 0
-            ){
+    for(const mob of mobs){
 
-                mob.hp =
-                    mob.maxHp;
-
-                mob.alive =
-                    true;
-
-            }
-
-
+        if(mob.dead)
             continue;
 
-        }
-
-
-        /*
-            IA
-        */
 
         const d =
-            distance(
-                player,
-                mob
+            Math.hypot(
+                mob.x-player.x,
+                mob.y-player.y
             );
 
 
-        if(
-            d < 300
-        ){
+        if(d<42){
 
-            let dx =
-                player.x -
-                mob.x;
+            mob.attackTimer--;
 
 
-            let dy =
-                player.y -
-                mob.y;
+            if(mob.attackTimer<=0){
+
+                player.hp-=
+                    mob.type.damage;
 
 
-            const len =
-                Math.hypot(
-                    dx,
-                    dy
+                playerHurtAnim=8;
+
+
+                createDamageNumber(
+                    player.x,
+                    player.y,
+                    mob.type.damage,
+                    true
                 );
 
 
-            if(len > 0){
-
-                dx /= len;
-
-                dy /= len;
+                mob.attackTimer=70;
 
 
-                const nx =
-                    mob.x +
-                    dx*mob.speed;
+                if(player.hp<=0){
 
-
-                const ny =
-                    mob.y +
-                    dy*mob.speed;
-
-
-                if(
-                    !worldBlocked(
-                        nx,
-                        mob.y
-                    )
-                ){
-
-                    mob.x =
-                        nx;
-
-                }
-
-
-                if(
-                    !worldBlocked(
-                        mob.x,
-                        ny
-                    )
-                ){
-
-                    mob.y =
-                        ny;
-
-                }
-
-            }
-
-
-            /*
-                Ataque do mob
-            */
-
-            if(
-                d < 32 &&
-                Math.random() < .025
-            ){
-
-                player.hp -=
-                    mob.damage;
-
-
-                showMessage(
-                    "💥 -" +
-                    mob.damage +
-                    " HP"
-                );
-
-
-                if(
-                    player.hp <= 0
-                ){
+                    player.hp=0;
 
                     die();
 
@@ -1480,1328 +3111,520 @@ function updateMobs(){
 }
 
 
-/* =========================================================
-   XP
-========================================================= */
+/* ================================================= */
+/* PARTICLES */
+/* ================================================= */
 
-function gainXP(amount){
+function createHitParticles(x,y){
 
-    player.xp +=
-        amount;
+    for(let i=0;i<14;i++){
 
+        particles.push({
 
-    while(
-        player.xp >=
-        player.xpNeeded
-    ){
+            x:x,
+            y:y,
 
-        player.xp -=
-            player.xpNeeded;
+            vx:
+                (Math.random()-.5)*7,
 
+            vy:
+                (Math.random()-.5)*7,
 
-        player.level++;
+            life:
+                25+
+                Math.random()*20,
 
+            size:
+                2+
+                Math.random()*4
 
-        player.xpNeeded +=
-            50;
-
-
-        player.maxHp +=
-            20;
-
-
-        player.hp =
-            player.maxHp;
-
-
-        player.damage +=
-            2;
-
-
-        showMessage(
-            "🎉 NÍVEL " +
-            player.level +
-            "!"
-        );
+        });
 
     }
 
 }
 
 
-/* =========================================================
-   MORTE
-========================================================= */
+function createDeathParticles(x,y){
 
-function die(){
+    for(let i=0;i<25;i++){
 
-    player.hp=0;
+        particles.push({
 
-    player.target=null;
+            x:x,
+            y:y,
 
-    player.moveTarget=null;
+            vx:
+                (Math.random()-.5)*9,
 
+            vy:
+                (Math.random()-.5)*9,
 
-    document.getElementById(
-        "death"
-    ).style.display =
-        "flex";
+            life:
+                30+
+                Math.random()*30,
+
+            size:
+                3+
+                Math.random()*5
+
+        });
+
+    }
 
 }
 
 
-function closeDeath(){
+function createLevelParticles(){
 
-    document.getElementById(
-        "death"
-    ).style.display =
-        "none";
+    for(let i=0;i<35;i++){
+
+        particles.push({
+
+            x:player.x,
+
+            y:player.y,
+
+            vx:
+                (Math.random()-.5)*8,
+
+            vy:
+                (Math.random()-.5)*8,
+
+            life:60,
+
+            size:
+                3+
+                Math.random()*4
+
+        });
+
+    }
 
 }
 
 
-/* =========================================================
-   SPAWN
-========================================================= */
+function updateParticles(){
 
-function returnToSpawn(){
+    for(const p of particles){
 
-    player.x =
-        SPAWN.x;
+        p.x+=p.vx;
 
-    player.y =
-        SPAWN.y;
+        p.y+=p.vy;
+
+        p.vx*=.96;
+
+        p.vy*=.96;
+
+        p.life--;
+
+    }
 
 
-    player.hp =
+    particles =
+        particles.filter(
+            p=>p.life>0
+        );
+
+}
+
+
+function drawParticles(){
+
+    for(const p of particles){
+
+        const sx =
+            p.x-
+            camera.x+
+            W/2;
+
+        const sy =
+            p.y-
+            camera.y+
+            H/2;
+
+
+        ctx.globalAlpha=
+            Math.max(
+                0,
+                p.life/60
+            );
+
+
+        ctx.fillStyle="#ffd84d";
+
+
+        ctx.fillRect(
+            sx,
+            sy,
+            p.size||4,
+            p.size||4
+        );
+
+    }
+
+
+    ctx.globalAlpha=1;
+
+}
+
+
+/* ================================================= */
+/* DAMAGE NUMBERS */
+/* ================================================= */
+
+function createDamageNumber(
+    x,
+    y,
+    amount,
+    red=false
+){
+
+    damageNumbers.push({
+
+        x:x,
+        y:y,
+
+        amount:amount,
+
+        life:50,
+
+        red:red
+
+    });
+
+}
+
+
+function updateDamageNumbers(){
+
+    for(const d of damageNumbers){
+
+        d.y-=.7;
+
+        d.life--;
+
+    }
+
+
+    damageNumbers =
+        damageNumbers.filter(
+            d=>d.life>0
+        );
+
+}
+
+
+function drawDamageNumbers(){
+
+    ctx.font=
+        "bold 16px Arial";
+
+    ctx.textAlign="center";
+
+
+    for(const d of damageNumbers){
+
+        const sx=
+            d.x-
+            camera.x+
+            W/2;
+
+        const sy=
+            d.y-
+            camera.y+
+            H/2;
+
+
+        ctx.globalAlpha=
+            d.life/50;
+
+
+        ctx.fillStyle=
+            d.red
+            ?"#ff5555"
+            :"#ffd84d";
+
+
+        ctx.fillText(
+            "-" + d.amount,
+            sx,
+            sy
+        );
+
+    }
+
+
+    ctx.globalAlpha=1;
+
+}
+
+
+/* ================================================= */
+/* HUD */
+/* ================================================= */
+
+function updateHUD(){
+
+    document.getElementById("hp")
+        .textContent=
+        Math.floor(player.hp);
+
+
+    document.getElementById("maxHp")
+        .textContent=
         player.maxHp;
 
 
-    player.target =
-        null;
+    document.getElementById("xp")
+        .textContent=
+        player.xp;
 
 
-    player.moveTarget =
-        null;
+    document.getElementById("xpMax")
+        .textContent=
+        player.xpMax;
 
 
-    closeDeath();
+    document.getElementById("level")
+        .textContent=
+        player.level;
 
 
-    showMessage(
-        "🏠 Voltaste ao Spawn!"
-    );
-
-}
-
-
-/* =========================================================
-   NPC
-========================================================= */
-
-function interact(){
-
-    if(
-        distance(
-            player,
-            npc
-        ) < 80
-    ){
-
-        openShop();
-
-    }
-
-}
-
-
-/* =========================================================
-   SHOP
-========================================================= */
-
-function openShop(){
-
-    document.getElementById(
-        "shop"
-    ).style.display =
-        "block";
-
-
-    updateShop();
-
-}
-
-
-function closeShop(){
-
-    document.getElementById(
-        "shop"
-    ).style.display =
-        "none";
-
-}
-
-
-function updateShop(){
-
-    document.getElementById(
-        "shopGold"
-    ).innerText =
+    document.getElementById("gold")
+        .textContent=
         player.gold;
 
+
+    document.getElementById("damage")
+        .textContent=
+        player.damage;
+
+
+    document.getElementById("mobCount")
+        .textContent=
+        mobs.filter(
+            m=>!m.dead
+        ).length;
+
+
+    const percent =
+        Math.min(
+            100,
+            player.xp/
+            player.xpMax*
+            100
+        );
+
+
+    document.getElementById(
+        "xpBarFill"
+    ).style.width=
+        percent+"%";
+
 }
 
 
-function buyPotion(){
+/* ================================================= */
+/* INVENTORY */
+/* ================================================= */
 
-    if(
-        player.gold < 10
-    ){
+function toggleInventory(){
 
-        showMessage(
-            "❌ Ouro insuficiente!"
+    const inv=
+        document.getElementById(
+            "inventory"
         );
 
+
+    inv.style.display =
+        inv.style.display==="block"
+        ?"none"
+        :"block";
+
+}
+
+
+function usePotion(){
+
+    if(player.hp>=player.maxHp)
         return;
 
-    }
+
+    player.hp=
+        Math.min(
+            player.maxHp,
+            player.hp+40
+        );
+
+}
 
 
-    player.gold -=
-        10;
+function equipMini(){
+
+    player.damage=5;
+
+    player.weapon=
+        "Mini Espada de Bosta";
 
 
-    player.potions++;
-
-
-    showMessage(
-        "🧪 Compraste uma poção!"
-    );
-
-
-    updateShop();
-
-    updateHUD();
+    document.getElementById(
+        "weaponName"
+    ).textContent=
+        player.weapon;
 
 }
 
 
 function buySword(){
 
-    if(
-        player.hasSword
-    ){
-
-        showMessage(
-            "❌ Já tens a espada!"
-        );
-
+    if(player.gold<100)
         return;
 
-    }
+
+    player.gold-=100;
+
+    player.damage=15;
+
+    player.weapon=
+        "Espada de Ferro";
 
 
-    if(
-        player.gold < 50
-    ){
+    document.getElementById(
+        "weaponName"
+    ).textContent=
+        player.weapon;
 
-        showMessage(
-            "❌ Precisas de 50 ouro!"
+}
+
+
+/* ================================================= */
+/* SHOP */
+/* ================================================= */
+
+function toggleShop(){
+
+    const shop=
+        document.getElementById(
+            "shop"
         );
 
+
+    shop.style.display =
+        shop.style.display==="block"
+        ?"none"
+        :"block";
+
+}
+
+
+function buyPotion(){
+
+    if(player.gold<10)
         return;
 
-    }
+
+    player.gold-=10;
+
+    player.hp=
+        Math.min(
+            player.maxHp,
+            player.hp+30
+        );
+
+}
 
 
-    player.gold -=
-        50;
+function buyIronSword(){
 
-
-    player.damage +=
-        10;
-
-
-    player.hasSword =
-        true;
-
-
-    showMessage(
-        "⚔️ Espada de Ferro equipada!"
-    );
-
-
-    updateShop();
-
-    updateHUD();
+    buySword();
 
 }
 
 
 function buyShield(){
 
-    if(
-        player.hasShield
-    ){
-
-        showMessage(
-            "❌ Já tens o escudo!"
-        );
-
+    if(player.gold<75)
         return;
 
-    }
 
+    player.gold-=75;
 
-    if(
-        player.gold < 40
-    ){
+    player.maxHp+=25;
 
-        showMessage(
-            "❌ Precisas de 40 ouro!"
-        );
-
-        return;
-
-    }
-
-
-    player.gold -=
-        40;
-
-
-    player.maxHp +=
-        20;
-
-
-    player.hp +=
-        20;
-
-
-    player.hasShield =
-        true;
-
-
-    showMessage(
-        "🛡️ Escudo equipado!"
-    );
-
-
-    updateShop();
-
-    updateHUD();
+    player.hp+=25;
 
 }
 
 
-/* =========================================================
-   POÇÃO
-========================================================= */
+/* ================================================= */
+/* SPAWN */
+/* ================================================= */
 
-function usePotion(){
+function returnSpawn(){
 
-    if(
-        player.potions <= 0
-    ){
+    player.x=0;
 
-        showMessage(
-            "❌ Não tens poções!"
-        );
+    player.y=0;
 
-        return;
+    target=null;
 
-    }
-
-
-    if(
-        player.hp >=
-        player.maxHp
-    ){
-
-        showMessage(
-            "❤️ Já tens HP máximo!"
-        );
-
-        return;
-
-    }
-
-
-    player.potions--;
-
-
-    player.hp =
-        Math.min(
-            player.maxHp,
-            player.hp+30
-        );
-
-
-    showMessage(
-        "🧪 +30 HP"
-    );
-
-
-    updateHUD();
+    destination=null;
 
 }
 
 
-/* =========================================================
-   INVENTÁRIO
-========================================================= */
+/* ================================================= */
+/* DEATH */
+/* ================================================= */
 
-function toggleInventory(){
+function die(){
 
-    const inv =
-        document.getElementById(
-            "inventory"
-        );
-
-
-    if(
-        inv.style.display ===
-        "block"
-    ){
-
-        inv.style.display =
-            "none";
-
-    }else{
-
-        inv.style.display =
-            "block";
-
-    }
-
+    target=null;
 
     document.getElementById(
-        "potionCount"
-    ).innerText =
-        player.potions;
-
-
-    document.getElementById(
-        "inventoryGold"
-    ).innerText =
-        player.gold;
+        "death"
+    ).style.display=
+        "flex";
 
 }
 
 
-/* =========================================================
-   MENSAGENS
-========================================================= */
+function respawn(){
 
-let messageTimer=0;
-
-
-function showMessage(text){
-
-    document.getElementById(
-        "message"
-    ).innerText =
-        text;
-
-
-    messageTimer =
-        100;
-
-}
-
-
-/* =========================================================
-   HUD
-========================================================= */
-
-function updateHUD(){
-
-    document.getElementById(
-        "hpText"
-    ).innerText =
-        Math.max(
-            0,
-            player.hp
-        ) +
-        "/" +
+    player.hp=
         player.maxHp;
 
+    player.x=0;
 
-    document.getElementById(
-        "hpBar"
-    ).style.width =
-        (
-            player.hp /
-            player.maxHp *
-            100
-        ) +
-        "%";
+    player.y=0;
+
+    target=null;
+
+    destination=null;
 
 
     document.getElementById(
-        "xpText"
-    ).innerText =
-        player.xp +
-        "/" +
-        player.xpNeeded;
-
-
-    document.getElementById(
-        "xpBar"
-    ).style.width =
-        (
-            player.xp /
-            player.xpNeeded *
-            100
-        ) +
-        "%";
-
-
-    document.getElementById(
-        "level"
-    ).innerText =
-        player.level;
-
-
-    document.getElementById(
-        "gold"
-    ).innerText =
-        player.gold;
-
-
-    document.getElementById(
-        "damage"
-    ).innerText =
-        player.damage;
-
-
-    document.getElementById(
-        "potionCount"
-    ).innerText =
-        player.potions;
-
-
-    document.getElementById(
-        "inventoryGold"
-    ).innerText =
-        player.gold;
-
-
-    document.getElementById(
-        "mobCount"
-    ).innerText =
-        mobs.filter(
-            m => m.alive
-        ).length;
+        "death"
+    ).style.display=
+        "none";
 
 }
 
 
-/* =========================================================
-   CÂMARA
-========================================================= */
-
-function getCamera(){
-
-    return {
-
-        x:
-            player.x -
-            canvas.width/2,
-
-        y:
-            player.y -
-            canvas.height/2
-
-    };
-
-}
-
-
-/* =========================================================
-   DESENHAR MUNDO
-========================================================= */
-
-function drawWorld(){
-
-    const camera =
-        getCamera();
-
-
-    const startX =
-        Math.floor(
-            camera.x/TILE
-        )-2;
-
-
-    const endX =
-        Math.ceil(
-            (
-                camera.x+
-                canvas.width
-            )/TILE
-        )+2;
-
-
-    const startY =
-        Math.floor(
-            camera.y/TILE
-        )-2;
-
-
-    const endY =
-        Math.ceil(
-            (
-                camera.y+
-                canvas.height
-            )/TILE
-        )+2;
-
-
-    for(
-        let y=startY;
-        y<=endY;
-        y++
-    ){
-
-        for(
-            let x=startX;
-            x<=endX;
-            x++
-        ){
-
-            const px =
-                x*TILE -
-                camera.x;
-
-
-            const py =
-                y*TILE -
-                camera.y;
-
-
-            const tile =
-                getTile(
-                    x,
-                    y
-                );
-
-
-            /*
-                GRAMA
-            */
-
-            if(
-                tile === "grass"
-            ){
-
-                ctx.fillStyle =
-                    ((x+y)&1)
-                    ? "#609653"
-                    : "#5a8e4d";
-
-
-                ctx.fillRect(
-                    px,
-                    py,
-                    TILE,
-                    TILE
-                );
-
-            }
-
-
-            /*
-                ÁGUA
-            */
-
-            if(
-                tile === "water"
-            ){
-
-                ctx.fillStyle =
-                    "#3275a8";
-
-
-                ctx.fillRect(
-                    px,
-                    py,
-                    TILE,
-                    TILE
-                );
-
-
-                ctx.fillStyle =
-                    "rgba(255,255,255,.12)";
-
-
-                ctx.fillRect(
-                    px+5,
-                    py+10,
-                    20,
-                    2
-                );
-
-            }
-
-
-            /*
-                ÁRVORE
-            */
-
-            if(
-                tile === "tree"
-            ){
-
-                ctx.fillStyle =
-                    "#4b3621";
-
-
-                ctx.fillRect(
-                    px+17,
-                    py+20,
-                    7,
-                    18
-                );
-
-
-                ctx.fillStyle =
-                    "#235c2b";
-
-
-                ctx.beginPath();
-
-
-                ctx.arc(
-                    px+20,
-                    py+17,
-                    17,
-                    0,
-                    Math.PI*2
-                );
-
-
-                ctx.fill();
-
-            }
-
-
-            /*
-                ROCHA
-            */
-
-            if(
-                tile === "rock"
-            ){
-
-                ctx.fillStyle =
-                    "#777";
-
-
-                ctx.beginPath();
-
-
-                ctx.arc(
-                    px+20,
-                    py+23,
-                    13,
-                    0,
-                    Math.PI*2
-                );
-
-
-                ctx.fill();
-
-            }
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   NPC
-========================================================= */
-
-function drawNPC(){
-
-    const camera =
-        getCamera();
-
-
-    const x =
-        npc.x -
-        camera.x;
-
-
-    const y =
-        npc.y -
-        camera.y;
-
-
-    /*
-        Corpo
-    */
-
-    ctx.fillStyle =
-        "#9b5de5";
-
-
-    ctx.fillRect(
-        x-14,
-        y-5,
-        28,
-        25
-    );
-
-
-    /*
-        Cabeça
-    */
-
-    ctx.fillStyle =
-        "#ffd6a5";
-
-
-    ctx.beginPath();
-
-
-    ctx.arc(
-        x,
-        y-13,
-        10,
-        0,
-        Math.PI*2
-    );
-
-
-    ctx.fill();
-
-
-    /*
-        Chapéu
-    */
-
-    ctx.fillStyle =
-        "#542e8a";
-
-
-    ctx.beginPath();
-
-
-    ctx.moveTo(
-        x-15,
-        y-18
-    );
-
-
-    ctx.lineTo(
-        x,
-        y-40
-    );
-
-
-    ctx.lineTo(
-        x+15,
-        y-18
-    );
-
-
-    ctx.fill();
-
-
-    /*
-        Nome
-    */
-
-    ctx.fillStyle =
-        "white";
-
-
-    ctx.font =
-        "bold 13px Arial";
-
-
-    ctx.textAlign =
-        "center";
-
-
-    ctx.fillText(
-        "🛒 SHOP",
-        x,
-        y-48
-    );
-
-}
-
-
-/* =========================================================
-   DESENHAR MOBS
-========================================================= */
-
-function drawMobs(){
-
-    const camera =
-        getCamera();
-
-
-    for(
-        const mob of mobs
-    ){
-
-        if(
-            !mob.alive
-        ){
-
-            continue;
-
-        }
-
-
-        /*
-            Não desenhar mobs muito longe
-        */
-
-        if(
-
-            Math.abs(
-                mob.x-player.x
-            ) > 900
-
-            ||
-
-            Math.abs(
-                mob.y-player.y
-            ) > 700
-
-        ){
-
-            continue;
-
-        }
-
-
-        const x =
-            mob.x -
-            camera.x;
-
-
-        const y =
-            mob.y -
-            camera.y;
-
-
-        let color =
-            "#ef476f";
-
-
-        if(
-            mob.type === "slime"
-        ){
-
-            color =
-                "#70e000";
-
-        }
-
-
-        if(
-            mob.type === "goblin"
-        ){
-
-            color =
-                "#588157";
-
-        }
-
-
-        if(
-            mob.type === "bat"
-        ){
-
-            color =
-                "#6a4c93";
-
-        }
-
-
-        if(
-            mob.type === "orc"
-        ){
-
-            color =
-                "#386641";
-
-        }
-
-
-        if(
-            mob.type === "wolf"
-        ){
-
-            color =
-                "#777";
-
-        }
-
-
-        /*
-            ALVO
-        */
-
-        if(
-            player.target === mob
-        ){
-
-            ctx.strokeStyle =
-                "#ffd166";
-
-
-            ctx.lineWidth=3;
-
-
-            ctx.beginPath();
-
-
-            ctx.arc(
-                x,
-                y,
-                25,
-                0,
-                Math.PI*2
-            );
-
-
-            ctx.stroke();
-
-        }
-
-
-        /*
-            CORPO
-        */
-
-        ctx.fillStyle =
-            color;
-
-
-        ctx.beginPath();
-
-
-        ctx.arc(
-            x,
-            y,
-            mob.type === "orc"
-                ? 20
-                : 15,
-            0,
-            Math.PI*2
-        );
-
-
-        ctx.fill();
-
-
-        /*
-            Olhos
-        */
-
-        ctx.fillStyle =
-            "white";
-
-
-        ctx.fillRect(
-            x-7,
-            y-4,
-            4,
-            4
-        );
-
-
-        ctx.fillRect(
-            x+4,
-            y-4,
-            4,
-            4
-        );
-
-
-        /*
-            Barra de HP
-        */
-
-        ctx.fillStyle =
-            "#222";
-
-
-        ctx.fillRect(
-            x-20,
-            y-30,
-            40,
-            6
-        );
-
-
-        ctx.fillStyle =
-            "#e63946";
-
-
-        ctx.fillRect(
-            x-20,
-            y-30,
-            40 *
-            (
-                mob.hp/
-                mob.maxHp
-            ),
-            6
-        );
-
-
-        /*
-            Nome
-        */
-
-        ctx.fillStyle =
-            "white";
-
-
-        ctx.font =
-            "11px Arial";
-
-
-        ctx.textAlign =
-            "center";
-
-
-        ctx.fillText(
-            mob.type,
-            x,
-            y+30
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   PLAYER
-========================================================= */
-
-function drawPlayer(){
-
-    const camera =
-        getCamera();
-
-
-    const x =
-        player.x -
-        camera.x;
-
-
-    const y =
-        player.y -
-        camera.y;
-
-
-    /*
-        Sombra
-    */
-
-    ctx.fillStyle =
-        "rgba(0,0,0,.25)";
-
-
-    ctx.beginPath();
-
-
-    ctx.ellipse(
-        x,
-        y+17,
-        16,
-        6,
-        0,
-        0,
-        Math.PI*2
-    );
-
-
-    ctx.fill();
-
-
-    /*
-        Corpo
-    */
-
-    ctx.fillStyle =
-        "#3498db";
-
-
-    ctx.fillRect(
-        x-13,
-        y-5,
-        26,
-        24
-    );
-
-
-    /*
-        Cabeça
-    */
-
-    ctx.fillStyle =
-        "#ffd6a5";
-
-
-    ctx.fillRect(
-        x-9,
-        y-18,
-        18,
-        15
-    );
-
-
-    /*
-        Cabelo
-    */
-
-    ctx.fillStyle =
-        "#542e2e";
-
-
-    ctx.fillRect(
-        x-9,
-        y-19,
-        18,
-        5
-    );
-
-
-    /*
-        Espada
-    */
-
-    ctx.strokeStyle =
-        "#ddd";
-
-
-    ctx.lineWidth=4;
-
-
-    ctx.beginPath();
-
-
-    ctx.moveTo(
-        x+10,
-        y+4
-    );
-
-
-    ctx.lineTo(
-        x+22,
-        y-8
-    );
-
-
-    ctx.stroke();
-
-
-    /*
-        Indicador se tiver alvo
-    */
-
-    if(
-        player.target &&
-        player.target.alive
-    ){
-
-        ctx.strokeStyle =
-            "#ffd166";
-
-
-        ctx.lineWidth=2;
-
-
-        ctx.beginPath();
-
-
-        ctx.arc(
-            x,
-            y,
-            24,
-            0,
-            Math.PI*2
-        );
-
-
-        ctx.stroke();
-
-    }
-
-}
-
-
-/* =========================================================
-   GAME LOOP
-========================================================= */
-
-function gameLoop(){
-
-    updatePlayer();
-
-
-    updateCombat();
-
-
-    updateMobs();
-
-
-    if(
-        player.attackCooldown > 0
-    ){
-
-        player.attackCooldown--;
-
-    }
-
-
-    if(
-        messageTimer > 0
-    ){
-
-        messageTimer--;
-
-    }else{
-
-        document.getElementById(
-            "message"
-        ).innerText =
-            "";
-
-    }
-
-
-    updateHUD();
-
-
-    /*
-        Limpar
-    */
+/* ================================================= */
+/* DRAW */
+/* ================================================= */
+
+function draw(){
 
     ctx.clearRect(
         0,
         0,
-        canvas.width,
-        canvas.height
+        W,
+        H
     );
 
-
-    /*
-        Desenhar
-    */
 
     drawWorld();
 
@@ -2809,23 +3632,113 @@ function gameLoop(){
 
     drawMobs();
 
+    drawParticles();
+
+    drawDamageNumbers();
+
     drawPlayer();
 
+}
+
+
+/* ================================================= */
+/* GAME LOOP */
+/* ================================================= */
+
+function loop(){
+
+    update();
+
+    draw();
 
     requestAnimationFrame(
-        gameLoop
+        loop
     );
 
 }
 
 
-/* =========================================================
-   INICIAR
-========================================================= */
+loop();
+
+
+/* ================================================= */
+/* START GAME */
+/* ================================================= */
+
+function startGame(){
+
+    closeMenu();
+
+    document.body.style.overflow=
+        "hidden";
+
+
+    document.getElementById(
+        "gameScreen"
+    ).style.display=
+        "block";
+
+
+    gameRunning=true;
+
+
+    player.x=0;
+    player.y=0;
+
+    player.hp=
+        player.maxHp;
+
+
+    target=null;
+
+    destination=null;
+
+
+    createMobs();
+
+    updateHUD();
+
+}
+
+
+/* ================================================= */
+/* EXIT GAME */
+/* ================================================= */
+
+function exitGame(){
+
+    gameRunning=false;
+
+
+    document.getElementById(
+        "gameScreen"
+    ).style.display=
+        "none";
+
+
+    document.body.style.overflow=
+        "auto";
+
+
+    document.getElementById(
+        "inventory"
+    ).style.display=
+        "none";
+
+
+    document.getElementById(
+        "shop"
+    ).style.display=
+        "none";
+
+}
+
+
+/* ================================================= */
+/* INITIAL */
+/* ================================================= */
 
 updateHUD();
-
-gameLoop();
 
 </script>
 
