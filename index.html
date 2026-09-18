@@ -732,6 +732,7 @@ canvas{
 #partyList{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:9px}
 .party-player{padding:5px 9px;background:#111620;border:1px solid #384153;border-radius:7px;color:#ddd;font-size:12px}
 #copyRoom{display:none}
+#remotePlayersOverlay{position:fixed;inset:0;pointer-events:none;z-index:15}.remote-player-marker{position:absolute;transform:translate(-50%,-100%);padding:3px 6px;border-radius:6px;background:#111c;color:#8fe3ff;border:1px solid #456;font-size:11px;white-space:nowrap}.room-start{display:block;margin:12px auto 0;padding:11px 28px;background:#7b5b20;color:#fff;border:1px solid #d9ad4b;border-radius:8px;font-weight:bold;font-size:15px}.room-start:hover{background:#9b7629}
 #roomCodeInput{text-transform:uppercase}
 </style>
 </head>
@@ -769,6 +770,8 @@ Dark Dungeons · Loot · Monsters · Adventure
   </div>
   <div id="roomStatus">Sem sala — podes jogar normalmente.</div>
   <div id="partyList"></div>
+<div id="remotePlayersOverlay"></div>
+  <button id="startRoomBtn" class="room-start" onclick="startRoomGame()" style="display:none">▶ START DUNGEON</button>
 </div>
 
 <div class="dungeons">
@@ -1200,227 +1203,33 @@ const player={
 
 
 /* =========================================================
-   MULTIPLAYER — ROOM ONLY / PRESERVES ORIGINAL GAME
+   MULTIPLAYER — CO-OP DUNGEON
 ========================================================= */
-const SUPABASE_URL = "https://lqzzvufqrggudnnvfrdv.supabase.co";
-const SUPABASE_KEY = "sb_publishable_r4OlSxiIe1_rBZ3q5V_K2w_GfxDWVyb";
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-let roomChannel = null;
-let roomCode = "";
-let roomHost = false;
-let roomHostId = null;
-let multiplayerPlayers = {};
-let playerId = crypto.randomUUID();
-
-function makeRoomCode(){
-  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code="RV-";
-  for(let i=0;i<4;i++) code+=chars[Math.floor(Math.random()*chars.length)];
-  return code;
-}
-
-function setRoomStatus(text){
-  const el=document.getElementById("roomStatus");
-  if(el) el.innerHTML=text;
-}
-
-function renderParty(){
-  const el=document.getElementById("partyList");
-  if(!el)return;
-  el.innerHTML="";
-  const all=[{id:playerId,name:playerName(),local:true},...Object.values(multiplayerPlayers)];
-  all.forEach(p=>{
-    const d=document.createElement("div");
-    d.className="party-player";
-    d.textContent=(p.local?"🟢 ":"🟢 ")+p.name+(p.id===roomHost?" 👑":"");
-    el.appendChild(d);
-  });
-}
-
-function playerName(){
-  const el=document.getElementById("playerNameInput");
-  return (el?.value||localStorage.getItem("runevale-name")||"Player").trim().slice(0,16)||"Player";
-}
-
-async function createRoom(){
-  const code=makeRoomCode();
-  await connectRoom(code,true);
-}
-
-async function joinRoom(){
-  const input=document.getElementById("roomCodeInput");
-  const code=(input?.value||"").trim().toUpperCase();
-  if(!/^RV-[A-Z0-9]{4}$/.test(code)){showToast("❌ Código inválido. Ex: RV-AB12");return;}
-  await connectRoom(code,false);
-}
-
-async function connectRoom(code,host){
-  try{
-    if(roomChannel) await supabaseClient.removeChannel(roomChannel);
-    roomCode=code;
-    roomHost=host;
-    if(host) roomHostId=playerId;
-    localStorage.setItem("runevale-name",playerName());
-    document.getElementById("roomCodeInput").value=code;
-    document.getElementById("copyRoom").style.display="inline-block";
-    setRoomStatus("A ligar à sala <b>"+code+"</b>...");
-
-    roomChannel=supabaseClient.channel("runevale-room:"+code,{config:{presence:{key:playerId}}});
-
-    roomChannel.on("presence",{event:"sync"},()=>syncRoomPlayers());
-    roomChannel.on("broadcast",{event:"runevale"},({payload})=>handleRoomMessage(payload));
-
-    await roomChannel.subscribe(async status=>{
-      if(status==="SUBSCRIBED"){
-        await roomChannel.track({
-          id:playerId, name:playerName(), host:roomHost,
-          x:player.x, y:player.y,
-          dungeon:currentDungeon, wave:currentWave,
-          hp:player.hp, maxHp:player.maxHp, level:player.level
-        });
-        setRoomStatus("Sala <b>"+roomCode+"</b> · " + (roomHost?"és o host 👑":"ligado") );
-        renderParty();
-        showToast("🌐 Sala ligada: "+roomCode);
-      }
-    });
-  }catch(err){
-    console.error(err);
-    setRoomStatus("❌ Não foi possível ligar à sala.");
-    showToast("❌ Erro ao ligar ao multiplayer");
-  }
-}
-
-function syncRoomPlayers(){
-  if(!roomChannel)return;
-  const state=roomChannel.presenceState();
-  multiplayerPlayers={};
-  for(const id of Object.keys(state)){
-    const entries=state[id];
-    const p=entries&&entries[entries.length-1];
-    if(!p)continue;
-    if(p.host) roomHostId=id;
-    if(p.id===playerId)continue;
-    multiplayerPlayers[id]=p;
-  }
-  if(roomHostId) roomHost=(roomHostId===playerId);
-  renderParty();
-  if(roomHost) broadcastFullState();
-}
-
-function handleRoomMessage(data){
-  if(!data)return;
-  if(data.type==="chat"){showToast("💬 "+data.name+": "+data.text);return;}
-
-  if(data.type==="request_state"){
-    if(roomHost) broadcastFullState();
-    return;
-  }
-
-  if(data.type==="request_dungeon"){
-    if(roomHost && data.dungeon===1){
-      beginDungeon(1,false);
-      broadcastRoom({type:"dungeon",from:playerId,dungeon:1});
-      broadcastFullState();
-    }
-    return;
-  }
-
-  if(data.type==="dungeon"){
-    if(data.from===playerId)return;
-    if(typeof data.dungeon==="number" && data.dungeon===1 && !roomHost){
-      beginDungeon(1,true);
-    }
-    return;
-  }
-
-  if(data.type==="attack"){
-    if(roomHost && data.from!==playerId)performRemoteAttack(data);
-    return;
-  }
-
-  if(data.type==="state"){
-    if(roomHost || data.from===playerId)return;
-    if(typeof data.dungeon==="number")currentDungeon=data.dungeon;
-    if(typeof data.wave==="number")currentWave=data.wave;
-    waveStarting=!!data.waveStarting;
-    dungeonComplete=!!data.dungeonComplete;
-    if(data.inDungeon){
-      document.getElementById("menu").classList.add("hidden");
-      document.getElementById("game").classList.remove("hidden");
-      document.getElementById("dungeonName").textContent=dungeonData[currentDungeon].name;
-    }
-    if(Array.isArray(data.mobs)) applyRemoteMobs(data.mobs);
-    updateHUD();
-    return;
-  }
-}
-
-function serializeMobs(){
-  return mobs.map(m=>({id:m.id,type:m.type,boss:!!m.boss,bossName:m.bossName||"",x:m.x,y:m.y,hp:m.hp,maxHp:m.maxHp,damage:m.damage,speed:m.speed,size:m.size,xp:m.xp,gold:m.gold,color:m.color,dead:!!m.dead,deathTime:m.deathTime||0,hit:m.hit||0,anim:m.anim||0,attackCooldown:m.attackCooldown||0,elite:!!m.elite,buffed:!!m.buffed,buffType:m.buffType||null,buffMultiplier:m.buffMultiplier||1}));
-}
-function applyRemoteMobs(list){
-  const old=target&&target.id;
-  mobs=list.map(m=>({...m}));
-  target=old?mobs.find(m=>m.id===old&&!m.dead):null;
-}
-function broadcastFullState(){
-  if(!roomChannel || !roomHost)return;
-  broadcastRoom({type:"state",from:playerId,dungeon:currentDungeon,wave:currentWave,waveStarting:!!waveStarting,dungeonComplete:!!dungeonComplete,inDungeon:!document.getElementById("game").classList.contains("hidden"),mobs:serializeMobs()});
-}
-function performRemoteAttack(data){
-  if(!roomHost || player.dead)return;
-  const px=Number(data.x),py=Number(data.y),damageBase=Number(data.damage)||1;
-  if(!Number.isFinite(px)||!Number.isFinite(py))return;
-  let hits=0;
-  for(const mob of mobs){
-    if(mob.dead)continue;
-    if(Math.hypot(mob.x-px,mob.y-py)>115)continue;
-    let damage=Math.max(1,Math.floor(damageBase+Math.random()*5));
-    if(mob.boss)damage=Math.floor(damage*.75);
-    mob.hp-=damage; mob.hit=.16; hits++;
-    if(mob.hp<=0) killMob(mob);
-  }
-  if(hits) broadcastFullState();
-}
-
-async function broadcastRoom(data){
-  if(!roomChannel)return;
-  try{await roomChannel.send({type:"broadcast",event:"runevale",payload:data});}catch(e){console.error(e);}
-}
-
-async function updateRoomPresence(){
-  if(!roomChannel)return;
-  try{
-    await roomChannel.track({
-      id:playerId, name:playerName(), host:roomHost,
-      x:player.x, y:player.y,
-      dungeon:currentDungeon, wave:currentWave,
-      hp:player.hp, maxHp:player.maxHp, level:player.level
-    });
-  }catch(e){}
-}
-
-async function copyRoomCode(){
-  if(!roomCode)return;
-  try{await navigator.clipboard.writeText(roomCode);showToast("📋 Código copiado: "+roomCode);}catch(e){showToast(roomCode);}
-}
-
-function leaveRoom(){
-  if(roomChannel){
-    supabaseClient.removeChannel(roomChannel);
-    roomChannel=null;
-  }
-  roomCode="";
-  roomHost=false;
-  roomHostId=null;
-  multiplayerPlayers={};
-  document.getElementById("copyRoom").style.display="none";
-  document.getElementById("roomCodeInput").value="";
-  setRoomStatus("Sem sala — podes jogar normalmente.");
-  renderParty();
-}
-
-
+const SUPABASE_URL="https://lqzzvufqrggudnnvfrdv.supabase.co";
+const SUPABASE_KEY="sb_publishable_r4OlSxiIe1_rBZ3q5V_K2w_GfxDWVyb";
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let roomChannel=null,roomCode="",roomHost=false,roomHostId=null,multiplayerPlayers={},playerId=crypto.randomUUID();
+function makeRoomCode(){const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let x="RV-";for(let i=0;i<4;i++)x+=c[Math.floor(Math.random()*c.length)];return x;}
+function setRoomStatus(t){const e=document.getElementById("roomStatus");if(e)e.innerHTML=t;}
+function playerName(){const e=document.getElementById("playerNameInput");return(e?.value||localStorage.getItem("runevale-name")||"Player").trim().slice(0,16)||"Player";}
+function renderParty(){const e=document.getElementById("partyList");if(!e)return;e.innerHTML="";[{id:playerId,name:playerName()},...Object.values(multiplayerPlayers)].forEach(p=>{const d=document.createElement("div");d.className="party-player";d.textContent="🟢 "+(p.name||"Player")+(p.id===roomHostId?" 👑":"");e.appendChild(d);});}
+function renderRemotePlayers(){const o=document.getElementById("remotePlayersOverlay");if(!o)return;o.innerHTML="";for(const p of Object.values(multiplayerPlayers)){if(typeof p.x!=="number")continue;const d=document.createElement("div");d.className="remote-player-marker";d.textContent="🧙 "+(p.name||"Player");d.style.left=(innerWidth/2+(p.x-player.x))+'px';d.style.top=(innerHeight/2+(p.y-player.y))+'px';o.appendChild(d);}}
+function updateRoomStartButton(){const b=document.getElementById("startRoomBtn");if(b)b.style.display=(roomChannel&&roomHost)?"block":"none";}
+function startRoomGame(){if(!roomChannel||!roomHost)return;broadcastRoom({type:"start_game",from:playerId,dungeon:1});beginDungeon(1);}
+async function createRoom(){await connectRoom(makeRoomCode(),true);}
+async function joinRoom(){const c=(document.getElementById("roomCodeInput")?.value||"").trim().toUpperCase();if(!/^RV-[A-Z0-9]{4}$/.test(c)){showToast("❌ Código inválido. Ex: RV-AB12");return;}await connectRoom(c,false);}
+async function connectRoom(code,host){try{if(roomChannel)await supabaseClient.removeChannel(roomChannel);roomCode=code;roomHost=host;roomHostId=host?playerId:null;localStorage.setItem("runevale-name",playerName());document.getElementById("roomCodeInput").value=code;document.getElementById("copyRoom").style.display="inline-block";setRoomStatus("A ligar à sala <b>"+code+"</b>...");roomChannel=supabaseClient.channel("runevale-room:"+code,{config:{presence:{key:playerId}}});roomChannel.on("presence",{event:"sync"},syncRoomPlayers);roomChannel.on("broadcast",{event:"runevale"},({payload})=>handleRoomMessage(payload));await roomChannel.subscribe(async status=>{if(status==="SUBSCRIBED"){await trackPresence();renderParty();updateRoomStartButton();setRoomStatus("Sala <b>"+roomCode+"</b> · "+(roomHost?"és o host 👑":"ligado"));showToast("🌐 Sala ligada: "+roomCode);if(!roomHost)broadcastRoom({type:"request_state",from:playerId});}});}catch(e){console.error(e);showToast("❌ Erro ao ligar ao multiplayer");}}
+function syncRoomPlayers(){if(!roomChannel)return;const state=roomChannel.presenceState();multiplayerPlayers={};for(const id of Object.keys(state)){const p=(state[id]||[]).at(-1);if(!p)continue;if(p.host)roomHostId=p.id||id;if((p.id||id)!==playerId)multiplayerPlayers[p.id||id]=p;}if(roomHostId)roomHost=roomHostId===playerId;renderParty();updateRoomStartButton();renderRemotePlayers();if(roomHost)broadcastFullState();}
+async function trackPresence(){if(!roomChannel)return;try{await roomChannel.track({id:playerId,name:playerName(),host:roomHost,x:player.x,y:player.y,dungeon:currentDungeon,wave:currentWave,hp:player.hp,maxHp:player.maxHp,level:player.level,host:roomHost});}catch(e){}}
+async function updateRoomPresence(){await trackPresence();renderRemotePlayers();}
+async function broadcastRoom(data){if(!roomChannel)return;try{await roomChannel.send({type:"broadcast",event:"runevale",payload:data});}catch(e){}}
+function serializeMobs(){return mobs.map(m=>({...m,boss:!!m.boss}));}
+function applyRemoteMobs(a){if(Array.isArray(a))mobs=a.map(m=>({...m}));}
+function broadcastFullState(){if(roomHost&&roomChannel)broadcastRoom({type:"state",from:playerId,dungeon:currentDungeon,wave:currentWave,waveStarting,dungeonComplete,player:{hp:player.hp,maxHp:player.maxHp,level:player.level,gold:player.gold,xp:player.xp},mobs:serializeMobs()});}
+function handleRoomMessage(d){if(!d)return;if(d.type==="request_state"&&roomHost)return broadcastFullState();if(d.type==="request_dungeon"&&roomHost&&d.dungeon===1)return beginDungeon(1);if(d.type==="request_attack"&&roomHost&&d.dungeon===currentDungeon&&!waveStarting)return performRemoteAttack(d);if(d.type==="damage"&&d.to===playerId){player.hp=Math.max(0,player.hp-(d.amount||0));player.hit=.15;updateHUD();return;}if(d.type==="state"&&!roomHost){if(typeof d.dungeon==="number"&&d.dungeon!==currentDungeon)beginDungeon(d.dungeon,true);currentWave=d.wave||currentWave;waveStarting=!!d.waveStarting;dungeonComplete=!!d.dungeonComplete;applyRemoteMobs(d.mobs);if(d.player){player.hp=d.player.hp;player.maxHp=d.player.maxHp;player.level=d.player.level;player.gold=d.player.gold;player.xp=d.player.xp;}updateHUD();}}
+function performRemoteAttack(d){for(const m of mobs){if(!m.dead&&Math.hypot(m.x-d.x,m.y-d.y)<=115){m.hp-=Math.max(1,Math.floor(d.damage||1));m.hit=.16;if(m.hp<=0)killMob(m);}}broadcastFullState();}
+async function copyRoomCode(){if(!roomCode)return;try{await navigator.clipboard.writeText(roomCode);showToast("📋 Código copiado: "+roomCode);}catch(e){showToast(roomCode);}}
+function leaveRoom(){if(roomChannel)supabaseClient.removeChannel(roomChannel);roomChannel=null;roomCode="";roomHost=false;roomHostId=null;multiplayerPlayers={};document.getElementById("copyRoom").style.display="none";document.getElementById("roomCodeInput").value="";setRoomStatus("Sem sala — podes jogar normalmente.");renderParty();}
 
 /* =========================================================
    INVENTORY
@@ -1978,13 +1787,8 @@ function enterDungeon(number){
   }
 
   if(number===1){
-    if(roomChannel && !roomHost){
-      broadcastRoom({type:"request_dungeon",from:playerId,dungeon:1});
-      showToast("⏳ A entrar na dungeon do host...");
-      return;
-    }
-    beginDungeon(1,false);
-
+    if(roomChannel&&!roomHost){broadcastRoom({type:"request_dungeon",from:playerId,dungeon:1});showToast("⏳ A pedir ao host para iniciar...");return;}
+    beginDungeon(1);
   }else{
 
     openShop(number);
@@ -1994,7 +1798,7 @@ function enterDungeon(number){
 }
 
 
-function beginDungeon(number,fromNetwork=false){
+function beginDungeon(number){
 
   currentDungeon=number;
 
@@ -2035,20 +1839,8 @@ function beginDungeon(number,fromNetwork=false){
     .textContent=
     dungeonData[number].name;
 
-  if(roomChannel){
-    if(!fromNetwork) broadcastRoom({type:"dungeon",from:playerId,dungeon:number});
-    updateRoomPresence();
-  }
-
-  if(roomChannel && !roomHost && fromNetwork){
-    mobs=[];
-    waveStarting=true;
-    broadcastRoom({type:"request_state",from:playerId});
-    return;
-  }
-
-  startWave();
-  if(roomChannel && roomHost) setTimeout(broadcastFullState,1100);
+  if(roomChannel)updateRoomPresence();
+  if(!roomChannel||roomHost)startWave();
 
 }
 
@@ -2322,7 +2114,6 @@ function startWave(){
     hideCenter();
 
     updateHUD();
-    if(roomChannel && roomHost) broadcastFullState();
 
   },1000);
 
@@ -2450,17 +2241,11 @@ function updatePlayer(dt){
 function areaAttack(){
 
   if(player.dead)return;
+  if(roomChannel&&!roomHost){if(attackCooldown>0||paused)return;const nearby=mobs.some(m=>!m.dead&&Math.hypot(m.x-player.x,m.y-player.y)<=115);if(!nearby)return;attackCooldown=.58;attackAnimation=.42;broadcastRoom({type:"request_attack",from:playerId,dungeon:currentDungeon,x:player.x,y:player.y,damage:player.damage+Math.floor(Math.random()*5)});return;}
 
   if(paused)return;
 
   if(attackCooldown>0)return;
-
-  if(roomChannel && !roomHost){
-    attackCooldown=.58;
-    attackAnimation=.42;
-    broadcastRoom({type:"attack",from:playerId,x:player.x,y:player.y,damage:player.damage});
-    return;
-  }
 
   const radius=115;
 
@@ -2563,7 +2348,6 @@ function areaAttack(){
       25,
       "#e6bd4e"
     );
-    if(roomChannel && roomHost) broadcastFullState();
 
   }
 
@@ -2811,129 +2595,20 @@ function gainXP(amount){
 ========================================================= */
 
 function updateMobs(dt){
-
-  // No multiplayer: normal local AI. In a room only the host simulates the mobs.
-  if(roomChannel && !roomHost)return;
-
   for(const mob of mobs){
-
-    if(mob.dead){
-
-      mob.deathTime+=dt;
-
-      continue;
-
-    }
-
-    mob.anim+=dt*5;
-
-    if(mob.hit>0)
-      mob.hit-=dt;
-
-    mob.attackCooldown-=dt;
-
-    const distanceToPlayer=Math.hypot(player.x-mob.x,player.y-mob.y);
-    if(distanceToPlayer>10000){
-      const angle=Math.random()*Math.PI*2;
-      mob.x=player.x+Math.cos(angle)*300;
-      mob.y=player.y+Math.sin(angle)*300;
-      continue;
-    }
-
-    const dx=
-      player.x-mob.x;
-
-    const dy=
-      player.y-mob.y;
-
-    const dist=
-      Math.hypot(dx,dy);
-
-    if(
-      dist<500 &&
-      dist>55
-    ){
-
-      mob.x+=
-        (dx/dist)*
-        mob.speed*
-        dt;
-
-      mob.y+=
-        (dy/dist)*
-        mob.speed*
-        dt;
-
-    }
-
-    if(
-      dist<=55 &&
-      mob.attackCooldown<=0
-    ){
-
-      mob.attackCooldown=
-        1.1+
-        Math.random()*.5;
-
-      const damage=
-        mob.damage;
-
-      player.hp-=damage;
-
-      player.hit=.15;
-
-      numbers.push({
-
-        x:player.x,
-
-        y:player.y-35,
-
-        text:"-"+damage,
-
-        color:"#ff6565",
-
-        life:.7,
-
-        maxLife:.7
-
-      });
-
-      burst(
-        player.x,
-        player.y,
-        10,
-        "#e65353"
-      );
-
-      if(player.hp<=0){
-
-        die();
-
-      }
-
-    }
-
+    if(mob.dead){mob.deathTime+=dt;continue;}
+    mob.anim+=dt*5;if(mob.hit>0)mob.hit-=dt;mob.attackCooldown-=dt;
+    if(roomChannel&&!roomHost)continue;
+    const targets=[{id:playerId,x:player.x,y:player.y}];
+    for(const p of Object.values(multiplayerPlayers))if(typeof p.x==="number"&&typeof p.y==="number")targets.push({id:p.id,x:p.x,y:p.y});
+    let t=targets[0],best=Infinity;for(const p of targets){const d=Math.hypot(p.x-mob.x,p.y-mob.y);if(d<best){best=d;t=p;}}
+    if(best>10000){const a=Math.random()*Math.PI*2;mob.x=t.x+Math.cos(a)*300;mob.y=t.y+Math.sin(a)*300;continue;}
+    const dx=t.x-mob.x,dy=t.y-mob.y,dist=Math.hypot(dx,dy);
+    if(dist<500&&dist>55){mob.x+=dx/dist*mob.speed*dt;mob.y+=dy/dist*mob.speed*dt;}
+    if(dist<=55&&mob.attackCooldown<=0){mob.attackCooldown=1.1+Math.random()*.5;const damage=mob.damage;if(t.id===playerId){player.hp-=damage;player.hit=.15;numbers.push({x:player.x,y:player.y-35,text:"-"+damage,color:"#ff6565",life:.7,maxLife:.7});burst(player.x,player.y,10,"#e65353");if(player.hp<=0)die();}else broadcastRoom({type:"damage",to:t.id,amount:damage});}
   }
-
-  if(
-    !waveStarting &&
-    !player.dead &&
-    mobs.length>0
-  ){
-
-    const alive=
-      mobs.filter(
-        m=>!m.dead
-      ).length;
-
-    if(alive===0){
-
-      nextWave();
-
-    }
-
-  }
-
+  if(!waveStarting&&!player.dead&&mobs.length>0&&mobs.filter(m=>!m.dead).length===0)nextWave();
+  if(roomHost&&roomChannel&&Math.floor(gameTime*10)!==Math.floor((gameTime-dt)*10))broadcastFullState();
 }
 
 
@@ -5023,10 +4698,8 @@ function update(dt){
 
   gameTime+=dt;
 
-  if(roomChannel && Math.floor(gameTime*10)!==Math.floor((gameTime-dt)*10)){
+  if(roomChannel && Math.floor(gameTime*5)!==Math.floor((gameTime-dt)*5)){
     updateRoomPresence();
-    if(roomHost) broadcastFullState();
-    else if(!roomHost && gameTime<1) broadcastRoom({type:"request_state",from:playerId});
   }
 
   if(attackCooldown>0)
