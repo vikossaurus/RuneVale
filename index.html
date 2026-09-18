@@ -2,1439 +2,856 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RuneVale — Dark Dungeons</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RuneVale Online</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 *{
-  box-sizing:border-box;
-  user-select:none;
+    box-sizing:border-box;
+    user-select:none;
 }
 
 html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#05060a;
-  color:#eee;
-  font-family:Arial,Helvetica,sans-serif;
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#080a10;
+    color:#eee;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+button,input{
+    font:inherit;
 }
 
 button{
-  font:inherit;
-  cursor:pointer;
+    cursor:pointer;
 }
-
-.hidden{
-  display:none!important;
-}
-
-/* =========================================================
-   GLOBAL
-========================================================= */
-
-::-webkit-scrollbar{
-  width:8px;
-}
-
-::-webkit-scrollbar-track{
-  background:#090b10;
-}
-
-::-webkit-scrollbar-thumb{
-  background:#343a48;
-  border-radius:10px;
-}
-
-/* =========================================================
-   MAIN MENU
-========================================================= */
 
 #menu{
-  position:fixed;
-  inset:0;
-  overflow:auto;
-  padding:30px 20px 80px;
-  background:
-    radial-gradient(circle at 50% 10%,#39244d 0,#171321 25%,#090b11 65%,#040509 100%);
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+        radial-gradient(circle at center,#22263a 0,#0b0d14 45%,#050609 100%);
 }
 
-#menu:before{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  opacity:.25;
-  background-image:
-    radial-gradient(circle,#fff 1px,transparent 1px);
-  background-size:80px 80px;
+.menuBox{
+    width:min(700px,94vw);
+    padding:35px;
+    border:1px solid #41465d;
+    background:rgba(13,16,25,.96);
+    box-shadow:0 0 50px #000;
+    border-radius:14px;
 }
 
 .logo{
-  position:relative;
-  text-align:center;
-  font-size:clamp(44px,8vw,82px);
-  color:#e9c96a;
-  letter-spacing:8px;
-  text-shadow:
-    0 0 8px #e9c96a,
-    0 0 30px #8e5c2e,
-    0 10px 40px #000;
-  margin:20px 0 4px;
+    text-align:center;
+    font-size:48px;
+    font-weight:900;
+    letter-spacing:5px;
+    color:#d9b86c;
+    text-shadow:0 0 20px #806b36;
 }
 
 .subtitle{
-  position:relative;
-  text-align:center;
-  color:#9299aa;
-  margin-bottom:35px;
+    text-align:center;
+    color:#858ba2;
+    margin-bottom:30px;
 }
 
-.menu-stats{
-  position:relative;
-  width:min(700px,95vw);
-  margin:0 auto 25px;
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  flex-wrap:wrap;
+.menuSection{
+    margin-top:18px;
+    padding:18px;
+    border:1px solid #292e40;
+    background:#10131d;
+    border-radius:10px;
 }
 
-.menu-stat{
-  background:#0c0f16dd;
-  border:1px solid #353b4a;
-  padding:9px 16px;
-  border-radius:9px;
+.menuTitle{
+    color:#d9b86c;
+    font-weight:bold;
+    margin-bottom:12px;
 }
 
-.menu-stat b{
-  color:#e8c75e;
+input{
+    width:100%;
+    padding:13px;
+    margin:5px 0;
+    color:white;
+    background:#080a10;
+    border:1px solid #363c51;
+    border-radius:7px;
+    outline:none;
 }
 
-.dungeons{
-  position:relative;
-  width:min(1050px,95vw);
-  margin:auto;
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:16px;
+input:focus{
+    border-color:#b99a58;
 }
 
-.dungeon{
-  position:relative;
-  min-height:220px;
-  padding:22px;
-  overflow:hidden;
-  background:
-    linear-gradient(145deg,#1a1d28ee,#0d1017ee);
-  border:1px solid #383f4f;
-  border-radius:15px;
-  box-shadow:0 15px 45px #0007;
-  transition:.2s;
+.menuButtons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:10px;
 }
 
-.dungeon:before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-    radial-gradient(circle at 80% 20%,#c69d4a22,transparent 40%);
-  pointer-events:none;
+button{
+    border:1px solid #4a5065;
+    background:#181c29;
+    color:#eee;
+    padding:12px 15px;
+    border-radius:7px;
+    transition:.12s;
 }
 
-.dungeon:not(.locked):hover{
-  transform:translateY(-5px);
-  border-color:#d0ad51;
-  box-shadow:0 20px 55px #000b,0 0 25px #b18a3c18;
+button:hover{
+    background:#252b3c;
+    border-color:#8f7949;
 }
 
-.dungeon h2{
-  position:relative;
-  margin:0 0 10px;
-  color:#e6c660;
+button.gold{
+    background:#80652e;
+    border-color:#b99a58;
 }
 
-.dungeon p{
-  position:relative;
-  color:#8f96a6;
-  font-size:14px;
+button.gold:hover{
+    background:#9b7a39;
 }
 
-.dungeon .difficulty{
-  color:#d28b62;
+button.danger{
+    background:#501e27;
 }
 
-.dungeon button{
-  position:relative;
-  width:100%;
-  margin-top:12px;
-  padding:12px;
-  border-radius:8px;
-  color:white;
-  background:#252b38;
-  border:1px solid #515a6c;
+.small{
+    font-size:12px;
+    color:#737a91;
 }
 
-.dungeon button:hover{
-  background:#353e4e;
+#roomInfo{
+    display:none;
+    margin-top:12px;
+    padding:12px;
+    background:#090c13;
+    border-radius:7px;
+    text-align:center;
 }
 
-.locked{
-  opacity:.45;
+#roomCode{
+    font-size:25px;
+    letter-spacing:4px;
+    color:#e1bd68;
+    font-weight:bold;
 }
-
-.lock{
-  position:absolute;
-  right:18px;
-  top:18px;
-  font-size:27px;
-  z-index:2;
-}
-
-/* =========================================================
-   GAME
-========================================================= */
 
 #game{
-  position:fixed;
-  inset:0;
-  background:#08090d;
+    display:none;
+    width:100%;
+    height:100%;
+    position:relative;
 }
 
 canvas{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
+    display:block;
+    width:100%;
+    height:100%;
+    background:#090b10;
 }
 
-/* =========================================================
-   HUD
-========================================================= */
-
-#hud{
-  position:absolute;
-  z-index:20;
-  left:12px;
-  top:12px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:7px;
-  max-width:70%;
+#topbar{
+    position:absolute;
+    top:10px;
+    left:10px;
+    right:10px;
+    height:58px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    pointer-events:none;
 }
 
-.stat{
-  min-width:95px;
-  padding:8px 11px;
-  background:#080b11eF;
-  border:1px solid #3e4657;
-  border-radius:8px;
-  box-shadow:0 5px 20px #0007;
+.panel{
+    pointer-events:auto;
+    background:rgba(10,13,21,.9);
+    border:1px solid #34394d;
+    border-radius:8px;
+    padding:8px 12px;
+    box-shadow:0 5px 20px #0008;
 }
 
-.stat small{
-  display:block;
-  color:#7e8697;
-  font-size:10px;
+#stats{
+    min-width:230px;
 }
 
-.stat b{
-  font-size:14px;
+.hpbar{
+    width:180px;
+    height:9px;
+    background:#272b34;
+    border-radius:5px;
+    overflow:hidden;
+    margin-top:4px;
 }
 
-#buttons{
-  position:absolute;
-  right:12px;
-  top:12px;
-  z-index:20;
-  display:flex;
-  gap:7px;
+.hpfill{
+    height:100%;
+    background:#b83345;
 }
 
-.btn{
-  padding:9px 12px;
-  color:#eee;
-  background:#121620ee;
-  border:1px solid #424b5e;
-  border-radius:8px;
-  box-shadow:0 5px 20px #0007;
+.xpbar{
+    width:180px;
+    height:6px;
+    background:#272b34;
+    border-radius:5px;
+    overflow:hidden;
+    margin-top:3px;
 }
 
-.btn:hover{
-  background:#252c3a;
+.xpfill{
+    height:100%;
+    background:#b99535;
 }
 
-#pauseButton{
-  font-size:18px;
+#dungeonInfo{
+    text-align:center;
+    min-width:190px;
 }
 
-/* =========================================================
-   WAVE
-========================================================= */
-
-#waveBox{
-  position:absolute;
-  z-index:20;
-  top:14px;
-  left:50%;
-  transform:translateX(-50%);
-  min-width:280px;
-  padding:10px 18px;
-  text-align:center;
-  background:#080b11ef;
-  border:1px solid #5c563e;
-  border-radius:10px;
-  box-shadow:0 8px 30px #0008;
+#waveText{
+    font-size:18px;
+    color:#d7b969;
+    font-weight:bold;
 }
 
-#waveBox strong{
-  color:#e7c75d;
+#players{
+    margin-left:auto;
+    min-width:150px;
 }
 
-.progress{
-  height:7px;
-  margin-top:7px;
-  background:#282d37;
-  border-radius:10px;
-  overflow:hidden;
+.playerLine{
+    font-size:12px;
+    margin:2px;
 }
 
-.progress i{
-  display:block;
-  width:0;
-  height:100%;
-  background:linear-gradient(90deg,#8e672c,#e9ca61);
-  transition:.2s;
+.onlineDot{
+    display:inline-block;
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:#54c979;
+    margin-right:5px;
 }
 
-/* =========================================================
-   TARGET
-========================================================= */
-
-#targetBox{
-  position:absolute;
-  z-index:20;
-  left:50%;
-  top:105px;
-  transform:translateX(-50%);
-  min-width:240px;
-  padding:9px 14px;
-  display:none;
-  text-align:center;
-  background:#080b11ef;
-  border:1px solid #555e70;
-  border-radius:8px;
+#bottom{
+    position:absolute;
+    left:10px;
+    bottom:10px;
+    display:flex;
+    gap:8px;
 }
 
-#targetBar{
-  height:7px;
-  margin-top:6px;
-  background:#292d36;
+#attack{
+    width:110px;
+    height:55px;
+    font-size:18px;
+    font-weight:bold;
+    background:#66232d;
 }
 
-#targetBar i{
-  display:block;
-  height:100%;
-  background:#d54d4d;
+#attack:hover{
+    background:#8a303d;
 }
 
-/* =========================================================
-   CENTER MESSAGE
-========================================================= */
-
-#message{
-  position:absolute;
-  z-index:30;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  width:90%;
-  text-align:center;
-  pointer-events:none;
-  opacity:0;
-  transition:.25s;
+#bottomRight{
+    position:absolute;
+    right:10px;
+    bottom:10px;
+    display:flex;
+    gap:8px;
 }
 
-#message h1{
-  margin:0;
-  font-size:clamp(32px,6vw,60px);
-  color:#e9c967;
-  text-shadow:0 5px 30px #000;
+#chat{
+    position:absolute;
+    left:10px;
+    bottom:75px;
+    width:310px;
+    pointer-events:none;
 }
 
-#message p{
-  color:#ddd;
-  font-size:16px;
+.chatMessages{
+    max-height:150px;
+    overflow:hidden;
 }
 
-/* =========================================================
-   TOAST
-========================================================= */
+.chatMsg{
+    font-size:12px;
+    margin-top:3px;
+    text-shadow:0 1px 2px black;
+}
+
+#chatInput{
+    display:none;
+    pointer-events:auto;
+}
+
+#pause,
+#inventory,
+#merchant,
+#dungeonSelect,
+#death{
+    display:none;
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.72);
+    align-items:center;
+    justify-content:center;
+    z-index:20;
+}
+
+.modal{
+    width:min(600px,92vw);
+    max-height:85vh;
+    overflow:auto;
+    background:#10131c;
+    border:1px solid #454b61;
+    border-radius:12px;
+    padding:25px;
+    box-shadow:0 20px 80px #000;
+}
+
+.modal h2{
+    color:#d9b86c;
+    margin-top:0;
+}
+
+.itemGrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+    gap:8px;
+}
+
+.item{
+    padding:12px;
+    border:1px solid #383d4f;
+    background:#171b27;
+    border-radius:7px;
+}
+
+.common{color:#ddd}
+.uncommon{color:#5bd67b}
+.rare{color:#56a9ff}
+.epic{color:#c477ff}
+.legendary{color:#ffb735}
+
+.shopGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
 
 #toast{
-  position:absolute;
-  z-index:60;
-  left:50%;
-  bottom:40px;
-  transform:translateX(-50%);
-  background:#090c12f5;
-  border:1px solid #515a6b;
-  padding:10px 17px;
-  border-radius:9px;
-  opacity:0;
-  transition:.2s;
-  pointer-events:none;
-  box-shadow:0 8px 30px #0009;
+    position:absolute;
+    top:85px;
+    left:50%;
+    transform:translateX(-50%);
+    padding:10px 18px;
+    border-radius:7px;
+    background:#171b27;
+    border:1px solid #555d72;
+    opacity:0;
+    transition:.2s;
+    pointer-events:none;
+    z-index:50;
 }
 
-/* =========================================================
-   PAUSE
-========================================================= */
-
-#pause{
-  position:absolute;
-  inset:0;
-  z-index:100;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:#020307c9;
-  backdrop-filter:blur(6px);
+#connection{
+    position:absolute;
+    top:75px;
+    right:10px;
+    font-size:11px;
+    color:#64d17d;
 }
-
-.pause-panel{
-  width:min(480px,92vw);
-  padding:30px;
-  background:
-    linear-gradient(145deg,#171b26,#0a0d13);
-  border:1px solid #4b5363;
-  border-radius:16px;
-  box-shadow:0 25px 100px #000;
-  text-align:center;
-}
-
-.pause-panel h1{
-  margin:0 0 8px;
-  color:#e9c967;
-  letter-spacing:3px;
-}
-
-.pause-panel p{
-  color:#81899a;
-  margin-bottom:25px;
-}
-
-.pause-info{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin-bottom:20px;
-}
-
-.pause-info div{
-  background:#0a0d13;
-  border:1px solid #303746;
-  padding:10px;
-  border-radius:8px;
-}
-
-.pause-info small{
-  display:block;
-  color:#70798b;
-}
-
-.pause-panel button{
-  width:100%;
-  padding:12px;
-  margin-top:8px;
-  color:#eee;
-  background:#222936;
-  border:1px solid #505a6d;
-  border-radius:8px;
-}
-
-.pause-panel button:hover{
-  background:#343e50;
-}
-
-/* =========================================================
-   SHOP
-========================================================= */
-
-#shop{
-  position:absolute;
-  inset:0;
-  z-index:90;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:#020307dd;
-  backdrop-filter:blur(5px);
-}
-
-.shop-panel{
-  width:min(850px,94vw);
-  max-height:90vh;
-  overflow:auto;
-  padding:26px;
-  background:
-    radial-gradient(circle at 50% 0,#4d332522,transparent 45%),
-    linear-gradient(145deg,#171a24,#0a0d13);
-  border:1px solid #5a5260;
-  border-radius:16px;
-  box-shadow:0 25px 100px #000;
-}
-
-.shop-title{
-  text-align:center;
-  margin-bottom:20px;
-}
-
-.shop-title h1{
-  margin:0 0 8px;
-  color:#e9c967;
-  font-size:28px;
-}
-
-.shop-title p{
-  color:#b7bcc6;
-  font-family:monospace;
-  font-size:15px;
-}
-
-.shop-gold{
-  text-align:center;
-  color:#e6c65c;
-  margin-bottom:15px;
-}
-
-.shop-items{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-  gap:10px;
-}
-
-.shop-item{
-  padding:15px;
-  background:#0b0e15;
-  border:1px solid #353c4b;
-  border-radius:10px;
-}
-
-.shop-item h3{
-  margin:0 0 6px;
-  color:#ddd;
-}
-
-.shop-item p{
-  color:#858d9e;
-  font-size:13px;
-  min-height:35px;
-}
-
-.shop-item .price{
-  color:#e4bf54;
-  margin-bottom:9px;
-}
-
-.shop-item button{
-  width:100%;
-  padding:9px;
-  background:#252c39;
-  border:1px solid #4d5668;
-  color:#fff;
-  border-radius:7px;
-}
-
-.shop-item button:hover{
-  background:#374152;
-}
-
-.shop-close{
-  display:block;
-  width:100%;
-  margin-top:16px;
-  padding:11px;
-  background:#161b25;
-  border:1px solid #4a5364;
-  color:#ddd;
-  border-radius:8px;
-}
-
-/* =========================================================
-   INVENTORY
-========================================================= */
-
-#inventory{
-  position:absolute;
-  inset:0;
-  z-index:85;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:#020307dd;
-  backdrop-filter:blur(5px);
-}
-
-.inventory-panel{
-  width:min(850px,94vw);
-  max-height:90vh;
-  overflow:auto;
-  padding:25px;
-  background:#10141c;
-  border:1px solid #495264;
-  border-radius:15px;
-  box-shadow:0 25px 100px #000;
-}
-
-.inventory-panel h1{
-  color:#e8c65e;
-  text-align:center;
-}
-
-.inventory-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-  gap:10px;
-}
-
-.item-card{
-  min-height:130px;
-  padding:13px;
-  background:#090c12;
-  border:1px solid #343b4b;
-  border-radius:9px;
-}
-
-.item-icon{
-  font-size:32px;
-}
-
-.item-card h3{
-  margin:5px 0;
-}
-
-.item-card p{
-  color:#858c9d;
-  font-size:12px;
-}
-
-.item-card button{
-  width:100%;
-  padding:7px;
-  background:#252c39;
-  border:1px solid #485266;
-  color:white;
-  border-radius:6px;
-}
-
-.close-modal{
-  width:100%;
-  margin-top:15px;
-  padding:11px;
-  background:#1a202c;
-  border:1px solid #4b5567;
-  color:#fff;
-  border-radius:8px;
-}
-
-/* =========================================================
-   DEATH
-========================================================= */
-
-#death{
-  position:absolute;
-  inset:0;
-  z-index:110;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  background:#000d;
-}
-
-#death h1{
-  font-size:clamp(40px,8vw,75px);
-  color:#d95454;
-  text-shadow:0 0 30px #7d2020;
-}
-
-#death button{
-  padding:13px 28px;
-  background:#252d3b;
-  border:1px solid #606b7f;
-  color:white;
-  border-radius:8px;
-}
-
-/* =========================================================
-   CONTROLS
-========================================================= */
-
-#controls{
-  position:absolute;
-  z-index:20;
-  left:12px;
-  bottom:10px;
-  color:#727a8b;
-  font-size:11px;
-}
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
 
 @media(max-width:700px){
-  #hud{
-    max-width:62%;
-  }
-
-  .stat{
-    min-width:72px;
-    padding:6px;
-  }
-
-  #buttons{
-    flex-direction:column;
-  }
-
-  #waveBox{
-    top:130px;
-  }
-
-  #controls{
-    display:none;
-  }
+    .logo{font-size:34px}
+    .menuButtons{grid-template-columns:1fr}
+    #players{display:none}
+    #dungeonInfo{display:none}
+    #stats{min-width:180px}
 }
 </style>
 </head>
 
 <body>
 
-<!-- =======================================================
-     MENU
-======================================================= -->
+<div id="menu">
 
-<section id="menu">
+    <div class="menuBox">
 
-<div class="logo">RUNEVALE</div>
+        <div class="logo">RUNEVALE</div>
+        <div class="subtitle">ONLINE CO-OP RPG</div>
 
-<div class="subtitle">
-Dark Dungeons · Loot · Monsters · Adventure
+        <div class="menuSection">
+            <div class="menuTitle">PLAYER</div>
+
+            <input id="nameInput"
+                   maxlength="16"
+                   placeholder="Nome do jogador"
+                   value="Vikos">
+
+            <div class="small">
+                O nome é apenas o teu nome dentro da sala.
+            </div>
+        </div>
+
+        <div class="menuSection">
+
+            <div class="menuTitle">MULTIPLAYER</div>
+
+            <div class="menuButtons">
+                <button class="gold" onclick="createRoom()">
+                    CREATE ROOM
+                </button>
+
+                <button onclick="showJoin()">
+                    JOIN ROOM
+                </button>
+            </div>
+
+            <div id="joinBox" style="display:none;margin-top:10px">
+                <input id="joinInput"
+                       maxlength="6"
+                       placeholder="Código: RV-AB12">
+
+                <button class="gold"
+                        style="width:100%"
+                        onclick="joinRoom()">
+                    JOIN
+                </button>
+            </div>
+
+            <div id="roomInfo">
+                <div class="small">ROOM CODE</div>
+                <div id="roomCode"></div>
+                <div id="roomPlayers" class="small"></div>
+            </div>
+
+        </div>
+
+        <div class="menuSection">
+
+            <div class="menuTitle">OFFLINE</div>
+
+            <button style="width:100%"
+                    onclick="startOffline()">
+                PLAY SOLO
+            </button>
+
+        </div>
+
+        <div class="small"
+             style="text-align:center;margin-top:18px">
+            RuneVale Online • Supabase Realtime
+        </div>
+
+    </div>
+
 </div>
 
-<div class="menu-stats">
-  <div class="menu-stat">⚔️ Level <b id="menuLevel">1</b></div>
-  <div class="menu-stat">💰 <b id="menuGold">25</b> ouro</div>
-  <div class="menu-stat">🏆 Dungeons <b id="menuDungeons">0/5</b></div>
-</div>
 
-<div class="dungeons">
-
-<div class="dungeon">
-<h2>⚔️ Dungeon I</h2>
-<p>As Catacumbas</p>
-<p>10 hordas · inimigos básicos</p>
-<p class="difficulty">Dificuldade: Normal</p>
-<button onclick="enterDungeon(1)">ENTRAR</button>
-</div>
-
-<div class="dungeon locked" data-dungeon="2">
-<span class="lock">🔒</span>
-<h2>🔥 Dungeon II</h2>
-<p>Cripta de Fogo</p>
-<p>10 hordas · inimigos mais fortes</p>
-<p class="difficulty">Dificuldade: Difícil</p>
-<button disabled>LOCKED</button>
-</div>
-
-<div class="dungeon locked" data-dungeon="3">
-<span class="lock">🔒</span>
-<h2>❄️ Dungeon III</h2>
-<p>Salão Congelado</p>
-<p>10 hordas · monstros poderosos</p>
-<p class="difficulty">Dificuldade: Muito difícil</p>
-<button disabled>LOCKED</button>
-</div>
-
-<div class="dungeon locked" data-dungeon="4">
-<span class="lock">🔒</span>
-<h2>☠️ Dungeon IV</h2>
-<p>Abismo Morto</p>
-<p>10 hordas · criaturas mortais</p>
-<p class="difficulty">Dificuldade: Brutal</p>
-<button disabled>LOCKED</button>
-</div>
-
-<div class="dungeon locked" data-dungeon="5">
-<span class="lock">👑</span>
-<h2>👑 Dungeon V</h2>
-<p>Castelo do Rei Negro</p>
-<p>10 hordas · inimigos lendários</p>
-<p class="difficulty">Dificuldade: Infernal</p>
-<button disabled>LOCKED</button>
-</div>
-
-</div>
-</section>
-
-
-<!-- =======================================================
-     GAME
-======================================================= -->
-
-<section id="game" class="hidden">
+<div id="game">
 
 <canvas id="canvas"></canvas>
 
-<div id="hud">
-
-<div class="stat">
-<small>HP</small>
-<b id="hp">100 / 100</b>
+<div id="connection">
+    ● CONNECTING
 </div>
 
-<div class="stat">
-<small>XP</small>
-<b id="xp">0 / 100</b>
-</div>
+<div id="topbar">
 
-<div class="stat">
-<small>NÍVEL</small>
-<b id="level">1</b>
-</div>
+    <div class="panel" id="stats">
 
-<div class="stat">
-<small>OURO</small>
-<b id="gold">25</b>
-</div>
+        <div>
+            <b id="playerName">Player</b>
+            <span id="levelText">LV 1</span>
+        </div>
 
-<div class="stat">
-<small>DANO</small>
-<b id="damage">5</b>
-</div>
+        <div class="hpbar">
+            <div class="hpfill" id="hpFill"></div>
+        </div>
 
-<div class="stat">
-<small>POÇÕES</small>
-<b id="potions">3</b>
-</div>
+        <div class="xpbar">
+            <div class="xpfill" id="xpFill"></div>
+        </div>
 
-</div>
+        <div class="small">
+            <span id="goldText">0</span> Gold
+            •
+            <span id="potionText">3</span> Potions
+        </div>
 
+    </div>
 
-<div id="buttons">
+    <div class="panel" id="dungeonInfo">
 
-<button class="btn" onclick="toggleInventory()">🎒</button>
+        <div id="dungeonName">Dungeon I</div>
 
-<button class="btn" onclick="usePotion()">🧪</button>
+        <div id="waveText">
+            WAVE 0 / 10
+        </div>
 
-<button class="btn" onclick="areaAttack()">⚔️</button>
+        <div class="small"
+             id="bossText">
+            Waiting...
+        </div>
 
-<button class="btn" id="pauseButton" onclick="togglePause()">⏸</button>
+    </div>
 
-</div>
-
-
-<div id="waveBox">
-
-<strong id="dungeonName">As Catacumbas</strong>
-
-<br>
-
-Horda <b id="wave">1</b> / 10
-
-<div class="progress">
-<i id="waveProgress"></i>
-</div>
-
-<small id="enemyCount">0 inimigos</small>
+    <div class="panel" id="players">
+        <div class="small">PARTY</div>
+        <div id="playerList"></div>
+    </div>
 
 </div>
 
+<div id="bottom">
 
-<div id="targetBox">
+    <button id="attack"
+            onclick="manualAttack()">
+        ⚔ ATTACK
+    </button>
 
-<b id="targetName">Alvo</b>
-
-<div id="targetBar">
-<i></i>
-</div>
-
-</div>
-
-
-<div id="message">
-
-<h1 id="messageTitle"></h1>
-
-<p id="messageText"></p>
+    <button onclick="usePotion()">
+        🧪 POTION
+    </button>
 
 </div>
 
+<div id="bottomRight">
 
-<div id="toast"></div>
+    <button onclick="openInventory()">
+        INVENTORY
+    </button>
 
+    <button onclick="togglePause()">
+        MENU
+    </button>
 
-<div id="controls">
-WASD mover · Clique no chão mover · Clique num inimigo atacar · ESPAÇO AoE · ESC pausa
 </div>
 
+<div id="chat">
 
-<!-- =====================================================
-     PAUSE
-===================================================== -->
+    <div class="panel chatMessages"
+         id="chatMessages"></div>
+
+    <input id="chatInput"
+           maxlength="80"
+           placeholder="Escreve uma mensagem...">
+
+</div>
+
 
 <div id="pause">
 
-<div class="pause-panel">
+    <div class="modal">
 
-<h1>PAUSADO</h1>
+        <h2>PAUSED</h2>
 
-<p>O tempo está parado.</p>
+        <button style="width:100%"
+                onclick="togglePause()">
+            CONTINUE
+        </button>
 
-<div class="pause-info">
+        <button style="width:100%;margin-top:8px"
+                onclick="openInventory()">
+            INVENTORY
+        </button>
 
-<div>
-<small>Dungeon</small>
-<b id="pauseDungeon">I</b>
-</div>
+        <button style="width:100%;margin-top:8px"
+                onclick="saveGame()">
+            SAVE
+        </button>
 
-<div>
-<small>Horda</small>
-<b id="pauseWave">1 / 10</b>
-</div>
+        <button style="width:100%;margin-top:8px"
+                onclick="leaveGame()">
+            EXIT TO MENU
+        </button>
 
-<div>
-<small>Nível</small>
-<b id="pauseLevel">1</b>
-</div>
-
-<div>
-<small>Ouro</small>
-<b id="pauseGold">25</b>
-</div>
+    </div>
 
 </div>
 
-<button onclick="togglePause()">▶ CONTINUAR</button>
-
-<button onclick="saveGame();showToast('💾 Jogo guardado!')">💾 GUARDAR</button>
-
-<button onclick="toggleInventory()">🎒 INVENTÁRIO</button>
-
-<button onclick="exitToMenu()">🏰 SAIR PARA DUNGEONS</button>
-
-</div>
-
-</div>
-
-
-<!-- =====================================================
-     SHOP
-===================================================== -->
-
-<div id="shop">
-
-<div class="shop-panel">
-
-<div class="shop-title">
-
-<h1>🧙 MERCHANT</h1>
-
-<p>HELLO, WHAT DO YOU WANT TO BUY?</p>
-
-</div>
-
-<div class="shop-gold">
-💰 Ouro: <b id="shopGold">0</b>
-</div>
-
-<div class="shop-items">
-
-<div class="shop-item">
-<h3>🧪 Poção</h3>
-<p>Restaura 40 HP.</p>
-<div class="price">💰 15</div>
-<button onclick="buyPotion()">COMPRAR</button>
-</div>
-
-<div class="shop-item">
-<h3>⚔️ Sharp Stone</h3>
-<p>Aumenta o dano em +2.</p>
-<div class="price">💰 60</div>
-<button onclick="buyDamage()">COMPRAR</button>
-</div>
-
-<div class="shop-item">
-<h3>❤️ Vital Crystal</h3>
-<p>Aumenta o HP máximo em +20.</p>
-<div class="price">💰 75</div>
-<button onclick="buyHealth()">COMPRAR</button>
-</div>
-
-<div class="shop-item">
-<h3>🗡️ Iron Blade</h3>
-<p>Espada melhorada. +5 dano.</p>
-<div class="price">💰 180</div>
-<button onclick="buyWeapon('Iron Blade',5,180)">COMPRAR</button>
-</div>
-
-<div class="shop-item">
-<h3>🛡️ Guardian Armor</h3>
-<p>+35 HP máximo.</p>
-<div class="price">💰 220</div>
-<button onclick="buyArmor()">COMPRAR</button>
-</div>
-
-<div class="shop-item">
-<h3>💍 Ring of Power</h3>
-<p>+8 dano.</p>
-<div class="price">💰 350</div>
-<button onclick="buyRing()">COMPRAR</button>
-</div>
-
-</div>
-
-<button class="shop-close" onclick="closeShop()">
-ENTRAR NA DUNGEON
-</button>
-
-</div>
-
-</div>
-
-
-<!-- =====================================================
-     INVENTORY
-===================================================== -->
 
 <div id="inventory">
 
-<div class="inventory-panel">
+    <div class="modal">
 
-<h1>🎒 INVENTÁRIO</h1>
+        <h2>INVENTORY</h2>
 
-<div class="inventory-grid" id="inventoryGrid"></div>
+        <div id="inventoryContent"
+             class="itemGrid">
+        </div>
 
-<button class="close-modal" onclick="toggleInventory()">
-FECHAR
-</button>
+        <button style="width:100%;margin-top:15px"
+                onclick="closeInventory()">
+            CLOSE
+        </button>
+
+    </div>
 
 </div>
 
+
+<div id="merchant">
+
+    <div class="modal">
+
+        <h2>HELLO, WHAT DO YOU WANT TO BUY?</h2>
+
+        <div class="shopGrid">
+
+            <button onclick="buyPotion()">
+                🧪 Potion<br>
+                <span class="small">25 gold</span>
+            </button>
+
+            <button onclick="buySword()">
+                ⚔ Iron Sword<br>
+                <span class="small">150 gold • +5 damage</span>
+            </button>
+
+            <button onclick="buyArmor()">
+                🛡 Armor<br>
+                <span class="small">200 gold • +20 HP</span>
+            </button>
+
+            <button onclick="buyRing()">
+                💍 Ring<br>
+                <span class="small">300 gold • +10 damage</span>
+            </button>
+
+        </div>
+
+        <button style="width:100%;margin-top:15px"
+                onclick="closeMerchant()">
+            CONTINUE
+        </button>
+
+    </div>
+
 </div>
 
 
-<!-- =====================================================
-     DEATH
-===================================================== -->
+<div id="dungeonSelect">
+
+    <div class="modal">
+
+        <h2>CHOOSE DUNGEON</h2>
+
+        <div id="dungeonButtons"></div>
+
+        <button style="width:100%;margin-top:15px"
+                onclick="closeDungeonSelect()">
+            CLOSE
+        </button>
+
+    </div>
+
+</div>
+
 
 <div id="death">
 
-<h1>DERROTADO</h1>
+    <div class="modal"
+         style="text-align:center">
 
-<p>Os monstros venceram esta batalha.</p>
+        <h2>YOU DIED</h2>
 
-<button onclick="respawn()">TENTAR NOVAMENTE</button>
+        <p>
+            A party member can revive the run,
+            or restart the current wave.
+        </p>
+
+        <button class="gold"
+                style="width:100%"
+                onclick="respawn()">
+            RESPAWN
+        </button>
+
+    </div>
 
 </div>
 
-</section>
+<div id="toast"></div>
+
+</div>
 
 
 <script>
 
 /* =========================================================
-   CANVAS
+   SUPABASE
 ========================================================= */
 
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
+const SUPABASE_URL =
+    "https://lqzzvufqrggudnnvfrdv.supabase.co";
 
-let W=innerWidth;
-let H=innerHeight;
-let DPR=Math.min(devicePixelRatio||1,2);
+const SUPABASE_KEY =
+    "sb_publishable_r4OlSxiIe1_rBZ3q5V_K2w_GfxDWVyb";
+
+const sb =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const canvas =
+    document.getElementById("canvas");
+
+const ctx =
+    canvas.getContext("2d");
+
+let W = 0;
+let H = 0;
 
 function resize(){
 
-  W=innerWidth;
-  H=innerHeight;
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
 
-  canvas.width=W*DPR;
-  canvas.height=H*DPR;
-
-  canvas.style.width=W+"px";
-  canvas.style.height=H+"px";
-
-  ctx.setTransform(DPR,0,0,DPR,0,0);
 }
 
-addEventListener("resize",resize);
-
+window.addEventListener("resize",resize);
 resize();
 
 
 /* =========================================================
-   GAME STATE
+   GAME DATA
 ========================================================= */
 
-const keys={};
+const DUNGEONS = [
 
-let mobs=[];
-let particles=[];
-let numbers=[];
-let floatingLoot=[];
+    {
+        name:"Dungeon I — Forgotten Crypt",
+        color:"#171925",
+        mobs:["Skeleton","Rat","Zombie","Cultist"],
+        boss:"Grave Knight"
+    },
 
-let target=null;
-let destination=null;
+    {
+        name:"Dungeon II — Dark Forest",
+        color:"#0c1b16",
+        mobs:["Wolf","Goblin","Witch","Ent"],
+        boss:"Forest Guardian"
+    },
 
-let currentDungeon=1;
-let currentWave=1;
+    {
+        name:"Dungeon III — Frozen Depths",
+        color:"#101b28",
+        mobs:["Ice Bat","Frost Wolf","Ice Golem","Mage"],
+        boss:"Frost Lord"
+    },
 
-let waveStarting=false;
-let dungeonComplete=false;
+    {
+        name:"Dungeon IV — Infernal Keep",
+        color:"#29110d",
+        mobs:["Imp","Demon","Fire Golem","Warlock"],
+        boss:"Infernal King"
+    },
 
-let gameTime=0;
-let lastTime=performance.now();
+    {
+        name:"Dungeon V — Void Citadel",
+        color:"#160d25",
+        mobs:["Voidling","Reaper","Dark Knight","Abyss Mage"],
+        boss:"Void Emperor"
+    }
 
-let attackCooldown=0;
-let attackAnimation=0;
+];
 
-let toastTimer=0;
 
-let paused=false;
-
-let shopDungeon=1;
-
-const completedDungeons={
-  1:false,
-  2:false,
-  3:false,
-  4:false,
-  5:false
-};
+const COLORS = [
+    "#62b5ff",
+    "#ff6969",
+    "#69dc8a",
+    "#c278ff"
+];
 
 
 /* =========================================================
    PLAYER
 ========================================================= */
 
-const player={
+const player = {
 
-  x:0,
-  y:0,
+    id:
+        crypto.randomUUID(),
 
-  hp:100,
-  maxHp:100,
+    name:"Vikos",
 
-  level:1,
+    x:0,
+    y:0,
 
-  xp:0,
-  xpMax:100,
+    hp:100,
+    maxHp:100,
 
-  gold:25,
+    level:1,
+    xp:0,
 
-  damage:5,
+    gold:0,
+    potions:3,
 
-  weapon:"Mini Espada de Bosta",
+    damage:12,
 
-  armor:"Roupa de Aventureiro",
+    weapon:"Rusty Sword",
+    armor:"Cloth Armor",
+    ring:"None",
 
-  ring:"Nenhum",
+    inventory:[],
 
-  potions:3,
-
-  speed:190,
-
-  direction:1,
-
-  anim:0,
-
-  hit:0,
-
-  dead:false
+    color:COLORS[
+        Math.floor(Math.random()*COLORS.length)
+    ]
 
 };
 
 
-/* =========================================================
-   INVENTORY
-========================================================= */
+let remotePlayers = {};
 
-const inventory=[];
+let mobs = [];
 
-function addItem(item){
+let particles = [];
 
-  inventory.push({
-    ...item,
-    id:Math.random()
-  });
+let selectedMob = null;
 
-  renderInventory();
+let dungeon = 0;
+let wave = 0;
 
-}
+let waveActive = false;
+let waveTimer = 0;
 
+let paused = false;
+let offline = false;
 
-/* =========================================================
-   RARITIES
-========================================================= */
+let roomCode = null;
+let channel = null;
+let isHost = false;
 
-const rarities={
+let lastStateBroadcast = 0;
+let lastPresence = 0;
+let lastAttack = 0;
 
-  common:{
-    name:"Comum",
-    color:"#aaa"
-  },
+let gameStarted = false;
 
-  uncommon:{
-    name:"Incomum",
-    color:"#69c77a"
-  },
-
-  rare:{
-    name:"Raro",
-    color:"#4c9ee8"
-  },
-
-  epic:{
-    name:"Épico",
-    color:"#b66cff"
-  },
-
-  legendary:{
-    name:"Lendário",
-    color:"#e9ad42"
-  }
-
-};
-
-
-/* =========================================================
-   MOB TYPES
-========================================================= */
-
-const types={
-
- slime:{
-   name:"Slime",
-   hp:25,
-   damage:4,
-   speed:35,
-   size:21,
-   xp:12,
-   gold:4,
-   color:"#55d47a"
- },
-
- goblin:{
-   name:"Goblin",
-   hp:38,
-   damage:6,
-   speed:48,
-   size:22,
-   xp:20,
-   gold:8,
-   color:"#70a54e"
- },
-
- bat:{
-   name:"Morcego",
-   hp:32,
-   damage:6,
-   speed:65,
-   size:20,
-   xp:18,
-   gold:7,
-   color:"#8050a0"
- },
-
- spider:{
-   name:"Aranha",
-   hp:42,
-   damage:8,
-   speed:58,
-   size:21,
-   xp:25,
-   gold:10,
-   color:"#453548"
- },
-
- wolf:{
-   name:"Lobo",
-   hp:55,
-   damage:10,
-   speed:72,
-   size:25,
-   xp:32,
-   gold:13,
-   color:"#969aa1"
- },
-
- skeleton:{
-   name:"Esqueleto",
-   hp:65,
-   damage:12,
-   speed:48,
-   size:25,
-   xp:45,
-   gold:18,
-   color:"#d8d0b9"
- },
-
- orc:{
-   name:"Orc",
-   hp:90,
-   damage:15,
-   speed:35,
-   size:29,
-   xp:65,
-   gold:25,
-   color:"#5d8e4d"
- },
-
- troll:{
-   name:"Troll",
-   hp:150,
-   damage:22,
-   speed:27,
-   size:36,
-   xp:100,
-   gold:40,
-   color:"#687f50"
- },
-
- knight:{
-   name:"Cavaleiro Negro",
-   hp:220,
-   damage:30,
-   speed:31,
-   size:34,
-   xp:160,
-   gold:65,
-   color:"#394153"
- },
-
- demon:{
-   name:"Demónio",
-   hp:330,
-   damage:40,
-   speed:38,
-   size:38,
-   xp:260,
-   gold:100,
-   color:"#9e414c"
- }
-
-};
-
-
-/* =========================================================
-   BOSS TYPES
-========================================================= */
-
-const bosses={
-
-  cryptLord:{
-    name:"LORD OF THE CATACOMBS",
-    hp:1200,
-    damage:48,
-    speed:27,
-    size:60,
-    color:"#674f79",
-    xp:800,
-    gold:500
-  },
-
-  fireKing:{
-    name:"FIRE KING",
-    hp:1800,
-    damage:65,
-    speed:30,
-    size:65,
-    color:"#b34d31",
-    xp:1200,
-    gold:750
-  },
-
-  frostLord:{
-    name:"FROST LORD",
-    hp:2500,
-    damage:82,
-    speed:25,
-    size:68,
-    color:"#5e9eb4",
-    xp:1700,
-    gold:1000
-  },
-
-  deadKing:{
-    name:"DEAD KING",
-    hp:3400,
-    damage:105,
-    speed:24,
-    size:72,
-    color:"#52576b",
-    xp:2400,
-    gold:1400
-  },
-
-  blackKing:{
-    name:"THE BLACK KING",
-    hp:5000,
-    damage:140,
-    speed:22,
-    size:80,
-    color:"#6d293b",
-    xp:4000,
-    gold:2500
-  }
-
-};
-
-
-/* =========================================================
-   DUNGEONS
-========================================================= */
-
-const dungeonData={
-
-  1:{
-    name:"As Catacumbas",
-    difficulty:1,
-    boss:"cryptLord",
-    accent:"#75608a"
-  },
-
-  2:{
-    name:"Cripta de Fogo",
-    difficulty:1.5,
-    boss:"fireKing",
-    accent:"#a84e35"
-  },
-
-  3:{
-    name:"Salão Congelado",
-    difficulty:2,
-    boss:"frostLord",
-    accent:"#5e96ad"
-  },
-
-  4:{
-    name:"Abismo Morto",
-    difficulty:2.5,
-    boss:"deadKing",
-    accent:"#5c6075"
-  },
-
-  5:{
-    name:"Castelo do Rei Negro",
-    difficulty:3,
-    boss:"blackKing",
-    accent:"#862d43"
-  }
-
-};
+let merchantOpened = false;
 
 
 /* =========================================================
@@ -1443,553 +860,794 @@ const dungeonData={
 
 function saveGame(){
 
-  const save={
+    localStorage.setItem(
+        "runevale-save",
+        JSON.stringify({
+            level:player.level,
+            xp:player.xp,
+            gold:player.gold,
+            potions:player.potions,
+            damage:player.damage,
+            weapon:player.weapon,
+            armor:player.armor,
+            ring:player.ring,
+            inventory:player.inventory
+        })
+    );
 
-    player:{
-      hp:player.hp,
-      maxHp:player.maxHp,
-      level:player.level,
-      xp:player.xp,
-      xpMax:player.xpMax,
-      gold:player.gold,
-      damage:player.damage,
-      weapon:player.weapon,
-      armor:player.armor,
-      ring:player.ring,
-      potions:player.potions
-    },
-
-    completedDungeons,
-
-    inventory
-
-  };
-
-  localStorage.setItem(
-    "runevale_save",
-    JSON.stringify(save)
-  );
+    toast("GAME SAVED");
 
 }
 
 
 function loadGame(){
 
-  try{
+    try{
 
-    const raw=localStorage.getItem("runevale_save");
+        const data =
+            JSON.parse(
+                localStorage.getItem("runevale-save")
+            );
 
-    if(!raw)return;
+        if(!data) return;
 
-    const save=JSON.parse(raw);
+        Object.assign(player,data);
 
-    if(save.player){
+    }catch(e){}
 
-      Object.assign(player,save.player);
+}
+
+
+/* =========================================================
+   MENU
+========================================================= */
+
+function getName(){
+
+    const value =
+        document
+        .getElementById("nameInput")
+        .value
+        .trim();
+
+    return value || "Player";
+
+}
+
+
+function showJoin(){
+
+    const box =
+        document.getElementById("joinBox");
+
+    box.style.display =
+        box.style.display === "none"
+        ? "block"
+        : "none";
+
+}
+
+
+function randomRoom(){
+
+    const chars =
+        "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+    let out="RV-";
+
+    for(let i=0;i<4;i++){
+
+        out +=
+            chars[
+                Math.floor(
+                    Math.random()*chars.length
+                )
+            ];
 
     }
 
-    if(save.completedDungeons){
+    return out;
 
-      Object.assign(
-        completedDungeons,
-        save.completedDungeons
-      );
+}
+
+
+/* =========================================================
+   ONLINE ROOM
+========================================================= */
+
+async function createRoom(){
+
+    player.name = getName();
+
+    roomCode = randomRoom();
+
+    await connectRoom();
+
+    document
+        .getElementById("roomInfo")
+        .style.display="block";
+
+    document
+        .getElementById("roomCode")
+        .textContent=roomCode;
+
+    toast("ROOM CREATED");
+
+    startOnlineGame();
+
+}
+
+
+async function joinRoom(){
+
+    const code =
+        document
+        .getElementById("joinInput")
+        .value
+        .trim()
+        .toUpperCase();
+
+    if(!code){
+
+        toast("ENTER ROOM CODE");
+        return;
 
     }
 
-    if(Array.isArray(save.inventory)){
+    player.name = getName();
 
-      inventory.length=0;
+    roomCode = code;
 
-      for(const item of save.inventory){
+    await connectRoom();
 
-        inventory.push(item);
+    document
+        .getElementById("roomInfo")
+        .style.display="block";
 
-      }
+    document
+        .getElementById("roomCode")
+        .textContent=roomCode;
+
+    startOnlineGame();
+
+}
+
+
+async function connectRoom(){
+
+    if(channel){
+
+        try{
+            await sb.removeChannel(channel);
+        }catch(e){}
 
     }
 
-  }catch(e){
-
-    console.warn("Save inválido",e);
-
-  }
-
-}
-
-
-/* =========================================================
-   AUTO SAVE
-========================================================= */
-
-setInterval(()=>{
-
-  saveGame();
-
-},10000);
-
-
-/* =========================================================
-   MOB CREATION
-========================================================= */
-
-function randomMobType(wave){
-
-  const available=[
-    "slime",
-    "goblin"
-  ];
-
-  if(wave>=2)
-    available.push("bat");
-
-  if(wave>=3)
-    available.push("spider");
-
-  if(wave>=4)
-    available.push("wolf");
-
-  if(wave>=5)
-    available.push("skeleton");
-
-  if(wave>=6)
-    available.push("orc");
-
-  if(wave>=8)
-    available.push("troll");
-
-  if(wave>=9)
-    available.push("knight");
-
-  if(wave>=10)
-    available.push("demon");
-
-  return available[
-    Math.floor(Math.random()*available.length)
-  ];
-
-}
-
-
-function createMob(type){
-
-  const t=types[type];
-
-  const angle=Math.random()*Math.PI*2;
-
-  const distance=
-    350+
-    Math.random()*300;
-
-  const dungeonScale=
-    dungeonData[currentDungeon].difficulty;
-
-  const waveScale=
-    1+(currentWave-1)*.13;
-
-  const scale=
-    dungeonScale*
-    waveScale;
-
-  return{
-
-    id:Math.random(),
-
-    type,
-
-    x:Math.cos(angle)*distance,
-    y:Math.sin(angle)*distance,
-
-    hp:Math.round(t.hp*scale),
-    maxHp:Math.round(t.hp*scale),
-
-    damage:Math.round(t.damage*scale),
-
-    speed:t.speed,
-
-    size:t.size,
-
-    xp:Math.round(t.xp*scale),
-
-    gold:Math.round(t.gold*scale),
-
-    color:t.color,
-
-    dead:false,
-
-    deathTime:0,
-
-    hit:0,
-
-    anim:Math.random()*10,
-
-    attackCooldown:.5+Math.random(),
-
-    elite:false
-
-  };
-
-}
-
-
-/* =========================================================
-   BOSS CREATION
-========================================================= */
-
-function createBoss(){
-
-  const data=
-    bosses[
-      dungeonData[currentDungeon].boss
-    ];
-
-  const scale=
-    dungeonData[currentDungeon].difficulty;
-
-  return{
-
-    id:Math.random(),
-
-    type:"boss",
-
-    boss:true,
-
-    bossName:data.name,
-
-    x:0,
-
-    y:-380,
-
-    hp:Math.round(data.hp*scale),
-
-    maxHp:Math.round(data.hp*scale),
-
-    damage:Math.round(data.damage*scale),
-
-    speed:data.speed,
-
-    size:data.size,
-
-    xp:Math.round(data.xp*scale),
-
-    gold:Math.round(data.gold*scale),
-
-    color:data.color,
-
-    dead:false,
-
-    deathTime:0,
-
-    hit:0,
-
-    anim:0,
-
-    attackCooldown:1,
-
-    elite:true
-
-  };
-
-}
-
-
-/* =========================================================
-   START DUNGEON
-========================================================= */
-
-function enterDungeon(number){
-
-  if(
-    number>1 &&
-    !completedDungeons[number-1]
-  ){
-
-    showToast(
-      "🔒 Completa a dungeon anterior!"
+    channel =
+        sb.channel(
+            "runevale:" + roomCode,
+            {
+                config:{
+                    presence:{
+                        key:player.id
+                    }
+                }
+            }
+        );
+
+
+    channel.on(
+        "presence",
+        {
+            event:"sync"
+        },
+        ()=>{
+            updatePresencePlayers();
+        }
     );
 
-    return;
 
-  }
+    channel.on(
+        "broadcast",
+        {
+            event:"game"
+        },
+        payload=>{
 
-  if(number===1){
+            handleNetworkEvent(
+                payload.payload
+            );
 
-    beginDungeon(1);
+        }
+    );
 
-  }else{
 
-    openShop(number);
+    const result =
+        await channel.subscribe(
+            async status=>{
 
-  }
+                if(status === "SUBSCRIBED"){
+
+                    setConnection(
+                        true
+                    );
+
+                    await sendPresence();
+
+                    setTimeout(
+                        determineHost,
+                        500
+                    );
+
+                }
+
+            }
+        );
+
+
+    if(result){
+
+        console.log(result);
+
+    }
 
 }
 
 
-function beginDungeon(number){
+function setConnection(ok){
 
-  currentDungeon=number;
+    const el =
+        document.getElementById(
+            "connection"
+        );
 
-  currentWave=1;
+    el.textContent =
+        ok
+        ? "● ONLINE"
+        : "● OFFLINE";
 
-  player.dead=false;
+    el.style.color =
+        ok
+        ? "#64d17d"
+        : "#d35d68";
 
-  player.x=0;
-  player.y=0;
+}
 
-  player.hp=player.maxHp;
 
-  attackCooldown=0;
+async function determineHost(){
 
-  attackAnimation=0;
+    if(!channel) return;
 
-  destination=null;
+    const state =
+        channel.presenceState();
 
-  target=null;
+    const ids =
+        Object.keys(state)
+        .sort();
 
-  dungeonComplete=false;
+    if(ids.length === 0){
 
-  paused=false;
+        isHost=true;
+        return;
 
-  document.getElementById("menu")
-    .classList.add("hidden");
+    }
 
-  document.getElementById("game")
-    .classList.remove("hidden");
+    isHost =
+        ids[0] === player.id;
 
-  document.getElementById("death")
-    .style.display="none";
+    if(isHost && !gameStarted){
 
-  document.getElementById("pause")
-    .style.display="none";
+        dungeon=0;
+        wave=0;
 
-  document.getElementById("dungeonName")
-    .textContent=
-    dungeonData[number].name;
+    }
 
-  startWave();
+    updatePartyUI();
+
+}
+
+
+async function sendPresence(){
+
+    if(!channel) return;
+
+    try{
+
+        await channel.track({
+
+            id:player.id,
+            name:player.name,
+
+            x:Math.round(player.x),
+            y:Math.round(player.y),
+
+            hp:player.hp,
+            maxHp:player.maxHp,
+
+            level:player.level,
+
+            color:player.color
+
+        });
+
+    }catch(e){
+
+        console.log(e);
+
+    }
+
+}
+
+
+function updatePresencePlayers(){
+
+    if(!channel) return;
+
+    const state =
+        channel.presenceState();
+
+    remotePlayers={};
+
+    for(const key in state){
+
+        const list =
+            state[key];
+
+        if(!list || !list.length)
+            continue;
+
+        const p =
+            list[list.length-1];
+
+        if(p.id === player.id)
+            continue;
+
+        remotePlayers[p.id]={
+            ...p
+        };
+
+    }
+
+    determineHost();
+
+    updatePartyUI();
+
+}
+
+
+function updatePartyUI(){
+
+    const list =
+        document.getElementById(
+            "playerList"
+        );
+
+    list.innerHTML="";
+
+    const players = [
+        {
+            ...player,
+            host:isHost
+        },
+        ...Object.values(
+            remotePlayers
+        )
+    ];
+
+    players
+        .slice(0,4)
+        .forEach(p=>{
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+            div.className="playerLine";
+
+            div.innerHTML =
+                `<span class="onlineDot"></span>
+                 ${escapeHTML(p.name)}
+                 LV ${p.level || 1}`;
+
+            list.appendChild(div);
+
+        });
+
+    document
+        .getElementById("roomPlayers")
+        .textContent =
+        `${players.length}/4 players`;
 
 }
 
 
 /* =========================================================
-   SHOP
+   NETWORK
 ========================================================= */
 
-function openShop(number){
+async function broadcast(data){
 
-  shopDungeon=number;
+    if(!channel) return;
 
-  document.getElementById("shop")
-    .style.display="flex";
+    try{
 
-  updateShop();
+        await channel.send({
+
+            type:"broadcast",
+            event:"game",
+
+            payload:data
+
+        });
+
+    }catch(e){
+
+        console.log("broadcast error",e);
+
+    }
 
 }
 
 
-function closeShop(){
+function handleNetworkEvent(data){
 
-  document.getElementById("shop")
-    .style.display="none";
-
-  beginDungeon(shopDungeon);
-
-}
+    if(!data) return;
 
 
-function updateShop(){
+    if(data.type === "state"){
 
-  document.getElementById("shopGold")
-    .textContent=player.gold;
+        if(isHost) return;
+
+        dungeon=data.dungeon;
+        wave=data.wave;
+
+        mobs =
+            data.mobs || [];
+
+        waveActive =
+            data.waveActive;
+
+        updateDungeonUI();
+
+    }
+
+
+    if(data.type === "attack"){
+
+        if(isHost){
+
+            hostProcessAttack(
+                data
+            );
+
+        }
+
+    }
+
+
+    if(data.type === "damage"){
+
+        const mob =
+            mobs.find(
+                m=>m.id===data.mobId
+            );
+
+        if(mob){
+
+            mob.hp =
+                data.hp;
+
+            mob.hit=8;
+
+        }
+
+    }
+
+
+    if(data.type === "removeMob"){
+
+        mobs =
+            mobs.filter(
+                m=>m.id!==data.mobId
+            );
+
+    }
+
+
+    if(data.type === "reward"){
+
+        gainXP(data.xp);
+
+        player.gold += data.gold;
+
+        spawnText(
+            player.x,
+            player.y-30,
+            `+${data.xp} XP  +${data.gold}G`,
+            "#e4c05e"
+        );
+
+    }
+
+
+    if(data.type === "chat"){
+
+        addChat(
+            data.name,
+            data.message
+        );
+
+    }
+
+
+    if(data.type === "wave"){
+
+        dungeon=data.dungeon;
+        wave=data.wave;
+
+        mobs=data.mobs || [];
+
+        waveActive=true;
+
+        updateDungeonUI();
+
+    }
+
+
+    if(data.type === "dungeon"){
+
+        dungeon=data.dungeon;
+        wave=0;
+
+        mobs=[];
+
+        waveActive=false;
+
+        updateDungeonUI();
+
+    }
 
 }
 
 
 /* =========================================================
-   BUY ITEMS
+   OFFLINE
 ========================================================= */
 
-function buyPotion(){
+function startOffline(){
 
-  if(player.gold<15){
+    offline=true;
 
-    showToast("❌ Ouro insuficiente.");
+    player.name=getName();
 
-    return;
-
-  }
-
-  player.gold-=15;
-
-  player.potions++;
-
-  updateShop();
-
-  saveGame();
-
-  showToast("🧪 Poção comprada!");
+    startGame();
 
 }
 
 
-function buyDamage(){
+function startOnlineGame(){
 
-  if(player.gold<60){
+    offline=false;
 
-    showToast("❌ Ouro insuficiente.");
-
-    return;
-
-  }
-
-  player.gold-=60;
-
-  player.damage+=2;
-
-  updateShop();
-
-  saveGame();
-
-  showToast("⚔️ +2 dano!");
+    startGame();
 
 }
 
 
-function buyHealth(){
+function startGame(){
 
-  if(player.gold<75){
+    loadGame();
 
-    showToast("❌ Ouro insuficiente.");
+    document
+        .getElementById("menu")
+        .style.display="none";
 
-    return;
+    document
+        .getElementById("game")
+        .style.display="block";
 
-  }
+    player.x=W/2;
+    player.y=H/2;
 
-  player.gold-=75;
+    gameStarted=true;
 
-  player.maxHp+=20;
+    updateUI();
 
-  player.hp=player.maxHp;
+    updateDungeonUI();
 
-  updateShop();
+    if(isHost || offline){
 
-  saveGame();
+        setTimeout(
+            ()=>{
+                openDungeonSelect();
+            },
+            300
+        );
 
-  showToast("❤️ +20 HP máximo!");
-
-}
-
-
-function buyWeapon(name,damage,price){
-
-  if(player.gold<price){
-
-    showToast("❌ Ouro insuficiente.");
-
-    return;
-
-  }
-
-  player.gold-=price;
-
-  player.damage+=damage;
-
-  player.weapon=name;
-
-  addItem({
-
-    name,
-
-    icon:"🗡️",
-
-    rarity:"rare",
-
-    description:"Arma equipada · +"+damage+" dano"
-
-  });
-
-  updateShop();
-
-  saveGame();
-
-  showToast("🗡️ "+name+" equipada!");
+    }
 
 }
 
 
-function buyArmor(){
+/* =========================================================
+   DUNGEONS
+========================================================= */
 
-  if(player.gold<220){
+function openDungeonSelect(){
 
-    showToast("❌ Ouro insuficiente.");
+    const box =
+        document.getElementById(
+            "dungeonButtons"
+        );
 
-    return;
+    box.innerHTML="";
 
-  }
+    for(let i=0;i<DUNGEONS.length;i++){
 
-  player.gold-=220;
+        const btn =
+            document.createElement(
+                "button"
+            );
 
-  player.maxHp+=35;
+        btn.style.width="100%";
+        btn.style.marginBottom="8px";
 
-  player.hp=player.maxHp;
+        btn.textContent =
+            `${DUNGEONS[i].name}`;
 
-  player.armor="Guardian Armor";
+        if(i>player.level-1 && i>0){
 
-  addItem({
+            // dungeon progression
+            if(i>dungeon+1){
 
-    name:"Guardian Armor",
+                btn.disabled=true;
 
-    icon:"🛡️",
+            }
 
-    rarity:"epic",
+        }
 
-    description:"+35 HP máximo"
+        btn.onclick=()=>{
 
-  });
+            if(!offline && !isHost){
 
-  updateShop();
+                toast("ONLY HOST CAN START");
 
-  saveGame();
+                return;
 
-  showToast("🛡️ Guardian Armor equipada!");
+            }
+
+            startDungeon(i);
+
+        };
+
+        box.appendChild(btn);
+
+    }
+
+    document
+        .getElementById(
+            "dungeonSelect"
+        )
+        .style.display="flex";
 
 }
 
 
-function buyRing(){
+function closeDungeonSelect(){
 
-  if(player.gold<350){
+    document
+        .getElementById(
+            "dungeonSelect"
+        )
+        .style.display="none";
 
-    showToast("❌ Ouro insuficiente.");
+}
 
-    return;
 
-  }
+function startDungeon(index){
 
-  player.gold-=350;
+    dungeon=index;
 
-  player.damage+=8;
+    wave=0;
 
-  player.ring="Ring of Power";
+    mobs=[];
 
-  addItem({
+    closeDungeonSelect();
 
-    name:"Ring of Power",
+    if(index>0){
 
-    icon:"💍",
+        openMerchant();
 
-    rarity:"legendary",
+    }
 
-    description:"+8 dano"
+    updateDungeonUI();
 
-  });
+    if(!offline){
 
-  updateShop();
+        broadcast({
 
-  saveGame();
+            type:"dungeon",
+            dungeon:index
 
-  showToast("💍 Ring of Power equipado!");
+        });
+
+    }
+
+    setTimeout(
+        startNextWave,
+        index===0 ? 500 : 1000
+    );
+
+}
+
+
+function startNextWave(){
+
+    if(wave>=10){
+
+        completeDungeon();
+
+        return;
+
+    }
+
+    wave++;
+
+    spawnWave();
+
+    waveActive=true;
+
+    waveTimer=0;
+
+    updateDungeonUI();
+
+    if(!offline){
+
+        broadcast({
+
+            type:"wave",
+            dungeon,
+            wave,
+            mobs
+
+        });
+
+    }
+
+}
+
+
+function completeDungeon(){
+
+    waveActive=false;
+
+    mobs=[];
+
+    toast(
+        `${DUNGEONS[dungeon].name} COMPLETE!`
+    );
+
+    if(dungeon<4){
+
+        player.level++;
+
+        player.maxHp+=20;
+        player.hp=player.maxHp;
+
+        player.damage+=4;
+
+        gainXP(100);
+
+        setTimeout(
+            ()=>{
+                if(offline || isHost)
+                    openDungeonSelect();
+            },
+            1200
+        );
+
+    }
 
 }
 
@@ -1998,476 +1656,484 @@ function buyRing(){
    WAVES
 ========================================================= */
 
-function startWave(){
+function spawnWave(){
 
-  mobs=[];
+    mobs=[];
 
-  target=null;
-
-  waveStarting=true;
-
-  showCenter(
-    "HORDA "+currentWave,
-    "Prepara-te..."
-  );
-
-  setTimeout(()=>{
-
-    if(player.dead)return;
-
-    const count=
-      6+
-      currentWave*2+
-      currentDungeon*2;
+    const count =
+        Math.min(
+            3 + Math.floor(wave/2),
+            8
+        );
 
     for(let i=0;i<count;i++){
 
-      mobs.push(
-        createMob(
-          randomMobType(currentWave)
-        )
-      );
+        spawnMob(false);
 
     }
 
-    if(currentWave===10){
+    if(wave===10){
 
-      mobs.push(createBoss());
+        spawnMob(true);
 
     }
 
-    waveStarting=false;
+}
 
-    hideCenter();
 
-    updateHUD();
+function spawnMob(boss){
 
-  },1000);
+    const d =
+        DUNGEONS[dungeon];
+
+    const name =
+        boss
+        ? d.boss
+        : d.mobs[
+            Math.floor(
+                Math.random()*d.mobs.length
+            )
+        ];
+
+    const base =
+        25 +
+        dungeon*25 +
+        wave*9;
+
+    const hp =
+        boss
+        ? base*5
+        : base;
+
+    const angle =
+        Math.random()*Math.PI*2;
+
+    const dist =
+        230 +
+        Math.random()*180;
+
+    const mob={
+
+        id:crypto.randomUUID(),
+
+        name,
+
+        x:
+            player.x +
+            Math.cos(angle)*dist,
+
+        y:
+            player.y +
+            Math.sin(angle)*dist,
+
+        hp,
+
+        maxHp:hp,
+
+        damage:
+            boss
+            ? 14+dungeon*4
+            : 4+dungeon*2+Math.floor(wave/3),
+
+        speed:
+            boss
+            ? .45
+            : .55+Math.random()*.3,
+
+        boss,
+
+        attackCooldown:0,
+
+        hit:0
+
+    };
+
+    mobs.push(mob);
 
 }
 
 
 /* =========================================================
-   PLAYER
+   PLAYER ATTACK
 ========================================================= */
 
-function updatePlayer(dt){
+function manualAttack(){
 
-  let vx=0;
-  let vy=0;
+    if(!gameStarted || paused)
+        return;
 
-  if(keys.w||keys.ArrowUp)
-    vy--;
+    const now=Date.now();
 
-  if(keys.s||keys.ArrowDown)
-    vy++;
+    if(now-lastAttack<350)
+        return;
 
-  if(keys.a||keys.ArrowLeft)
-    vx--;
+    lastAttack=now;
 
-  if(keys.d||keys.ArrowRight)
-    vx++;
+    const radius=125;
 
-  const keyboard=
-    vx!==0||
-    vy!==0;
+    if(!offline){
 
-  if(keyboard){
+        broadcast({
 
-    destination=null;
+            type:"attack",
 
-  }else if(
-    target &&
-    !target.dead
-  ){
+            playerId:player.id,
 
-    const dx=
-      target.x-player.x;
+            x:player.x,
+            y:player.y,
 
-    const dy=
-      target.y-player.y;
+            radius
 
-    const dist=
-      Math.hypot(dx,dy);
-
-    if(dist>78){
-
-      vx=dx/dist;
-      vy=dy/dist;
+        });
 
     }else{
 
-      areaAttack();
+        hostProcessAttack({
+
+            playerId:player.id,
+            x:player.x,
+            y:player.y,
+            radius
+
+        });
 
     }
 
-  }else if(destination){
+    attackEffect();
 
-    const dx=
-      destination.x-player.x;
+}
 
-    const dy=
-      destination.y-player.y;
 
-    const dist=
-      Math.hypot(dx,dy);
+function hostProcessAttack(data){
 
-    if(dist<5){
+    const attacker =
+        data.playerId === player.id
+        ? player
+        : remotePlayers[data.playerId];
 
-      destination=null;
+    if(!attacker)
+        return;
 
-    }else{
+    let hitSomething=false;
 
-      vx=dx/dist;
-      vy=dy/dist;
+    for(const mob of [...mobs]){
+
+        const dx =
+            mob.x-data.x;
+
+        const dy =
+            mob.y-data.y;
+
+        const dist =
+            Math.sqrt(dx*dx+dy*dy);
+
+        if(dist<=data.radius){
+
+            hitSomething=true;
+
+            const damage =
+                player.damage +
+                Math.floor(
+                    player.level*1.5
+                );
+
+            mob.hp-=damage;
+
+            mob.hit=10;
+
+            if(!offline){
+
+                broadcast({
+
+                    type:"damage",
+                    mobId:mob.id,
+                    hp:Math.max(0,mob.hp)
+
+                });
+
+            }
+
+            if(mob.hp<=0){
+
+                const xp =
+                    mob.boss
+                    ? 150+dungeon*80
+                    : 15+dungeon*8+wave*3;
+
+                const gold =
+                    mob.boss
+                    ? 100+dungeon*50
+                    : 5+dungeon*3;
+
+                if(!offline){
+
+                    broadcast({
+
+                        type:"reward",
+                        xp,
+                        gold
+
+                    });
+
+                    broadcast({
+
+                        type:"removeMob",
+                        mobId:mob.id
+
+                    });
+
+                }
+
+                gainXP(xp);
+
+                player.gold+=gold;
+
+                spawnLoot(
+                    mob.x,
+                    mob.y
+                );
+
+                mobs =
+                    mobs.filter(
+                        m=>m.id!==mob.id
+                    );
+
+            }
+
+        }
 
     }
 
-  }
+    if(hitSomething){
 
-  if(vx!==0||vy!==0){
-
-    const len=
-      Math.hypot(vx,vy);
-
-    vx/=len;
-    vy/=len;
-
-    player.x+=
-      vx*
-      player.speed*
-      dt;
-
-    player.y+=
-      vy*
-      player.speed*
-      dt;
-
-    player.anim+=dt*10;
-
-    if(vx!==0){
-
-      player.direction=
-        vx>0?1:-1;
+        attackEffect();
 
     }
 
-  }else{
+    if(mobs.length===0 && waveActive){
 
-    player.anim+=dt*2;
+        waveActive=false;
 
-  }
+        setTimeout(
+            startNextWave,
+            1200
+        );
+
+    }
 
 }
 
 
 /* =========================================================
-   AOE ATTACK
+   MOVEMENT
 ========================================================= */
 
-function areaAttack(){
+const keys={};
 
-  if(player.dead)return;
+window.addEventListener(
+    "keydown",
+    e=>{
 
-  if(paused)return;
+        keys[e.key.toLowerCase()]=true;
 
-  if(attackCooldown>0)return;
+        if(e.code==="Space"){
 
-  const radius=115;
+            e.preventDefault();
+            manualAttack();
 
-  let nearby=false;
+        }
 
-  for(const mob of mobs){
+        if(e.key==="Escape"){
 
-    if(mob.dead)continue;
+            if(
+                document
+                .getElementById("chatInput")
+                .style.display==="block"
+            ){
 
-    const dist=
-      Math.hypot(
-        mob.x-player.x,
-        mob.y-player.y
-      );
+                closeChat();
 
-    if(dist<=radius){
+            }else{
 
-      nearby=true;
-      break;
+                togglePause();
 
-    }
+            }
 
-  }
+        }
 
-  if(!nearby)return;
+        if(e.key==="Enter"){
 
-  attackCooldown=.58;
+            openChat();
 
-  attackAnimation=.42;
-
-  let hits=0;
-
-  for(const mob of mobs){
-
-    if(mob.dead)continue;
-
-    const dist=
-      Math.hypot(
-        mob.x-player.x,
-        mob.y-player.y
-      );
-
-    if(dist<=radius){
-
-      hits++;
-
-      let damage=
-        player.damage+
-        Math.floor(Math.random()*5);
-
-      if(mob.boss){
-
-        damage=
-          Math.floor(damage*.75);
-
-      }
-
-      mob.hp-=damage;
-
-      mob.hit=.16;
-
-      numbers.push({
-
-        x:mob.x,
-
-        y:mob.y-mob.size-10,
-
-        text:"-"+damage,
-
-        color:"#ffe16b",
-
-        life:.7,
-
-        maxLife:.7
-
-      });
-
-      burst(
-        mob.x,
-        mob.y,
-        9,
-        "#f1c957"
-      );
-
-      if(mob.hp<=0){
-
-        killMob(mob);
-
-      }
+        }
 
     }
+);
 
-  }
+window.addEventListener(
+    "keyup",
+    e=>{
+        keys[e.key.toLowerCase()]=false;
+    }
+);
 
-  if(hits>0){
 
-    burst(
-      player.x,
-      player.y,
-      25,
-      "#e6bd4e"
-    );
+function updatePlayer(){
 
-  }
+    if(paused)
+        return;
+
+    let dx=0;
+    let dy=0;
+
+    if(keys["w"] || keys["arrowup"])
+        dy--;
+
+    if(keys["s"] || keys["arrowdown"])
+        dy++;
+
+    if(keys["a"] || keys["arrowleft"])
+        dx--;
+
+    if(keys["d"] || keys["arrowright"])
+        dx++;
+
+    if(dx || dy){
+
+        const len =
+            Math.sqrt(
+                dx*dx+dy*dy
+            );
+
+        dx/=len;
+        dy/=len;
+
+        const speed=3;
+
+        player.x+=dx*speed;
+        player.y+=dy*speed;
+
+        player.x=
+            Math.max(
+                40,
+                Math.min(W-40,player.x)
+            );
+
+        player.y=
+            Math.max(
+                90,
+                Math.min(H-40,player.y)
+            );
+
+    }
 
 }
 
 
 /* =========================================================
-   KILL MOB
+   MOBS AI
 ========================================================= */
 
-function killMob(mob){
+function updateMobs(){
 
-  mob.dead=true;
+    if(!waveActive)
+        return;
 
-  mob.deathTime=0;
+    for(const mob of mobs){
 
-  player.gold+=mob.gold;
+        const dx =
+            player.x-mob.x;
 
-  gainXP(mob.xp);
+        const dy =
+            player.y-mob.y;
 
-  numbers.push({
+        const dist =
+            Math.sqrt(dx*dx+dy*dy);
 
-    x:mob.x,
+        if(dist>45){
 
-    y:mob.y-30,
+            mob.x +=
+                dx/dist *
+                mob.speed;
 
-    text:"+"+mob.gold+" ouro",
+            mob.y +=
+                dy/dist *
+                mob.speed;
 
-    color:"#ffd65a",
+        }else{
 
-    life:1,
+            mob.attackCooldown--;
 
-    maxLife:1
+            if(
+                mob.attackCooldown<=0 &&
+                (offline || isHost)
+            ){
 
-  });
+                mob.attackCooldown=70;
 
-  /* loot */
+                player.hp -=
+                    mob.damage;
 
-  const chance=
-    mob.boss?
-    .65:
-    .10;
+                if(player.hp<=0){
 
-  if(Math.random()<chance){
+                    player.hp=0;
 
-    dropLoot(mob);
+                    document
+                        .getElementById(
+                            "death"
+                        )
+                        .style.display="flex";
 
-  }
+                }
 
-  burst(
-    mob.x,
-    mob.y,
-    mob.boss?50:18,
-    mob.color
-  );
+            }
+
+        }
+
+        if(mob.hit>0)
+            mob.hit--;
+
+    }
 
 }
 
 
 /* =========================================================
-   LOOT
+   REMOTE MOVEMENT PRESENCE
 ========================================================= */
 
-function dropLoot(mob){
+async function updateNetwork(){
 
-  const roll=Math.random();
+    if(!channel)
+        return;
 
-  let rarity;
+    const now=Date.now();
 
-  if(mob.boss){
+    if(now-lastPresence>150){
 
-    rarity=
-      roll<.2?
-      "legendary":
-      roll<.55?
-      "epic":
-      "rare";
+        lastPresence=now;
 
-  }else{
+        sendPresence();
 
-    rarity=
-      roll<.05?
-      "epic":
-      roll<.2?
-      "rare":
-      roll<.5?
-      "uncommon":
-      "common";
-
-  }
-
-  const items=[
-
-    {
-      name:"Ruby Fragment",
-      icon:"🔴",
-      description:"+3 dano",
-      stat:3
-    },
-
-    {
-      name:"Moon Crystal",
-      icon:"🔷",
-      description:"+10 HP",
-      stat:10
-    },
-
-    {
-      name:"Ancient Coin",
-      icon:"🪙",
-      description:"+25 ouro",
-      stat:25
-    },
-
-    {
-      name:"Shadow Shard",
-      icon:"🟣",
-      description:"+7 dano",
-      stat:7
-    },
-
-    {
-      name:"Guardian Fragment",
-      icon:"🛡️",
-      description:"+25 HP",
-      stat:25
     }
 
-  ];
+    if(isHost && now-lastStateBroadcast>180){
 
-  const item=
-    items[
-      Math.floor(
-        Math.random()*items.length
-      )
-    ];
+        lastStateBroadcast=now;
 
-  const loot={
+        broadcast({
 
-    name:item.name,
+            type:"state",
 
-    icon:item.icon,
+            dungeon,
+            wave,
 
-    rarity,
+            mobs,
+            waveActive
 
-    description:item.description,
+        });
 
-    stat:item.stat
-
-  };
-
-  if(item.name==="Ancient Coin"){
-
-    player.gold+=25;
-
-  }else if(
-    item.name==="Ruby Fragment"||
-    item.name==="Shadow Shard"
-  ){
-
-    player.damage+=item.stat;
-
-  }else{
-
-    player.maxHp+=item.stat;
-
-    player.hp+=item.stat;
-
-  }
-
-  addItem(loot);
-
-  floatingLoot.push({
-
-    x:mob.x,
-
-    y:mob.y,
-
-    text:item.icon+" "+item.name,
-
-    life:2,
-
-    maxLife:2,
-
-    color:rarities[rarity].color
-
-  });
-
-  showToast(
-    "🎁 "+item.name+
-    " ["+
-    rarities[rarity].name+
-    "]"
-  );
+    }
 
 }
 
@@ -2478,268 +2144,34 @@ function dropLoot(mob){
 
 function gainXP(amount){
 
-  player.xp+=amount;
+    player.xp+=amount;
 
-  while(
-    player.xp>=player.xpMax
-  ){
+    let needed =
+        100 + player.level*50;
 
-    player.xp-=player.xpMax;
+    while(player.xp>=needed){
 
-    player.level++;
+        player.xp-=needed;
 
-    player.xpMax=
-      Math.floor(
-        player.xpMax*1.35
-      );
+        player.level++;
 
-    player.maxHp+=15;
+        player.maxHp+=15;
 
-    player.hp=player.maxHp;
+        player.hp=
+            player.maxHp;
 
-    player.damage+=2;
+        player.damage+=3;
 
-    burst(
-      player.x,
-      player.y,
-      40,
-      "#ffe16b"
-    );
+        needed =
+            100 + player.level*50;
 
-    showToast(
-      "✨ LEVEL UP! Nível "+
-      player.level
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   MOB UPDATE
-========================================================= */
-
-function updateMobs(dt){
-
-  for(const mob of mobs){
-
-    if(mob.dead){
-
-      mob.deathTime+=dt;
-
-      continue;
+        toast(
+            `LEVEL UP! LV ${player.level}`
+        );
 
     }
 
-    mob.anim+=dt*5;
-
-    if(mob.hit>0)
-      mob.hit-=dt;
-
-    mob.attackCooldown-=dt;
-
-    const dx=
-      player.x-mob.x;
-
-    const dy=
-      player.y-mob.y;
-
-    const dist=
-      Math.hypot(dx,dy);
-
-    if(
-      dist<500 &&
-      dist>55
-    ){
-
-      mob.x+=
-        (dx/dist)*
-        mob.speed*
-        dt;
-
-      mob.y+=
-        (dy/dist)*
-        mob.speed*
-        dt;
-
-    }
-
-    if(
-      dist<=55 &&
-      mob.attackCooldown<=0
-    ){
-
-      mob.attackCooldown=
-        1.1+
-        Math.random()*.5;
-
-      const damage=
-        mob.damage;
-
-      player.hp-=damage;
-
-      player.hit=.15;
-
-      numbers.push({
-
-        x:player.x,
-
-        y:player.y-35,
-
-        text:"-"+damage,
-
-        color:"#ff6565",
-
-        life:.7,
-
-        maxLife:.7
-
-      });
-
-      burst(
-        player.x,
-        player.y,
-        10,
-        "#e65353"
-      );
-
-      if(player.hp<=0){
-
-        die();
-
-      }
-
-    }
-
-  }
-
-  if(
-    !waveStarting &&
-    !player.dead &&
-    mobs.length>0
-  ){
-
-    const alive=
-      mobs.filter(
-        m=>!m.dead
-      ).length;
-
-    if(alive===0){
-
-      nextWave();
-
-    }
-
-  }
-
-}
-
-
-/* =========================================================
-   NEXT WAVE
-========================================================= */
-
-function nextWave(){
-
-  waveStarting=true;
-
-  if(currentWave>=10){
-
-    completeDungeon();
-
-    return;
-
-  }
-
-  currentWave++;
-
-  showCenter(
-    "HORDA LIMPA!",
-    "A próxima horda está a chegar..."
-  );
-
-  setTimeout(()=>{
-
-    startWave();
-
-  },1300);
-
-}
-
-
-/* =========================================================
-   COMPLETE DUNGEON
-========================================================= */
-
-function completeDungeon(){
-
-  completedDungeons[currentDungeon]=true;
-
-  const reward=
-    100+
-    currentDungeon*150;
-
-  player.gold+=reward;
-
-  saveGame();
-
-  showCenter(
-    "🏆 DUNGEON COMPLETA!",
-    "Recompensa: +"+
-    reward+
-    " ouro"
-  );
-
-  setTimeout(()=>{
-
-    exitToMenu();
-
-  },3000);
-
-}
-
-
-/* =========================================================
-   DEATH
-========================================================= */
-
-function die(){
-
-  if(player.dead)return;
-
-  player.dead=true;
-
-  target=null;
-
-  destination=null;
-
-  document.getElementById("death")
-    .style.display="flex";
-
-}
-
-
-function respawn(){
-
-  player.dead=false;
-
-  player.hp=player.maxHp;
-
-  player.x=0;
-
-  player.y=0;
-
-  mobs=[];
-
-  target=null;
-
-  attackCooldown=0;
-
-  document.getElementById("death")
-    .style.display="none";
-
-  startWave();
+    updateUI();
 
 }
 
@@ -2750,307 +2182,216 @@ function respawn(){
 
 function usePotion(){
 
-  if(player.potions<=0){
+    if(player.potions<=0){
 
-    showToast("Não tens poções!");
+        toast("NO POTIONS");
+        return;
 
-    return;
+    }
 
-  }
+    if(player.hp>=player.maxHp){
 
-  if(
-    player.hp>=
-    player.maxHp
-  ){
+        toast("HP FULL");
+        return;
 
-    showToast("O HP já está cheio.");
+    }
 
-    return;
+    player.potions--;
 
-  }
+    player.hp=
+        Math.min(
+            player.maxHp,
+            player.hp+45
+        );
 
-  player.potions--;
+    updateUI();
 
-  player.hp=
-    Math.min(
-      player.maxHp,
-      player.hp+40
+}
+
+
+/* =========================================================
+   SHOP
+========================================================= */
+
+function openMerchant(){
+
+    merchantOpened=true;
+
+    document
+        .getElementById("merchant")
+        .style.display="flex";
+
+}
+
+
+function closeMerchant(){
+
+    merchantOpened=false;
+
+    document
+        .getElementById("merchant")
+        .style.display="none";
+
+}
+
+
+function buyPotion(){
+
+    if(player.gold<25){
+
+        toast("NOT ENOUGH GOLD");
+        return;
+
+    }
+
+    player.gold-=25;
+    player.potions++;
+
+    updateUI();
+
+}
+
+
+function buySword(){
+
+    if(player.gold<150){
+
+        toast("NOT ENOUGH GOLD");
+        return;
+
+    }
+
+    player.gold-=150;
+    player.damage+=5;
+    player.weapon="Iron Sword";
+
+    toast("IRON SWORD BOUGHT");
+
+    updateUI();
+
+}
+
+
+function buyArmor(){
+
+    if(player.gold<200){
+
+        toast("NOT ENOUGH GOLD");
+        return;
+
+    }
+
+    player.gold-=200;
+    player.maxHp+=20;
+    player.hp+=20;
+    player.armor="Iron Armor";
+
+    toast("ARMOR BOUGHT");
+
+    updateUI();
+
+}
+
+
+function buyRing(){
+
+    if(player.gold<300){
+
+        toast("NOT ENOUGH GOLD");
+        return;
+
+    }
+
+    player.gold-=300;
+    player.damage+=10;
+    player.ring="Ring of Power";
+
+    toast("RING OF POWER BOUGHT");
+
+    updateUI();
+
+}
+
+
+/* =========================================================
+   INVENTORY
+========================================================= */
+
+function openInventory(){
+
+    document
+        .getElementById("pause")
+        .style.display="none";
+
+    document
+        .getElementById("inventory")
+        .style.display="flex";
+
+    renderInventory();
+
+}
+
+
+function closeInventory(){
+
+    document
+        .getElementById("inventory")
+        .style.display="none";
+
+}
+
+
+function renderInventory(){
+
+    const box =
+        document.getElementById(
+            "inventoryContent"
+        );
+
+    box.innerHTML="";
+
+    const items=[
+        {
+            name:player.weapon,
+            rarity:"common",
+            text:`Damage +${player.damage-12}`
+        },
+        {
+            name:player.armor,
+            rarity:"common",
+            text:`Max HP +${player.maxHp-100}`
+        },
+        {
+            name:player.ring,
+            rarity:"rare",
+            text:"Power ring"
+        }
+    ];
+
+    player.inventory.forEach(
+        item=>items.push(item)
     );
 
-  showToast("🧪 +40 HP");
+    items.forEach(item=>{
 
-}
+        const div =
+            document.createElement(
+                "div"
+            );
 
+        div.className="item";
 
-/* =========================================================
-   PARTICLES
-========================================================= */
+        div.innerHTML=
+            `<b class="${item.rarity}">
+                ${escapeHTML(item.name)}
+             </b>
+             <div class="small">
+                ${escapeHTML(item.text || "")}
+             </div>`;
 
-function burst(
-  x,
-  y,
-  count,
-  color
-){
-
-  for(
-    let i=0;
-    i<count;
-    i++
-  ){
-
-    const angle=
-      Math.random()*
-      Math.PI*2;
-
-    const speed=
-      40+
-      Math.random()*130;
-
-    particles.push({
-
-      x,
-      y,
-
-      vx:
-        Math.cos(angle)*
-        speed,
-
-      vy:
-        Math.sin(angle)*
-        speed,
-
-      life:
-        .35+
-        Math.random()*.6,
-
-      maxLife:.9,
-
-      size:
-        2+
-        Math.random()*4,
-
-      color
+        box.appendChild(div);
 
     });
-
-  }
-
-}
-
-
-/* =========================================================
-   PARTICLE UPDATE
-========================================================= */
-
-function updateParticles(dt){
-
-  for(
-    let i=particles.length-1;
-    i>=0;
-    i--
-  ){
-
-    const p=particles[i];
-
-    p.life-=dt;
-
-    p.x+=p.vx*dt;
-
-    p.y+=p.vy*dt;
-
-    p.vx*=.96;
-
-    p.vy*=.96;
-
-    if(p.life<=0){
-
-      particles.splice(i,1);
-
-    }
-
-  }
-
-  for(
-    let i=numbers.length-1;
-    i>=0;
-    i--
-  ){
-
-    const n=numbers[i];
-
-    n.life-=dt;
-
-    n.y-=35*dt;
-
-    if(n.life<=0){
-
-      numbers.splice(i,1);
-
-    }
-
-  }
-
-  for(
-    let i=floatingLoot.length-1;
-    i>=0;
-    i--
-  ){
-
-    const l=floatingLoot[i];
-
-    l.life-=dt;
-
-    l.y-=20*dt;
-
-    if(l.life<=0){
-
-      floatingLoot.splice(i,1);
-
-    }
-
-  }
-
-}
-
-
-/* =========================================================
-   HUD
-========================================================= */
-
-function updateHUD(){
-
-  document.getElementById("hp")
-    .textContent=
-    Math.max(
-      0,
-      Math.ceil(player.hp)
-    )+
-    " / "+
-    player.maxHp;
-
-  document.getElementById("xp")
-    .textContent=
-    player.xp+
-    " / "+
-    player.xpMax;
-
-  document.getElementById("level")
-    .textContent=
-    player.level;
-
-  document.getElementById("gold")
-    .textContent=
-    player.gold;
-
-  document.getElementById("damage")
-    .textContent=
-    player.damage;
-
-  document.getElementById("potions")
-    .textContent=
-    player.potions;
-
-  document.getElementById("wave")
-    .textContent=
-    currentWave;
-
-  const alive=
-    mobs.filter(
-      m=>!m.dead
-    ).length;
-
-  document.getElementById("enemyCount")
-    .textContent=
-    alive+
-    " inimigo"+
-    (alive===1?"":"s");
-
-  const killed=
-    mobs.length-alive;
-
-  document.getElementById("waveProgress")
-    .style.width=
-    (
-      mobs.length?
-      killed/mobs.length*100:
-      0
-    )+"%";
-
-  if(
-    target &&
-    !target.dead
-  ){
-
-    document.getElementById("targetBox")
-      .style.display="block";
-
-    document.getElementById("targetName")
-      .textContent=
-      target.boss?
-      target.bossName:
-      types[target.type].name;
-
-    document.querySelector(
-      "#targetBar i"
-    ).style.width=
-      Math.max(
-        0,
-        target.hp/
-        target.maxHp*
-        100
-      )+"%";
-
-  }else{
-
-    document.getElementById("targetBox")
-      .style.display="none";
-
-  }
-
-}
-
-
-/* =========================================================
-   CENTER MESSAGE
-========================================================= */
-
-function showCenter(title,text){
-
-  document.getElementById("messageTitle")
-    .textContent=title;
-
-  document.getElementById("messageText")
-    .textContent=text;
-
-  document.getElementById("message")
-    .style.opacity=1;
-
-}
-
-
-function hideCenter(){
-
-  document.getElementById("message")
-    .style.opacity=0;
-
-}
-
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-function showToast(text){
-
-  const toast=
-    document.getElementById("toast");
-
-  toast.textContent=text;
-
-  toast.style.opacity=1;
-
-  toastTimer=2;
 
 }
 
@@ -3061,1696 +2402,600 @@ function showToast(text){
 
 function togglePause(){
 
-  if(
-    document.getElementById("shop")
-      .style.display==="flex"
-  )return;
+    paused=!paused;
 
-  paused=!paused;
-
-  document.getElementById("pause")
-    .style.display=
-    paused?
-    "flex":
-    "none";
-
-  document.getElementById("pauseDungeon")
-    .textContent=
-    currentDungeon;
-
-  document.getElementById("pauseWave")
-    .textContent=
-    currentWave+
-    " / 10";
-
-  document.getElementById("pauseLevel")
-    .textContent=
-    player.level;
-
-  document.getElementById("pauseGold")
-    .textContent=
-    player.gold;
+    document
+        .getElementById("pause")
+        .style.display =
+        paused
+        ? "flex"
+        : "none";
 
 }
 
 
-/* =========================================================
-   INVENTORY
-========================================================= */
+async function leaveGame(){
 
-function toggleInventory(){
+    if(channel){
 
-  const el=
-    document.getElementById("inventory");
-
-  if(el.style.display==="flex"){
-
-    el.style.display="none";
-
-  }else{
-
-    renderInventory();
-
-    el.style.display="flex";
-
-  }
-
-}
-
-
-function renderInventory(){
-
-  const grid=
-    document.getElementById("inventoryGrid");
-
-  grid.innerHTML="";
-
-  if(inventory.length===0){
-
-    grid.innerHTML=
-      "<p style='color:#777'>O inventário está vazio.</p>";
-
-    return;
-
-  }
-
-  for(const item of inventory){
-
-    const card=
-      document.createElement("div");
-
-    card.className="item-card";
-
-    const rarity=
-      rarities[item.rarity]||
-      rarities.common;
-
-    card.style.borderColor=
-      rarity.color;
-
-    card.innerHTML=`
-
-      <div class="item-icon">
-        ${item.icon}
-      </div>
-
-      <h3 style="color:${rarity.color}">
-        ${item.name}
-      </h3>
-
-      <small style="color:${rarity.color}">
-        ${rarity.name}
-      </small>
-
-      <p>
-        ${item.description}
-      </p>
-
-    `;
-
-    grid.appendChild(card);
-
-  }
-
-}
-
-
-/* =========================================================
-   MENU
-========================================================= */
-
-function updateMenu(){
-
-  document.getElementById("menuLevel")
-    .textContent=
-    player.level;
-
-  document.getElementById("menuGold")
-    .textContent=
-    player.gold;
-
-  const completed=
-    Object.values(
-      completedDungeons
-    ).filter(Boolean).length;
-
-  document.getElementById("menuDungeons")
-    .textContent=
-    completed+
-    "/5";
-
-  const cards=
-    document.querySelectorAll(
-      ".dungeon[data-dungeon]"
-    );
-
-  cards.forEach(card=>{
-
-    const n=
-      Number(
-        card.dataset.dungeon
-      );
-
-    const unlocked=
-      completedDungeons[n-1];
-
-    if(unlocked){
-
-      card.classList.remove("locked");
-
-      const lock=
-        card.querySelector(".lock");
-
-      if(lock)lock.remove();
-
-      const button=
-        card.querySelector("button");
-
-      button.disabled=false;
-
-      button.textContent="ENTRAR";
-
-      button.onclick=()=>{
-        enterDungeon(n);
-      };
+        try{
+            await sb.removeChannel(channel);
+        }catch(e){}
 
     }
 
-  });
+    channel=null;
+    roomCode=null;
+
+    location.reload();
 
 }
 
 
 /* =========================================================
-   EXIT MENU
+   RESPAWN
 ========================================================= */
 
-function exitToMenu(){
+function respawn(){
 
-  saveGame();
+    document
+        .getElementById("death")
+        .style.display="none";
 
-  paused=false;
+    player.hp=
+        Math.floor(
+            player.maxHp*.5
+        );
 
-  mobs=[];
+    player.x=W/2;
+    player.y=H/2;
 
-  target=null;
-
-  destination=null;
-
-  document.getElementById("pause")
-    .style.display="none";
-
-  document.getElementById("game")
-    .classList.add("hidden");
-
-  document.getElementById("menu")
-    .classList.remove("hidden");
-
-  updateMenu();
+    updateUI();
 
 }
 
 
 /* =========================================================
-   WORLD
+   CHAT
 ========================================================= */
 
-function drawDungeon(){
+function openChat(){
 
-  const data=
-    dungeonData[currentDungeon]||
-    dungeonData[1];
+    const input =
+        document.getElementById(
+            "chatInput"
+        );
 
-  ctx.fillStyle="#11141b";
+    input.style.display="block";
 
-  ctx.fillRect(
-    0,
-    0,
-    W,
-    H
-  );
+    input.focus();
 
-  /* floor */
+}
 
-  const size=70;
 
-  const ox=
-    ((-player.x)%size+size)%size;
+function closeChat(){
 
-  const oy=
-    ((-player.y)%size+size)%size;
+    const input =
+        document.getElementById(
+            "chatInput"
+        );
 
-  ctx.strokeStyle="#252a34";
+    input.style.display="none";
+    input.value="";
 
-  ctx.lineWidth=1;
+}
 
-  for(
-    let x=ox;
-    x<W;
-    x+=size
-  ){
 
-    ctx.beginPath();
+document
+.getElementById("chatInput")
+.addEventListener(
+    "keydown",
+    e=>{
 
-    ctx.moveTo(x,0);
+        if(e.key==="Enter"){
 
-    ctx.lineTo(x,H);
+            const msg=e.target.value.trim();
 
-    ctx.stroke();
+            if(msg){
 
-  }
+                addChat(
+                    player.name,
+                    msg
+                );
 
-  for(
-    let y=oy;
-    y<H;
-    y+=size
-  ){
+                if(!offline){
 
-    ctx.beginPath();
+                    broadcast({
 
-    ctx.moveTo(0,y);
+                        type:"chat",
 
-    ctx.lineTo(W,y);
+                        name:player.name,
 
-    ctx.stroke();
+                        message:msg
 
-  }
+                    });
 
-  /* tiles */
+                }
 
-  for(
-    let i=0;
-    i<60;
-    i++
-  ){
+            }
 
-    const x=
-      ((i*173)%W);
+            closeChat();
 
-    const y=
-      ((i*97)%H);
+        }
 
-    ctx.fillStyle=
-      i%3===0?
-      "#20242d":
-      "#191d25";
+        if(e.key==="Escape")
+            closeChat();
+
+    }
+);
+
+
+function addChat(name,message){
+
+    const box =
+        document.getElementById(
+            "chatMessages"
+        );
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+    div.className="chatMsg";
+
+    div.innerHTML=
+        `<b>${escapeHTML(name)}:</b>
+         ${escapeHTML(message)}`;
+
+    box.appendChild(div);
+
+    while(box.children.length>8){
+
+        box.removeChild(
+            box.firstChild
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   UI
+========================================================= */
+
+function updateUI(){
+
+    document
+        .getElementById("playerName")
+        .textContent=player.name;
+
+    document
+        .getElementById("levelText")
+        .textContent=
+        `LV ${player.level}`;
+
+    document
+        .getElementById("goldText")
+        .textContent=player.gold;
+
+    document
+        .getElementById("potionText")
+        .textContent=player.potions;
+
+    document
+        .getElementById("hpFill")
+        .style.width=
+        `${Math.max(
+            0,
+            player.hp/player.maxHp*100
+        )}%`;
+
+    const xpNeed =
+        100 + player.level*50;
+
+    document
+        .getElementById("xpFill")
+        .style.width=
+        `${Math.min(
+            100,
+            player.xp/xpNeed*100
+        )}%`;
+
+}
+
+
+function updateDungeonUI(){
+
+    const d =
+        DUNGEONS[dungeon];
+
+    document
+        .getElementById(
+            "dungeonName"
+        )
+        .textContent=d.name;
+
+    document
+        .getElementById(
+            "waveText"
+        )
+        .textContent=
+        `WAVE ${wave} / 10`;
+
+    document
+        .getElementById(
+            "bossText"
+        )
+        .textContent=
+        wave===10
+        ? `⚠ ${d.boss}`
+        : wave===0
+        ? "Waiting..."
+        : `${mobs.length} enemies`;
+
+}
+
+
+/* =========================================================
+   VISUALS
+========================================================= */
+
+function drawBackground(){
+
+    const d =
+        DUNGEONS[dungeon];
+
+    ctx.fillStyle =
+        d.color;
 
     ctx.fillRect(
-      x,
-      y,
-      3+i%4,
-      3+i%3
+        0,
+        0,
+        W,
+        H
     );
 
-  }
-
-  /* dungeon-specific atmosphere */
-
-  if(currentDungeon===1){
-
-    drawPurpleFog();
-
-  }else if(currentDungeon===2){
-
-    drawFireAtmosphere();
-
-  }else if(currentDungeon===3){
-
-    drawIceAtmosphere();
-
-  }else if(currentDungeon===4){
-
-    drawDeadAtmosphere();
-
-  }else{
-
-    drawCastleAtmosphere();
-
-  }
-
-  /* border */
-
-  ctx.fillStyle="#090b10";
-
-  ctx.fillRect(0,0,W,12);
-  ctx.fillRect(0,H-12,W,12);
-  ctx.fillRect(0,0,12,H);
-  ctx.fillRect(W-12,0,12,H);
-
-}
-
-
-function drawPurpleFog(){
-
-  const g=
-    ctx.createRadialGradient(
-      W/2,H/2,100,
-      W/2,H/2,Math.max(W,H)*.7
-    );
-
-  g.addColorStop(
-    0,
-    "rgba(100,70,130,.02)"
-  );
-
-  g.addColorStop(
-    1,
-    "rgba(60,30,90,.25)"
-  );
-
-  ctx.fillStyle=g;
-
-  ctx.fillRect(
-    0,
-    0,
-    W,
-    H
-  );
-
-}
-
-
-function drawFireAtmosphere(){
-
-  ctx.fillStyle=
-    "rgba(130,45,25,.08)";
-
-  ctx.fillRect(
-    0,
-    0,
-    W,
-    H
-  );
-
-  for(
-    let i=0;
-    i<12;
-    i++
-  ){
-
-    const x=
-      (i*131+
-      gameTime*15)%
-      W;
-
-    const y=
-      (i*71-
-      gameTime*20)%
-      H;
-
-    ctx.fillStyle="#ef713344";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      x,
-      y,
-      2+i%3,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-  }
-
-}
-
-
-function drawIceAtmosphere(){
-
-  ctx.fillStyle=
-    "rgba(70,150,180,.09)";
-
-  ctx.fillRect(
-    0,
-    0,
-    W,
-    H
-  );
-
-  for(
-    let i=0;
-    i<18;
-    i++
-  ){
-
-    const x=
-      (i*101+
-      Math.sin(gameTime+i)*20)%
-      W;
-
-    const y=
-      (i*67+
-      gameTime*12)%
-      H;
-
-    ctx.fillStyle="#b9f0ff55";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      x,
-      y,
-      2+i%3,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-  }
-
-}
-
-
-function drawDeadAtmosphere(){
-
-  ctx.fillStyle=
-    "rgba(20,20,35,.15)";
-
-  ctx.fillRect(
-    0,
-    0,
-    W,
-    H
-  );
-
-}
-
-
-function drawCastleAtmosphere(){
-
-  ctx.fillStyle=
-    "rgba(80,10,25,.12)";
-
-  ctx.fillRect(
-    0,
-    0,
-    W,
-    H
-  );
-
-}
-
-
-/* =========================================================
-   WORLD TO SCREEN
-========================================================= */
-
-function worldToScreen(x,y){
-
-  return{
-
-    x:
-      x-
-      player.x+
-      W/2,
-
-    y:
-      y-
-      player.y+
-      H/2
-
-  };
-
-}
-
-
-/* =========================================================
-   PLAYER DRAW
-========================================================= */
-
-function drawPlayer(){
-
-  const x=W/2;
-
-  const y=H/2;
-
-  const moving=
-    keys.w||
-    keys.a||
-    keys.s||
-    keys.d||
-    destination||
-    (target&&!target.dead);
-
-  const bob=
-    moving?
-    Math.sin(player.anim)*3:
-    Math.sin(gameTime*2)*1.5;
-
-  const leg=
-    Math.sin(player.anim)*5;
-
-  ctx.save();
-
-  ctx.translate(
-    x,
-    y+bob
-  );
-
-  ctx.scale(
-    player.direction,
-    1
-  );
-
-  /* shadow */
-
-  ctx.fillStyle="#0009";
-
-  ctx.beginPath();
-
-  ctx.ellipse(
-    0,
-    31,
-    29,
-    8,
-    0,
-    0,
-    Math.PI*2
-  );
-
-  ctx.fill();
-
-  /* cape */
-
-  ctx.fillStyle="#54276e";
-
-  ctx.beginPath();
-
-  ctx.moveTo(-14,-8);
-
-  ctx.lineTo(-30,31);
-
-  ctx.lineTo(0,22);
-
-  ctx.closePath();
-
-  ctx.fill();
-
-  /* legs */
-
-  ctx.fillStyle="#272d3b";
-
-  ctx.fillRect(
-    -11+leg*.35,
-    7,
-    8,
-    21
-  );
-
-  ctx.fillRect(
-    3-leg*.35,
-    7,
-    8,
-    21
-  );
-
-  /* boots */
-
-  ctx.fillStyle="#101218";
-
-  ctx.fillRect(
-    -15+leg*.35,
-    24,
-    13,
-    6
-  );
-
-  ctx.fillRect(
-    2-leg*.35,
-    24,
-    13,
-    6
-  );
-
-  /* body armor */
-
-  ctx.fillStyle="#425879";
-
-  ctx.beginPath();
-
-  ctx.roundRect(
-    -16,
-    -13,
-    32,
-    30,
-    7
-  );
-
-  ctx.fill();
-
-  /* belt */
-
-  ctx.fillStyle="#b18442";
-
-  ctx.fillRect(
-    -16,
-    3,
-    32,
-    5
-  );
-
-  /* head */
-
-  ctx.fillStyle="#d99b70";
-
-  ctx.beginPath();
-
-  ctx.arc(
-    0,
-    -26,
-    13,
-    0,
-    Math.PI*2
-  );
-
-  ctx.fill();
-
-  /* hair */
-
-  ctx.fillStyle="#30232b";
-
-  ctx.beginPath();
-
-  ctx.arc(
-    0,
-    -30,
-    13,
-    Math.PI,
-    Math.PI*2
-  );
-
-  ctx.fill();
-
-  /* eye */
-
-  ctx.fillStyle="#111";
-
-  ctx.fillRect(
-    5,
-    -27,
-    3,
-    3
-  );
-
-  /* arm */
-
-  ctx.fillStyle="#d99b70";
-
-  ctx.fillRect(
-    12,
-    -7,
-    8,
-    13
-  );
-
-  /* sword */
-
-  ctx.save();
-
-  if(attackAnimation>0){
-
-    const progress=
-      1-
-      attackAnimation/.42;
-
-    ctx.rotate(
-      -1+
-      progress*2.7
-    );
-
-  }
-
-  ctx.strokeStyle="#e8ecf5";
-
-  ctx.lineWidth=5;
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    16,
-    8
-  );
-
-  ctx.lineTo(
-    51,
-    8
-  );
-
-  ctx.stroke();
-
-  ctx.strokeStyle="#9c6d3b";
-
-  ctx.lineWidth=5;
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    12,
-    6
-  );
-
-  ctx.lineTo(
-    24,
-    6
-  );
-
-  ctx.stroke();
-
-  ctx.restore();
-
-  /* attack arc */
-
-  if(attackAnimation>0){
-
-    const alpha=
-      attackAnimation/.42;
+    const grid=50;
 
     ctx.strokeStyle=
-      "rgba(245,205,80,"+
-      alpha+
-      ")";
+        "rgba(255,255,255,.025)";
 
-    ctx.lineWidth=5;
+    ctx.lineWidth=1;
 
-    ctx.beginPath();
+    for(
+        let x=0;
+        x<W;
+        x+=grid
+    ){
 
-    ctx.arc(
-      0,
-      0,
-      115,
-      -Math.PI*.85,
-      Math.PI*.85
-    );
+        ctx.beginPath();
 
-    ctx.stroke();
+        ctx.moveTo(x,70);
+        ctx.lineTo(x,H);
 
-  }
+        ctx.stroke();
 
-  ctx.restore();
+    }
+
+    for(
+        let y=70;
+        y<H;
+        y+=grid
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(0,y);
+        ctx.lineTo(W,y);
+
+        ctx.stroke();
+
+    }
 
 }
 
 
-/* =========================================================
-   MOB DRAW
-========================================================= */
+function drawPlayer(
+    x,
+    y,
+    color,
+    name,
+    hp,
+    maxHp,
+    local=false
+){
+
+    ctx.save();
+
+    ctx.translate(x,y);
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        17,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fillStyle=color;
+    ctx.fill();
+
+    ctx.strokeStyle=
+        local
+        ? "#fff"
+        : "#bbb";
+
+    ctx.lineWidth=2;
+    ctx.stroke();
+
+    ctx.fillStyle="#ddd";
+
+    ctx.fillRect(
+        -18,
+        -28,
+        36,
+        5
+    );
+
+    ctx.fillStyle="#4ac76a";
+
+    ctx.fillRect(
+        -18,
+        -28,
+        36*
+        Math.max(
+            0,
+            hp/maxHp
+        ),
+        5
+    );
+
+    ctx.fillStyle="#fff";
+
+    ctx.font="11px Arial";
+    ctx.textAlign="center";
+
+    ctx.fillText(
+        name,
+        0,
+        -35
+    );
+
+    ctx.restore();
+
+}
+
 
 function drawMob(mob){
 
-  const s=
-    worldToScreen(
-      mob.x,
-      mob.y
+    ctx.save();
+
+    ctx.translate(
+        mob.x,
+        mob.y
     );
 
-  if(
-    s.x<-150||
-    s.x>W+150||
-    s.y<-150||
-    s.y>H+150
-  )return;
-
-  ctx.save();
-
-  ctx.translate(
-    s.x,
-    s.y
-  );
-
-  const deathScale=
-    mob.dead?
-    Math.max(
-      0,
-      1-
-      mob.deathTime/.7
-    ):
-    1;
-
-  ctx.scale(
-    1,
-    deathScale
-  );
-
-  if(mob.hit>0){
-
-    ctx.globalAlpha=.5;
-
-  }
-
-  /* target */
-
-  if(
-    target===mob &&
-    !mob.dead
-  ){
-
-    ctx.strokeStyle="#f4d35e";
-
-    ctx.lineWidth=3;
+    const size =
+        mob.boss
+        ? 30
+        : 19;
 
     ctx.beginPath();
 
     ctx.arc(
-      0,
-      0,
-      mob.size+10,
-      0,
-      Math.PI*2
+        0,
+        0,
+        size,
+        0,
+        Math.PI*2
     );
+
+    ctx.fillStyle =
+        mob.boss
+        ? "#8d2935"
+        : "#514452";
+
+    ctx.fill();
+
+    ctx.strokeStyle =
+        mob.hit>0
+        ? "#fff"
+        : "#222";
+
+    ctx.lineWidth=2;
 
     ctx.stroke();
 
-  }
-
-  /* shadow */
-
-  ctx.fillStyle="#0009";
-
-  ctx.beginPath();
-
-  ctx.ellipse(
-    0,
-    mob.size*.8,
-    mob.size,
-    mob.size*.35,
-    0,
-    0,
-    Math.PI*2
-  );
-
-  ctx.fill();
-
-  if(mob.boss){
-
-    drawBoss(mob);
-
-  }else{
-
-    drawMobBody(mob);
-
-  }
-
-  /* hp */
-
-  if(!mob.dead){
-
-    ctx.fillStyle="#111318";
-
-    ctx.fillRect(
-      -mob.size,
-      -mob.size-13,
-      mob.size*2,
-      5
-    );
-
-    ctx.fillStyle="#d84c4c";
-
-    ctx.fillRect(
-      -mob.size,
-      -mob.size-13,
-      mob.size*2*
-      Math.max(
-        0,
-        mob.hp/mob.maxHp
-      ),
-      5
-    );
-
-  }
-
-  ctx.restore();
-
-}
-
-
-/* =========================================================
-   BOSS DRAW
-========================================================= */
-
-function drawBoss(m){
-
-  const s=m.size;
-
-  const pulse=
-    1+
-    Math.sin(
-      gameTime*3
-    )*.04;
-
-  ctx.scale(
-    pulse,
-    pulse
-  );
-
-  /* aura */
-
-  ctx.strokeStyle=
-    m.color+
-    "66";
-
-  ctx.lineWidth=7;
-
-  ctx.beginPath();
-
-  ctx.arc(
-    0,
-    0,
-    s+14,
-    0,
-    Math.PI*2
-  );
-
-  ctx.stroke();
-
-  /* body */
-
-  ctx.fillStyle=m.color;
-
-  ctx.beginPath();
-
-  ctx.arc(
-    0,
-    -10,
-    s*.65,
-    0,
-    Math.PI*2
-  );
-
-  ctx.fill();
-
-  ctx.fillRect(
-    -s*.65,
-    8,
-    s*1.3,
-    s*.7
-  );
-
-  /* horns */
-
-  ctx.fillStyle="#ddd0ae";
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    -s*.3,
-    -s*.65
-  );
-
-  ctx.lineTo(
-    -s*.7,
-    -s*1.15
-  );
-
-  ctx.lineTo(
-    -s*.05,
-    -s*.75
-  );
-
-  ctx.closePath();
-
-  ctx.fill();
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    s*.3,
-    -s*.65
-  );
-
-  ctx.lineTo(
-    s*.7,
-    -s*1.15
-  );
-
-  ctx.lineTo(
-    s*.05,
-    -s*.75
-  );
-
-  ctx.closePath();
-
-  ctx.fill();
-
-  /* eyes */
-
-  ctx.fillStyle="#ff5353";
-
-  ctx.fillRect(
-    -s*.25,
-    -s*.18,
-    9,
-    6
-  );
-
-  ctx.fillRect(
-    s*.08,
-    -s*.18,
-    9,
-    6
-  );
-
-}
-
-
-/* =========================================================
-   MOB BODY
-========================================================= */
-
-function drawMobBody(m){
-
-  const s=m.size;
-
-  if(m.type==="slime"){
-
-    const squash=
-      1+
-      Math.sin(
-        gameTime*8+m.anim
-      )*.08;
-
-    ctx.scale(
-      squash,
-      1/squash
-    );
-
-    ctx.fillStyle=m.color;
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-      0,
-      4,
-      s,
-      s*.75,
-      0,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-    ctx.fillStyle="#effff7";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      -7,
-      -1,
-      4,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-    ctx.fillStyle="#17251d";
-
-    ctx.fillRect(-7,4,4,5);
-    ctx.fillRect(5,4,4,5);
-
-  }
-
-  else if(m.type==="goblin"){
-
-    ctx.fillStyle=m.color;
-
-    ctx.beginPath();
-
-    ctx.arc(
-      0,
-      -2,
-      s*.75,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-    ctx.fillStyle="#496d38";
-
-    ctx.beginPath();
-
-    ctx.moveTo(-10,-9);
-    ctx.lineTo(-24,-18);
-    ctx.lineTo(-13,1);
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.beginPath();
-
-    ctx.moveTo(10,-9);
-    ctx.lineTo(24,-18);
-    ctx.lineTo(13,1);
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.fillStyle="#111";
-
-    ctx.fillRect(-6,-3,4,5);
-    ctx.fillRect(4,-3,4,5);
-
-  }
-
-  else if(m.type==="bat"){
-
-    const flap=
-      Math.sin(
-        gameTime*13+m.anim
-      )*8;
-
-    ctx.fillStyle=m.color;
-
-    ctx.beginPath();
-
-    ctx.moveTo(-5,0);
-    ctx.lineTo(-s-10,-10-flap);
-    ctx.lineTo(-s+2,8);
-    ctx.lineTo(-10,10);
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.beginPath();
-
-    ctx.moveTo(5,0);
-    ctx.lineTo(s+10,-10+flap);
-    ctx.lineTo(s-2,8);
-    ctx.lineTo(10,10);
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.fillStyle="#9d65c4";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      0,
-      0,
-      10,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-    ctx.fillStyle="#ff6565";
-
-    ctx.fillRect(-6,-2,3,4);
-    ctx.fillRect(3,-2,3,4);
-
-  }
-
-  else if(m.type==="spider"){
-
-    ctx.fillStyle=m.color;
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-      0,
-      2,
-      13,
-      18,
-      0,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-    ctx.strokeStyle="#916b9b";
-
-    ctx.lineWidth=3;
-
-    for(
-      let i=0;
-      i<4;
-      i++
-    ){
-
-      const yy=-10+i*7;
-
-      ctx.beginPath();
-
-      ctx.moveTo(-7,yy);
-      ctx.lineTo(-29,yy-9);
-
-      ctx.stroke();
-
-      ctx.beginPath();
-
-      ctx.moveTo(7,yy);
-      ctx.lineTo(29,yy-9);
-
-      ctx.stroke();
-
-    }
-
-    ctx.fillStyle="#ed5a66";
-
-    ctx.fillRect(-6,-3,4,4);
-    ctx.fillRect(3,-3,4,4);
-
-  }
-
-  else if(m.type==="wolf"){
-
-    ctx.fillStyle=m.color;
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-      0,
-      3,
-      s*1.05,
-      s*.65,
-      0,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-    ctx.fillStyle="#b1b4ba";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      15,
-      -7,
-      12,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-    ctx.fillStyle="#777c84";
-
-    ctx.beginPath();
-
-    ctx.moveTo(10,-15);
-    ctx.lineTo(12,-29);
-    ctx.lineTo(20,-17);
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.fillStyle="#222";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      23,
-      -7,
-      2,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-  }
-
-  else if(m.type==="skeleton"){
-
-    ctx.fillStyle="#ddd5bd";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      0,
-      -10,
-      12,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-    ctx.fillStyle="#282828";
-
-    ctx.fillRect(-7,-13,4,6);
-    ctx.fillRect(4,-13,4,6);
-
-    ctx.strokeStyle="#ddd5bd";
-
-    ctx.lineWidth=5;
-
-    ctx.beginPath();
-
-    ctx.moveTo(0,2);
-    ctx.lineTo(0,20);
-
-    ctx.moveTo(-12,8);
-    ctx.lineTo(12,8);
-
-    ctx.moveTo(-8,26);
-    ctx.lineTo(0,20);
-    ctx.lineTo(8,26);
-
-    ctx.stroke();
-
-  }
-
-  else if(m.type==="orc"){
-
-    ctx.fillStyle=m.color;
-
-    ctx.beginPath();
-
-    ctx.arc(
-      0,
-      -7,
-      s*.7,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-    ctx.fillStyle="#42683b";
-
-    ctx.fillRect(
-      -18,
-      4,
-      36,
-      28
-    );
-
-    ctx.fillStyle="#20221e";
-
-    ctx.fillRect(-7,-10,5,6);
-    ctx.fillRect(3,-10,5,6);
-
-    ctx.fillStyle="#f1dfac";
-
-    ctx.beginPath();
-
-    ctx.moveTo(-8,5);
-    ctx.lineTo(-3,16);
-    ctx.lineTo(1,5);
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.beginPath();
-
-    ctx.moveTo(4,5);
-    ctx.lineTo(9,16);
-    ctx.lineTo(13,5);
-    ctx.closePath();
-
-    ctx.fill();
-
-  }
-
-  else if(m.type==="troll"){
-
-    ctx.fillStyle=m.color;
-
-    ctx.beginPath();
-
-    ctx.arc(
-      0,
-      -8,
-      s*.7,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-    ctx.fillStyle="#52673f";
-
-    ctx.fillRect(
-      -20,
-      4,
-      40,
-      32
-    );
-
-    ctx.fillStyle="#25251f";
-
-    ctx.fillRect(-9,-10,5,7);
-    ctx.fillRect(4,-10,5,7);
-
-  }
-
-  else if(m.type==="knight"){
-
-    ctx.fillStyle="#292f3e";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      0,
-      -8,
-      s*.7,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-    ctx.fillStyle="#4d5669";
-
-    ctx.fillRect(
-      -19,
-      3,
-      38,
-      32
-    );
-
-    ctx.fillStyle="#11151d";
-
-    ctx.fillRect(
-      -12,
-      -12,
-      24,
-      10
-    );
-
-    ctx.fillStyle="#e55762";
-
-    ctx.fillRect(-7,-8,4,3);
-    ctx.fillRect(4,-8,4,3);
-
-    ctx.strokeStyle="#bbc2ce";
-
-    ctx.lineWidth=5;
-
-    ctx.beginPath();
-
-    ctx.moveTo(17,10);
-    ctx.lineTo(35,-20);
-
-    ctx.stroke();
-
-  }
-
-  else if(m.type==="demon"){
-
-    ctx.fillStyle="#9b3f49";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      0,
-      -4,
-      s*.7,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-    ctx.fillStyle="#ddd0ae";
-
-    ctx.beginPath();
-
-    ctx.moveTo(-10,-17);
-    ctx.lineTo(-23,-38);
-    ctx.lineTo(-3,-22);
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.beginPath();
-
-    ctx.moveTo(10,-17);
-    ctx.lineTo(23,-38);
-    ctx.lineTo(3,-22);
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.fillStyle="#2a1015";
-
-    ctx.fillRect(-8,-7,5,5);
-    ctx.fillRect(4,-7,5,5);
-
-    ctx.fillStyle="#632c35";
-
-    ctx.fillRect(
-      -20,
-      4,
-      40,
-      30
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   EFFECTS
-========================================================= */
-
-function drawEffects(){
-
-  for(const p of particles){
-
-    const s=
-      worldToScreen(
-        p.x,
-        p.y
-      );
-
-    ctx.globalAlpha=
-      Math.max(
-        0,
-        p.life/p.maxLife
-      );
-
-    ctx.fillStyle=p.color;
-
-    ctx.beginPath();
-
-    ctx.arc(
-      s.x,
-      s.y,
-      p.size,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-  }
-
-  ctx.globalAlpha=1;
-
-  for(const n of numbers){
-
-    const s=
-      worldToScreen(
-        n.x,
-        n.y
-      );
-
-    ctx.globalAlpha=
-      Math.max(
-        0,
-        n.life/n.maxLife
-      );
-
-    ctx.fillStyle=n.color;
-
-    ctx.font=
-      "bold 15px Arial";
+    ctx.fillStyle="#e8e8e8";
+
+    ctx.font =
+        mob.boss
+        ? "bold 13px Arial"
+        : "11px Arial";
 
     ctx.textAlign="center";
 
     ctx.fillText(
-      n.text,
-      s.x,
-      s.y
-    );
-
-  }
-
-  for(const l of floatingLoot){
-
-    const s=
-      worldToScreen(
-        l.x,
-        l.y
-      );
-
-    ctx.globalAlpha=
-      Math.max(
+        mob.name,
         0,
-        l.life/l.maxLife
-      );
-
-    ctx.fillStyle=l.color;
-
-    ctx.font=
-      "bold 14px Arial";
-
-    ctx.textAlign="center";
-
-    ctx.fillText(
-      l.text,
-      s.x,
-      s.y
+        -size-8
     );
 
-  }
+    ctx.fillStyle="#251e23";
 
-  ctx.globalAlpha=1;
+    ctx.fillRect(
+        -25,
+        size+7,
+        50,
+        6
+    );
+
+    ctx.fillStyle="#c3434d";
+
+    ctx.fillRect(
+        -25,
+        size+7,
+        50*
+        Math.max(
+            0,
+            mob.hp/mob.maxHp
+        ),
+        6
+    );
+
+    ctx.restore();
+
+}
+
+
+function attackEffect(){
+
+    particles.push({
+
+        x:player.x,
+        y:player.y,
+
+        r:10,
+
+        life:15,
+
+        max:15
+
+    });
+
+}
+
+
+function spawnLoot(x,y){
+
+    particles.push({
+
+        x,
+        y,
+
+        r:4,
+
+        life:70,
+
+        max:70,
+
+        loot:true
+
+    });
+
+    spawnText(
+        x,
+        y-20,
+        "LOOT!",
+        "#e5bd58"
+    );
+
+}
+
+
+function spawnText(
+    x,
+    y,
+    text,
+    color
+){
+
+    particles.push({
+
+        x,
+        y,
+
+        text,
+        color,
+
+        life:50,
+        max:50
+
+    });
 
 }
 
 
 /* =========================================================
-   GAME UPDATE
+   PARTICLES
 ========================================================= */
 
-function update(dt){
+function updateParticles(){
 
-  if(paused)return;
+    for(const p of particles){
 
-  gameTime+=dt;
+        p.life--;
 
-  if(attackCooldown>0)
-    attackCooldown-=dt;
+        if(p.text){
 
-  if(attackAnimation>0)
-    attackAnimation-=dt;
+            p.y-=.5;
 
-  if(!player.dead){
-
-    updatePlayer(dt);
-
-    updateMobs(dt);
-
-  }
-
-  updateParticles(dt);
-
-  updateHUD();
-
-  if(toastTimer>0){
-
-    toastTimer-=dt;
-
-    if(toastTimer<=0){
-
-      document.getElementById("toast")
-        .style.opacity=0;
+        }
 
     }
 
-  }
+    particles=
+        particles.filter(
+            p=>p.life>0
+        );
+
+}
+
+
+function drawParticles(){
+
+    for(const p of particles){
+
+        const alpha =
+            p.life/p.max;
+
+        ctx.save();
+
+        ctx.globalAlpha=alpha;
+
+        if(p.text){
+
+            ctx.fillStyle=p.color;
+
+            ctx.font="bold 13px Arial";
+
+            ctx.textAlign="center";
+
+            ctx.fillText(
+                p.text,
+                p.x,
+                p.y
+            );
+
+        }else{
+
+            ctx.beginPath();
+
+            ctx.arc(
+                p.x,
+                p.y,
+                p.r +
+                (1-alpha)*50,
+                0,
+                Math.PI*2
+            );
+
+            ctx.strokeStyle=
+                "rgba(230,190,90,.7)";
+
+            ctx.lineWidth=3;
+
+            ctx.stroke();
+
+        }
+
+        ctx.restore();
+
+    }
 
 }
 
@@ -4761,216 +3006,296 @@ function update(dt){
 
 function render(){
 
-  ctx.clearRect(
-    0,
-    0,
-    W,
-    H
-  );
+    drawBackground();
 
-  drawDungeon();
+    for(const mob of mobs){
 
-  const sorted=
-    [...mobs].sort(
-      (a,b)=>a.y-b.y
+        drawMob(mob);
+
+    }
+
+    for(const p of Object.values(
+        remotePlayers
+    )){
+
+        drawPlayer(
+            p.x || W/2,
+            p.y || H/2,
+            p.color || "#aaa",
+            p.name || "Player",
+            p.hp || 100,
+            p.maxHp || 100,
+            false
+        );
+
+    }
+
+    drawPlayer(
+        player.x,
+        player.y,
+        player.color,
+        player.name,
+        player.hp,
+        player.maxHp,
+        true
     );
 
-  for(
-    const mob of sorted
-  ){
-
-    drawMob(mob);
-
-  }
-
-  drawPlayer();
-
-  drawEffects();
+    drawParticles();
 
 }
 
 
 /* =========================================================
-   INPUT
+   MAIN LOOP
 ========================================================= */
 
-addEventListener(
-  "keydown",
-  e=>{
+function loop(){
+
+    updatePlayer();
 
     if(
-      e.key==="Escape"
+        offline ||
+        isHost
     ){
 
-      e.preventDefault();
-
-      if(
-        document.getElementById("inventory")
-          .style.display==="flex"
-      ){
-
-        toggleInventory();
-
-        return;
-
-      }
-
-      togglePause();
-
-      return;
+        updateMobs();
 
     }
 
-    keys[e.key]=true;
+    updateParticles();
 
-    keys[e.key.toLowerCase()]=true;
+    updateNetwork();
 
-    if(e.code==="Space"){
+    updateUI();
 
-      e.preventDefault();
-
-      areaAttack();
-
-    }
-
-  }
-);
-
-
-addEventListener(
-  "keyup",
-  e=>{
-
-    keys[e.key]=false;
-
-    keys[e.key.toLowerCase()]=false;
-
-  }
-);
-
-
-/* =========================================================
-   CANVAS CLICK
-========================================================= */
-
-canvas.addEventListener(
-  "pointerdown",
-  e=>{
-
-    if(
-      player.dead||
-      paused
-    )return;
-
-    const rect=
-      canvas.getBoundingClientRect();
-
-    const sx=
-      e.clientX-
-      rect.left;
-
-    const sy=
-      e.clientY-
-      rect.top;
-
-    const wx=
-      sx-
-      W/2+
-      player.x;
-
-    const wy=
-      sy-
-      H/2+
-      player.y;
-
-    let clicked=null;
-
-    let closest=80;
-
-    for(const mob of mobs){
-
-      if(mob.dead)continue;
-
-      const d=
-        Math.hypot(
-          wx-mob.x,
-          wy-mob.y
-        );
-
-      if(
-        d<
-        Math.max(
-          50,
-          mob.size+20
-        ) &&
-        d<closest
-      ){
-
-        closest=d;
-
-        clicked=mob;
-
-      }
-
-    }
-
-    if(clicked){
-
-      target=clicked;
-
-      destination=null;
-
-    }else{
-
-      target=null;
-
-      destination={
-        x:wx,
-        y:wy
-      };
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   INITIAL LOAD
-========================================================= */
-
-loadGame();
-
-updateMenu();
-
-updateHUD();
-
-renderInventory();
-
-
-/* =========================================================
-   GAME LOOP
-========================================================= */
-
-requestAnimationFrame(
-  function loop(now){
-
-    const dt=
-      Math.min(
-        .033,
-        (now-lastTime)/1000
-      );
-
-    lastTime=now;
-
-    update(dt);
+    updateDungeonUI();
 
     render();
 
     requestAnimationFrame(loop);
 
-  }
+}
+
+loop();
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer=null;
+
+function toast(message){
+
+    const el =
+        document.getElementById(
+            "toast"
+        );
+
+    el.textContent=message;
+
+    el.style.opacity="1";
+
+    clearTimeout(toastTimer);
+
+    toastTimer =
+        setTimeout(
+            ()=>{
+                el.style.opacity="0";
+            },
+            1600
+        );
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(str){
+
+    return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
+}
+
+
+/* =========================================================
+   CLICK MOB
+========================================================= */
+
+canvas.addEventListener(
+    "click",
+    e=>{
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+        const x =
+            e.clientX-rect.left;
+
+        const y =
+            e.clientY-rect.top;
+
+        let closest=null;
+        let distance=Infinity;
+
+        for(const mob of mobs){
+
+            const dx=mob.x-x;
+            const dy=mob.y-y;
+
+            const d =
+                Math.sqrt(
+                    dx*dx+dy*dy
+                );
+
+            if(d<distance){
+
+                distance=d;
+                closest=mob;
+
+            }
+
+        }
+
+        if(
+            closest &&
+            distance<60
+        ){
+
+            selectedMob=closest;
+
+            const dx =
+                closest.x-player.x;
+
+            const dy =
+                closest.y-player.y;
+
+            const d =
+                Math.sqrt(
+                    dx*dx+dy*dy
+                );
+
+            if(d>110){
+
+                keys["w"]=false;
+                keys["a"]=false;
+                keys["s"]=false;
+                keys["d"]=false;
+
+            }
+
+            manualAttack();
+
+        }
+
+    }
 );
+
+
+/* =========================================================
+   AUTO ATTACK
+========================================================= */
+
+setInterval(
+    ()=>{
+
+        if(
+            !paused &&
+            gameStarted &&
+            mobs.length
+        ){
+
+            let target=null;
+
+            let best=Infinity;
+
+            for(const mob of mobs){
+
+                const dx =
+                    mob.x-player.x;
+
+                const dy =
+                    mob.y-player.y;
+
+                const d =
+                    Math.sqrt(
+                        dx*dx+dy*dy
+                    );
+
+                if(
+                    d<125 &&
+                    d<best
+                ){
+
+                    best=d;
+                    target=mob;
+
+                }
+
+            }
+
+            if(target){
+
+                manualAttack();
+
+            }
+
+        }
+
+    },
+    400
+);
+
+
+/* =========================================================
+   KEYBOARD SHORTCUTS
+========================================================= */
+
+window.addEventListener(
+    "keydown",
+    e=>{
+
+        if(e.key==="i"){
+
+            if(
+                document
+                .getElementById("inventory")
+                .style.display!=="flex"
+            ){
+
+                openInventory();
+
+            }
+
+        }
+
+        if(e.key==="p"){
+
+            usePotion();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   INITIAL
+========================================================= */
+
+loadGame();
+
+player.name =
+    document
+    .getElementById("nameInput")
+    .value || "Vikos";
 
 </script>
 
