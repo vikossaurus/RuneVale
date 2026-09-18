@@ -733,6 +733,8 @@ canvas{
 .party-player{padding:5px 9px;background:#111620;border:1px solid #384153;border-radius:7px;color:#ddd;font-size:12px}
 #copyRoom{display:none}
 #roomCodeInput{text-transform:uppercase}
+
+.dungeon.future{opacity:.45;filter:grayscale(.8);pointer-events:none}.future-badge{display:inline-block;margin-top:8px;padding:4px 8px;border:1px solid #555;border-radius:6px;color:#888;font-size:11px}
 </style>
 </head>
 
@@ -753,7 +755,7 @@ Dark Dungeons · Loot · Monsters · Adventure
 <div class="menu-stats">
   <div class="menu-stat">⚔️ Level <b id="menuLevel">1</b></div>
   <div class="menu-stat">💰 <b id="menuGold">25</b> ouro</div>
-  <div class="menu-stat">🏆 Dungeons <b id="menuDungeons">0/5</b></div>
+  <div class="menu-stat">🏆 Dungeons <b id="menuDungeons">0/1</b></div>
 </div>
 
 <div id="multiplayer">
@@ -781,41 +783,10 @@ Dark Dungeons · Loot · Monsters · Adventure
 <button onclick="enterDungeon(1)">ENTRAR</button>
 </div>
 
-<div class="dungeon locked" data-dungeon="2">
-<span class="lock">🔒</span>
-<h2>🔥 Dungeon II</h2>
-<p>Cripta de Fogo</p>
-<p>10 hordas · inimigos mais fortes</p>
-<p class="difficulty">Dificuldade: Difícil</p>
-<button disabled>LOCKED</button>
-</div>
-
-<div class="dungeon locked" data-dungeon="3">
-<span class="lock">🔒</span>
-<h2>❄️ Dungeon III</h2>
-<p>Salão Congelado</p>
-<p>10 hordas · monstros poderosos</p>
-<p class="difficulty">Dificuldade: Muito difícil</p>
-<button disabled>LOCKED</button>
-</div>
-
-<div class="dungeon locked" data-dungeon="4">
-<span class="lock">🔒</span>
-<h2>☠️ Dungeon IV</h2>
-<p>Abismo Morto</p>
-<p>10 hordas · criaturas mortais</p>
-<p class="difficulty">Dificuldade: Brutal</p>
-<button disabled>LOCKED</button>
-</div>
-
-<div class="dungeon locked" data-dungeon="5">
-<span class="lock">👑</span>
-<h2>👑 Dungeon V</h2>
-<p>Castelo do Rei Negro</p>
-<p>10 hordas · inimigos lendários</p>
-<p class="difficulty">Dificuldade: Infernal</p>
-<button disabled>LOCKED</button>
-</div>
+<div class="dungeon future"><span class="lock">🔒</span><h2>🔥 Dungeon II</h2><p>Cripta de Fogo</p><span class="future-badge">ATUALIZAÇÃO FUTURA</span></div>
+<div class="dungeon future"><span class="lock">🔒</span><h2>❄️ Dungeon III</h2><p>Salão Congelado</p><span class="future-badge">ATUALIZAÇÃO FUTURA</span></div>
+<div class="dungeon future"><span class="lock">🔒</span><h2>☠️ Dungeon IV</h2><p>Abismo Morto</p><span class="future-badge">ATUALIZAÇÃO FUTURA</span></div>
+<div class="dungeon future"><span class="lock">🔒</span><h2>👑 Dungeon V</h2><p>Castelo do Rei Negro</p><span class="future-badge">ATUALIZAÇÃO FUTURA</span></div>
 
 </div>
 </section>
@@ -1293,16 +1264,58 @@ function syncRoomPlayers(){
   const state=roomChannel.presenceState();
   multiplayerPlayers={};
   const ids=Object.keys(state).sort();
-  if(ids.length && ids[0]===playerId) roomHost=true;
-  else if(ids.length) roomHost=(ids[0]===playerId);
+  // O host é quem criou a sala; não o jogador com o ID que calha a ordenar primeiro.
   for(const id of ids){
     const entries=state[id];
     const p=entries&&entries[entries.length-1];
     if(!p||p.id===playerId)continue;
     multiplayerPlayers[id]=p;
   }
-  if(ids.length) roomHost=(ids[0]===playerId);
   renderParty();
+}
+
+function serializeMobs(){
+  return mobs.map(m=>({
+    id:m.id,type:m.type,boss:!!m.boss,bossName:m.bossName||"",
+    x:m.x,y:m.y,hp:m.hp,maxHp:m.maxHp,damage:m.damage,speed:m.speed,
+    size:m.size,xp:m.xp,gold:m.gold,color:m.color,dead:!!m.dead,
+    deathTime:m.deathTime||0,hit:m.hit||0,anim:m.anim||0,
+    attackCooldown:m.attackCooldown||0,elite:!!m.elite,
+    buffed:!!m.buffed,buffType:m.buffType||null,buffMultiplier:m.buffMultiplier||1
+  }));
+}
+
+function applyRemoteMobs(list){
+  if(!Array.isArray(list))return;
+  const oldTargetId=target&&target.id;
+  mobs=list.map(m=>({...m}));
+  target=oldTargetId?mobs.find(m=>m.id===oldTargetId&&!m.dead):null;
+}
+
+function broadcastDungeonState(){
+  if(roomChannel && roomHost && !document.getElementById("game").classList.contains("hidden")){
+    broadcastRoom({type:"state",from:playerId,dungeon:currentDungeon,wave:currentWave,
+      waveStarting:!!waveStarting,mobs:serializeMobs()});
+  }
+}
+
+function performRemoteAttack(data){
+  if(!roomHost||!data||!Array.isArray(mobs))return;
+  const px=Number(data.x), py=Number(data.y), damageBase=Number(data.damage)||0;
+  if(!Number.isFinite(px)||!Number.isFinite(py))return;
+  const radius=115;
+  let hit=false;
+  for(const mob of mobs){
+    if(mob.dead)continue;
+    const dist=Math.hypot(mob.x-px,mob.y-py);
+    if(dist>radius)continue;
+    hit=true;
+    let damage=Math.max(1,Math.floor(damageBase+Math.random()*5));
+    if(mob.boss)damage=Math.floor(damage*.75);
+    mob.hp-=damage; mob.hit=.16;
+    if(mob.hp<=0)killMob(mob);
+  }
+  if(hit)broadcastDungeonState();
 }
 
 function handleRoomMessage(data){
@@ -1311,9 +1324,21 @@ function handleRoomMessage(data){
   if(data.type==="dungeon"){
     if(data.from===playerId)return;
     if(typeof data.dungeon==="number" && data.dungeon!==currentDungeon){
-      // Only announce the host's dungeon choice; the existing local game remains unchanged until the player enters.
-      showToast("👑 Host entrou na Dungeon "+data.dungeon);
+      beginDungeon(data.dungeon,true);
     }
+    return;
+  }
+  if(data.type==="attack"){
+    if(data.from!==playerId)performRemoteAttack(data);
+    return;
+  }
+  if(data.type==="state"){
+    if(data.from===playerId || roomHost)return;
+    if(typeof data.dungeon==="number")currentDungeon=data.dungeon;
+    if(typeof data.wave==="number")currentWave=data.wave;
+    waveStarting=!!data.waveStarting;
+    applyRemoteMobs(data.mobs);
+    updateHUD();
   }
 }
 
@@ -1789,6 +1814,16 @@ function createMob(type){
     dungeonScale*
     waveScale;
 
+  // 18% de probabilidade de um mob aparecer buffado.
+  const buffRoll=Math.random();
+  const buffed=buffRoll<0.18;
+  const buffTypes=["Berserker","Armored","Swift"];
+  const buffType=buffed?buffTypes[Math.floor(Math.random()*buffTypes.length)]:null;
+  let buffMultiplier=1;
+  if(buffType==="Berserker") buffMultiplier=1.55;
+  if(buffType==="Armored") buffMultiplier=1.8;
+  if(buffType==="Swift") buffMultiplier=1.25;
+
   return{
 
     id:Math.random(),
@@ -1798,12 +1833,12 @@ function createMob(type){
     x:Math.cos(angle)*distance,
     y:Math.sin(angle)*distance,
 
-    hp:Math.round(t.hp*scale),
-    maxHp:Math.round(t.hp*scale),
+    hp:Math.round(t.hp*scale*(buffType==="Armored"?buffMultiplier:buffMultiplier)),
+    maxHp:Math.round(t.hp*scale*(buffType==="Armored"?buffMultiplier:buffMultiplier)),
 
-    damage:Math.round(t.damage*scale),
+    damage:Math.round(t.damage*scale*(buffType==="Berserker"?buffMultiplier:1)),
 
-    speed:t.speed,
+    speed:t.speed*(buffType==="Swift"?buffMultiplier:1),
 
     size:t.size,
 
@@ -1823,7 +1858,11 @@ function createMob(type){
 
     attackCooldown:.5+Math.random(),
 
-    elite:false
+    elite:false,
+    // Alguns mobs podem nascer como variantes buffadas.
+    buffed: false,
+    buffType: null,
+    buffMultiplier: 1
 
   };
 
@@ -1898,8 +1937,7 @@ function createBoss(){
 function enterDungeon(number){
 
   if(
-    number>1 &&
-    !completedDungeons[number-1]
+    number!==1
   ){
 
     showToast(
@@ -1923,7 +1961,7 @@ function enterDungeon(number){
 }
 
 
-function beginDungeon(number){
+function beginDungeon(number,fromNetwork=false){
 
   currentDungeon=number;
 
@@ -1965,8 +2003,15 @@ function beginDungeon(number){
     dungeonData[number].name;
 
   if(roomChannel){
-    broadcastRoom({type:"dungeon",from:playerId,dungeon:number});
+    if(!fromNetwork)broadcastRoom({type:"dungeon",from:playerId,dungeon:number});
     updateRoomPresence();
+  }
+
+  if(roomChannel && !roomHost && fromNetwork){
+    // Os jogadores convidados entram na mesma dungeon, mas os mobs são controlados pelo host.
+    waveStarting=true;
+    mobs=[];
+    return;
   }
 
   startWave();
@@ -2243,6 +2288,7 @@ function startWave(){
     hideCenter();
 
     updateHUD();
+    if(roomChannel && roomHost)broadcastDungeonState();
 
   },1000);
 
@@ -2375,6 +2421,14 @@ function areaAttack(){
 
   if(attackCooldown>0)return;
 
+  // Em multiplayer, o convidado envia o ataque ao host para que todos atinjam os mesmos mobs.
+  if(roomChannel && !roomHost){
+    attackCooldown=.58;
+    attackAnimation=.42;
+    broadcastRoom({type:"attack",from:playerId,x:player.x,y:player.y,damage:player.damage});
+    return;
+  }
+
   const radius=115;
 
   let nearby=false;
@@ -2477,6 +2531,7 @@ function areaAttack(){
       "#e6bd4e"
     );
 
+    if(roomChannel && roomHost)broadcastDungeonState();
   }
 
 }
@@ -2817,6 +2872,7 @@ function updateMobs(dt){
   }
 
   if(
+    (!roomChannel || roomHost) &&
     !waveStarting &&
     !player.dead &&
     mobs.length>0
@@ -3399,7 +3455,7 @@ function updateMenu(){
   document.getElementById("menuDungeons")
     .textContent=
     completed+
-    "/5";
+    "/1";
 
   const cards=
     document.querySelectorAll(
@@ -4154,6 +4210,14 @@ function drawMob(mob){
 
     drawMobBody(mob);
 
+  }
+
+  /* buff indicator */
+  if(!mob.dead && mob.buffed){
+    ctx.fillStyle = mob.buffType === "Berserker" ? "#ff5a5a" : mob.buffType === "Armored" ? "#b9c2d0" : "#62c8ff";
+    ctx.font = "bold 11px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(mob.buffType === "Berserker" ? "⚔ BERSERKER" : mob.buffType === "Armored" ? "🛡 ARMORED" : "⚡ SWIFT", 0, -mob.size-21);
   }
 
   /* hp */
@@ -4926,6 +4990,9 @@ function update(dt){
 
   if(roomChannel && Math.floor(gameTime*5)!==Math.floor((gameTime-dt)*5)){
     updateRoomPresence();
+  }
+  if(roomChannel && roomHost && Math.floor(gameTime*10)!==Math.floor((gameTime-dt)*10)){
+    broadcastDungeonState();
   }
 
   if(attackCooldown>0)
