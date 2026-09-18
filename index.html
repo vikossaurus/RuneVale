@@ -3,313 +3,731 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RuneVale — Dungeons</title>
+<title>RuneVale — Dark Dungeons</title>
 
 <style>
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+  user-select:none;
+}
+
 html,body{
   margin:0;
   width:100%;
   height:100%;
   overflow:hidden;
-  background:#08090d;
+  background:#05060a;
   color:#eee;
-  font-family:Arial,sans-serif
+  font-family:Arial,Helvetica,sans-serif;
 }
-button{font:inherit;cursor:pointer}
-.hidden{display:none!important}
 
-/* MENU */
+button{
+  font:inherit;
+  cursor:pointer;
+}
+
+.hidden{
+  display:none!important;
+}
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+::-webkit-scrollbar{
+  width:8px;
+}
+
+::-webkit-scrollbar-track{
+  background:#090b10;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#343a48;
+  border-radius:10px;
+}
+
+/* =========================================================
+   MAIN MENU
+========================================================= */
+
 #menu{
   position:fixed;
   inset:0;
   overflow:auto;
-  padding:30px 20px;
+  padding:30px 20px 80px;
   background:
-    radial-gradient(circle at 50% 15%,#302044,#11121b 40%,#07080c 85%)
+    radial-gradient(circle at 50% 10%,#39244d 0,#171321 25%,#090b11 65%,#040509 100%);
+}
+
+#menu:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.25;
+  background-image:
+    radial-gradient(circle,#fff 1px,transparent 1px);
+  background-size:80px 80px;
 }
 
 .logo{
+  position:relative;
   text-align:center;
-  font-size:clamp(42px,8vw,75px);
+  font-size:clamp(44px,8vw,82px);
   color:#e9c96a;
-  letter-spacing:5px;
-  text-shadow:0 0 25px #9d6b2f;
-  margin:15px 0 5px
+  letter-spacing:8px;
+  text-shadow:
+    0 0 8px #e9c96a,
+    0 0 30px #8e5c2e,
+    0 10px 40px #000;
+  margin:20px 0 4px;
 }
 
 .subtitle{
+  position:relative;
   text-align:center;
-  color:#999fb0;
-  margin-bottom:30px
+  color:#9299aa;
+  margin-bottom:35px;
+}
+
+.menu-stats{
+  position:relative;
+  width:min(700px,95vw);
+  margin:0 auto 25px;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.menu-stat{
+  background:#0c0f16dd;
+  border:1px solid #353b4a;
+  padding:9px 16px;
+  border-radius:9px;
+}
+
+.menu-stat b{
+  color:#e8c75e;
 }
 
 .dungeons{
-  width:min(950px,95vw);
+  position:relative;
+  width:min(1050px,95vw);
   margin:auto;
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
-  gap:15px
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
 }
 
 .dungeon{
   position:relative;
+  min-height:220px;
   padding:22px;
-  min-height:190px;
-  background:linear-gradient(145deg,#191c27,#101219);
-  border:1px solid #393f50;
-  border-radius:14px;
-  transition:.2s
+  overflow:hidden;
+  background:
+    linear-gradient(145deg,#1a1d28ee,#0d1017ee);
+  border:1px solid #383f4f;
+  border-radius:15px;
+  box-shadow:0 15px 45px #0007;
+  transition:.2s;
+}
+
+.dungeon:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 80% 20%,#c69d4a22,transparent 40%);
+  pointer-events:none;
 }
 
 .dungeon:not(.locked):hover{
-  transform:translateY(-4px);
-  border-color:#c5a653;
-  box-shadow:0 10px 40px #0008
+  transform:translateY(-5px);
+  border-color:#d0ad51;
+  box-shadow:0 20px 55px #000b,0 0 25px #b18a3c18;
 }
 
 .dungeon h2{
-  margin:0 0 8px;
-  color:#e4c65e
+  position:relative;
+  margin:0 0 10px;
+  color:#e6c660;
 }
 
 .dungeon p{
-  color:#969dac;
-  font-size:14px
+  position:relative;
+  color:#8f96a6;
+  font-size:14px;
+}
+
+.dungeon .difficulty{
+  color:#d28b62;
 }
 
 .dungeon button{
+  position:relative;
   width:100%;
   margin-top:12px;
-  padding:11px;
-  color:#fff;
-  background:#272d3a;
-  border:1px solid #555d70;
-  border-radius:8px
+  padding:12px;
+  border-radius:8px;
+  color:white;
+  background:#252b38;
+  border:1px solid #515a6c;
 }
 
-.dungeon button:hover{background:#353e4f}
+.dungeon button:hover{
+  background:#353e4e;
+}
 
-.locked{opacity:.5}
+.locked{
+  opacity:.45;
+}
+
 .lock{
   position:absolute;
   right:18px;
   top:18px;
-  font-size:25px
+  font-size:27px;
+  z-index:2;
 }
 
-/* GAME */
+/* =========================================================
+   GAME
+========================================================= */
+
 #game{
   position:fixed;
   inset:0;
-  background:#111
+  background:#08090d;
 }
 
 canvas{
   position:absolute;
   inset:0;
   width:100%;
-  height:100%
+  height:100%;
 }
+
+/* =========================================================
+   HUD
+========================================================= */
 
 #hud{
   position:absolute;
-  top:12px;
+  z-index:20;
   left:12px;
-  z-index:5;
+  top:12px;
   display:flex;
   flex-wrap:wrap;
   gap:7px;
-  max-width:72%
+  max-width:70%;
 }
 
 .stat{
-  min-width:100px;
+  min-width:95px;
   padding:8px 11px;
-  background:#0a0c12ed;
-  border:1px solid #414756;
-  border-radius:8px
+  background:#080b11eF;
+  border:1px solid #3e4657;
+  border-radius:8px;
+  box-shadow:0 5px 20px #0007;
 }
 
 .stat small{
   display:block;
-  color:#858c9d;
-  font-size:10px
+  color:#7e8697;
+  font-size:10px;
 }
 
-.stat b{font-size:15px}
+.stat b{
+  font-size:14px;
+}
 
 #buttons{
   position:absolute;
   right:12px;
   top:12px;
-  z-index:5;
+  z-index:20;
   display:flex;
-  gap:7px
+  gap:7px;
 }
 
 .btn{
-  background:#151923ed;
-  border:1px solid #454c5e;
-  color:#eee;
   padding:9px 12px;
-  border-radius:8px
+  color:#eee;
+  background:#121620ee;
+  border:1px solid #424b5e;
+  border-radius:8px;
+  box-shadow:0 5px 20px #0007;
 }
 
-.btn:hover{background:#252c39}
+.btn:hover{
+  background:#252c3a;
+}
+
+#pauseButton{
+  font-size:18px;
+}
+
+/* =========================================================
+   WAVE
+========================================================= */
 
 #waveBox{
   position:absolute;
+  z-index:20;
   top:14px;
   left:50%;
   transform:translateX(-50%);
-  z-index:5;
-  min-width:250px;
-  padding:10px 16px;
+  min-width:280px;
+  padding:10px 18px;
   text-align:center;
-  background:#0a0c12ee;
-  border:1px solid #625b45;
-  border-radius:10px
+  background:#080b11ef;
+  border:1px solid #5c563e;
+  border-radius:10px;
+  box-shadow:0 8px 30px #0008;
 }
 
-#waveBox strong{color:#e6c760}
+#waveBox strong{
+  color:#e7c75d;
+}
 
 .progress{
   height:7px;
   margin-top:7px;
-  background:#292d36;
+  background:#282d37;
   border-radius:10px;
-  overflow:hidden
+  overflow:hidden;
 }
 
 .progress i{
   display:block;
   width:0;
   height:100%;
-  background:#c9a747;
-  transition:.2s
+  background:linear-gradient(90deg,#8e672c,#e9ca61);
+  transition:.2s;
 }
+
+/* =========================================================
+   TARGET
+========================================================= */
 
 #targetBox{
   position:absolute;
+  z-index:20;
   left:50%;
   top:105px;
   transform:translateX(-50%);
-  z-index:5;
+  min-width:240px;
+  padding:9px 14px;
   display:none;
-  min-width:220px;
-  padding:8px 13px;
   text-align:center;
-  background:#090c12ef;
-  border:1px solid #555d70;
-  border-radius:8px
+  background:#080b11ef;
+  border:1px solid #555e70;
+  border-radius:8px;
 }
 
 #targetBar{
   height:7px;
-  margin-top:5px;
-  background:#292d36
+  margin-top:6px;
+  background:#292d36;
 }
 
 #targetBar i{
   display:block;
   height:100%;
-  background:#d64c4c
+  background:#d54d4d;
 }
+
+/* =========================================================
+   CENTER MESSAGE
+========================================================= */
 
 #message{
   position:absolute;
+  z-index:30;
   left:50%;
   top:50%;
   transform:translate(-50%,-50%);
-  z-index:10;
+  width:90%;
   text-align:center;
   pointer-events:none;
   opacity:0;
-  transition:.2s;
-  width:90%
+  transition:.25s;
 }
 
 #message h1{
-  font-size:42px;
   margin:0;
-  color:#e9c968;
-  text-shadow:0 5px 25px #000
+  font-size:clamp(32px,6vw,60px);
+  color:#e9c967;
+  text-shadow:0 5px 30px #000;
 }
 
-#message p{color:#ddd}
+#message p{
+  color:#ddd;
+  font-size:16px;
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
 
 #toast{
   position:absolute;
+  z-index:60;
   left:50%;
-  bottom:35px;
+  bottom:40px;
   transform:translateX(-50%);
-  z-index:30;
-  background:#090c12f2;
-  border:1px solid #4e5565;
-  padding:10px 16px;
+  background:#090c12f5;
+  border:1px solid #515a6b;
+  padding:10px 17px;
   border-radius:9px;
   opacity:0;
   transition:.2s;
-  pointer-events:none
+  pointer-events:none;
+  box-shadow:0 8px 30px #0009;
 }
+
+/* =========================================================
+   PAUSE
+========================================================= */
+
+#pause{
+  position:absolute;
+  inset:0;
+  z-index:100;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:#020307c9;
+  backdrop-filter:blur(6px);
+}
+
+.pause-panel{
+  width:min(480px,92vw);
+  padding:30px;
+  background:
+    linear-gradient(145deg,#171b26,#0a0d13);
+  border:1px solid #4b5363;
+  border-radius:16px;
+  box-shadow:0 25px 100px #000;
+  text-align:center;
+}
+
+.pause-panel h1{
+  margin:0 0 8px;
+  color:#e9c967;
+  letter-spacing:3px;
+}
+
+.pause-panel p{
+  color:#81899a;
+  margin-bottom:25px;
+}
+
+.pause-info{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-bottom:20px;
+}
+
+.pause-info div{
+  background:#0a0d13;
+  border:1px solid #303746;
+  padding:10px;
+  border-radius:8px;
+}
+
+.pause-info small{
+  display:block;
+  color:#70798b;
+}
+
+.pause-panel button{
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  color:#eee;
+  background:#222936;
+  border:1px solid #505a6d;
+  border-radius:8px;
+}
+
+.pause-panel button:hover{
+  background:#343e50;
+}
+
+/* =========================================================
+   SHOP
+========================================================= */
+
+#shop{
+  position:absolute;
+  inset:0;
+  z-index:90;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:#020307dd;
+  backdrop-filter:blur(5px);
+}
+
+.shop-panel{
+  width:min(850px,94vw);
+  max-height:90vh;
+  overflow:auto;
+  padding:26px;
+  background:
+    radial-gradient(circle at 50% 0,#4d332522,transparent 45%),
+    linear-gradient(145deg,#171a24,#0a0d13);
+  border:1px solid #5a5260;
+  border-radius:16px;
+  box-shadow:0 25px 100px #000;
+}
+
+.shop-title{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.shop-title h1{
+  margin:0 0 8px;
+  color:#e9c967;
+  font-size:28px;
+}
+
+.shop-title p{
+  color:#b7bcc6;
+  font-family:monospace;
+  font-size:15px;
+}
+
+.shop-gold{
+  text-align:center;
+  color:#e6c65c;
+  margin-bottom:15px;
+}
+
+.shop-items{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:10px;
+}
+
+.shop-item{
+  padding:15px;
+  background:#0b0e15;
+  border:1px solid #353c4b;
+  border-radius:10px;
+}
+
+.shop-item h3{
+  margin:0 0 6px;
+  color:#ddd;
+}
+
+.shop-item p{
+  color:#858d9e;
+  font-size:13px;
+  min-height:35px;
+}
+
+.shop-item .price{
+  color:#e4bf54;
+  margin-bottom:9px;
+}
+
+.shop-item button{
+  width:100%;
+  padding:9px;
+  background:#252c39;
+  border:1px solid #4d5668;
+  color:#fff;
+  border-radius:7px;
+}
+
+.shop-item button:hover{
+  background:#374152;
+}
+
+.shop-close{
+  display:block;
+  width:100%;
+  margin-top:16px;
+  padding:11px;
+  background:#161b25;
+  border:1px solid #4a5364;
+  color:#ddd;
+  border-radius:8px;
+}
+
+/* =========================================================
+   INVENTORY
+========================================================= */
+
+#inventory{
+  position:absolute;
+  inset:0;
+  z-index:85;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:#020307dd;
+  backdrop-filter:blur(5px);
+}
+
+.inventory-panel{
+  width:min(850px,94vw);
+  max-height:90vh;
+  overflow:auto;
+  padding:25px;
+  background:#10141c;
+  border:1px solid #495264;
+  border-radius:15px;
+  box-shadow:0 25px 100px #000;
+}
+
+.inventory-panel h1{
+  color:#e8c65e;
+  text-align:center;
+}
+
+.inventory-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:10px;
+}
+
+.item-card{
+  min-height:130px;
+  padding:13px;
+  background:#090c12;
+  border:1px solid #343b4b;
+  border-radius:9px;
+}
+
+.item-icon{
+  font-size:32px;
+}
+
+.item-card h3{
+  margin:5px 0;
+}
+
+.item-card p{
+  color:#858c9d;
+  font-size:12px;
+}
+
+.item-card button{
+  width:100%;
+  padding:7px;
+  background:#252c39;
+  border:1px solid #485266;
+  color:white;
+  border-radius:6px;
+}
+
+.close-modal{
+  width:100%;
+  margin-top:15px;
+  padding:11px;
+  background:#1a202c;
+  border:1px solid #4b5567;
+  color:#fff;
+  border-radius:8px;
+}
+
+/* =========================================================
+   DEATH
+========================================================= */
 
 #death{
   position:absolute;
   inset:0;
-  z-index:50;
+  z-index:110;
   display:none;
   align-items:center;
   justify-content:center;
   flex-direction:column;
-  background:#000c
+  background:#000d;
 }
 
 #death h1{
-  font-size:50px;
-  color:#d95555
+  font-size:clamp(40px,8vw,75px);
+  color:#d95454;
+  text-shadow:0 0 30px #7d2020;
 }
 
 #death button{
-  padding:12px 25px;
+  padding:13px 28px;
+  background:#252d3b;
+  border:1px solid #606b7f;
   color:white;
-  background:#272d3b;
-  border:1px solid #626b7e;
-  border-radius:8px
+  border-radius:8px;
 }
+
+/* =========================================================
+   CONTROLS
+========================================================= */
 
 #controls{
   position:absolute;
+  z-index:20;
+  left:12px;
   bottom:10px;
-  left:10px;
-  color:#7e8594;
-  font-size:11px
+  color:#727a8b;
+  font-size:11px;
 }
 
-@media(max-width:650px){
-  #hud{max-width:65%}
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:700px){
+  #hud{
+    max-width:62%;
+  }
+
   .stat{
-    min-width:75px;
-    padding:6px
+    min-width:72px;
+    padding:6px;
   }
+
   #buttons{
-    flex-direction:column
+    flex-direction:column;
   }
-  #waveBox{top:130px}
+
+  #waveBox{
+    top:130px;
+  }
+
+  #controls{
+    display:none;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<!-- ================= MENU ================= -->
+<!-- =======================================================
+     MENU
+======================================================= -->
 
 <section id="menu">
 
 <div class="logo">RUNEVALE</div>
 
 <div class="subtitle">
-Escolhe uma dungeon e sobrevive às 10 hordas.
+Dark Dungeons · Loot · Monsters · Adventure
+</div>
+
+<div class="menu-stats">
+  <div class="menu-stat">⚔️ Level <b id="menuLevel">1</b></div>
+  <div class="menu-stat">💰 <b id="menuGold">25</b> ouro</div>
+  <div class="menu-stat">🏆 Dungeons <b id="menuDungeons">0/5</b></div>
 </div>
 
 <div class="dungeons">
@@ -317,39 +735,44 @@ Escolhe uma dungeon e sobrevive às 10 hordas.
 <div class="dungeon">
 <h2>⚔️ Dungeon I</h2>
 <p>As Catacumbas</p>
-<p>10 hordas · dificuldade normal</p>
-<button onclick="startDungeon(1)">ENTRAR</button>
+<p>10 hordas · inimigos básicos</p>
+<p class="difficulty">Dificuldade: Normal</p>
+<button onclick="enterDungeon(1)">ENTRAR</button>
 </div>
 
-<div class="dungeon locked">
+<div class="dungeon locked" data-dungeon="2">
 <span class="lock">🔒</span>
 <h2>🔥 Dungeon II</h2>
 <p>Cripta de Fogo</p>
-<p>Completa a Dungeon I</p>
+<p>10 hordas · inimigos mais fortes</p>
+<p class="difficulty">Dificuldade: Difícil</p>
 <button disabled>LOCKED</button>
 </div>
 
-<div class="dungeon locked">
+<div class="dungeon locked" data-dungeon="3">
 <span class="lock">🔒</span>
 <h2>❄️ Dungeon III</h2>
 <p>Salão Congelado</p>
-<p>Completa a Dungeon II</p>
+<p>10 hordas · monstros poderosos</p>
+<p class="difficulty">Dificuldade: Muito difícil</p>
 <button disabled>LOCKED</button>
 </div>
 
-<div class="dungeon locked">
+<div class="dungeon locked" data-dungeon="4">
 <span class="lock">🔒</span>
 <h2>☠️ Dungeon IV</h2>
 <p>Abismo Morto</p>
-<p>Completa a Dungeon III</p>
+<p>10 hordas · criaturas mortais</p>
+<p class="difficulty">Dificuldade: Brutal</p>
 <button disabled>LOCKED</button>
 </div>
 
-<div class="dungeon locked">
-<span class="lock">🔒</span>
+<div class="dungeon locked" data-dungeon="5">
+<span class="lock">👑</span>
 <h2>👑 Dungeon V</h2>
 <p>Castelo do Rei Negro</p>
-<p>Completa a Dungeon IV</p>
+<p>10 hordas · inimigos lendários</p>
+<p class="difficulty">Dificuldade: Infernal</p>
 <button disabled>LOCKED</button>
 </div>
 
@@ -357,7 +780,9 @@ Escolhe uma dungeon e sobrevive às 10 hordas.
 </section>
 
 
-<!-- ================= GAME ================= -->
+<!-- =======================================================
+     GAME
+======================================================= -->
 
 <section id="game" class="hidden">
 
@@ -399,17 +824,21 @@ Escolhe uma dungeon e sobrevive às 10 hordas.
 
 
 <div id="buttons">
-<button class="btn" onclick="backToDungeons()">🏰 Dungeons</button>
-<button class="btn" onclick="usePotion()">🧪 Poção</button>
-<button class="btn" onclick="areaAttack()">⚔️ ATACAR</button>
+
+<button class="btn" onclick="toggleInventory()">🎒</button>
+
+<button class="btn" onclick="usePotion()">🧪</button>
+
+<button class="btn" onclick="areaAttack()">⚔️</button>
+
+<button class="btn" id="pauseButton" onclick="togglePause()">⏸</button>
+
 </div>
 
 
 <div id="waveBox">
 
-<strong id="dungeonName">
-As Catacumbas
-</strong>
+<strong id="dungeonName">As Catacumbas</strong>
 
 <br>
 
@@ -419,9 +848,7 @@ Horda <b id="wave">1</b> / 10
 <i id="waveProgress"></i>
 </div>
 
-<small id="enemyCount">
-0 inimigos
-</small>
+<small id="enemyCount">0 inimigos</small>
 
 </div>
 
@@ -440,6 +867,7 @@ Horda <b id="wave">1</b> / 10
 <div id="message">
 
 <h1 id="messageTitle"></h1>
+
 <p id="messageText"></p>
 
 </div>
@@ -449,17 +877,166 @@ Horda <b id="wave">1</b> / 10
 
 
 <div id="controls">
-WASD mover · Clique no chão mover · Clique num mob seguir/atacar · ESPAÇO AoE
+WASD mover · Clique no chão mover · Clique num inimigo atacar · ESPAÇO AoE · ESC pausa
 </div>
 
+
+<!-- =====================================================
+     PAUSE
+===================================================== -->
+
+<div id="pause">
+
+<div class="pause-panel">
+
+<h1>PAUSADO</h1>
+
+<p>O tempo está parado.</p>
+
+<div class="pause-info">
+
+<div>
+<small>Dungeon</small>
+<b id="pauseDungeon">I</b>
+</div>
+
+<div>
+<small>Horda</small>
+<b id="pauseWave">1 / 10</b>
+</div>
+
+<div>
+<small>Nível</small>
+<b id="pauseLevel">1</b>
+</div>
+
+<div>
+<small>Ouro</small>
+<b id="pauseGold">25</b>
+</div>
+
+</div>
+
+<button onclick="togglePause()">▶ CONTINUAR</button>
+
+<button onclick="saveGame();showToast('💾 Jogo guardado!')">💾 GUARDAR</button>
+
+<button onclick="toggleInventory()">🎒 INVENTÁRIO</button>
+
+<button onclick="exitToMenu()">🏰 SAIR PARA DUNGEONS</button>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     SHOP
+===================================================== -->
+
+<div id="shop">
+
+<div class="shop-panel">
+
+<div class="shop-title">
+
+<h1>🧙 MERCHANT</h1>
+
+<p>HELLO, WHAT DO YOU WANT TO BUY?</p>
+
+</div>
+
+<div class="shop-gold">
+💰 Ouro: <b id="shopGold">0</b>
+</div>
+
+<div class="shop-items">
+
+<div class="shop-item">
+<h3>🧪 Poção</h3>
+<p>Restaura 40 HP.</p>
+<div class="price">💰 15</div>
+<button onclick="buyPotion()">COMPRAR</button>
+</div>
+
+<div class="shop-item">
+<h3>⚔️ Sharp Stone</h3>
+<p>Aumenta o dano em +2.</p>
+<div class="price">💰 60</div>
+<button onclick="buyDamage()">COMPRAR</button>
+</div>
+
+<div class="shop-item">
+<h3>❤️ Vital Crystal</h3>
+<p>Aumenta o HP máximo em +20.</p>
+<div class="price">💰 75</div>
+<button onclick="buyHealth()">COMPRAR</button>
+</div>
+
+<div class="shop-item">
+<h3>🗡️ Iron Blade</h3>
+<p>Espada melhorada. +5 dano.</p>
+<div class="price">💰 180</div>
+<button onclick="buyWeapon('Iron Blade',5,180)">COMPRAR</button>
+</div>
+
+<div class="shop-item">
+<h3>🛡️ Guardian Armor</h3>
+<p>+35 HP máximo.</p>
+<div class="price">💰 220</div>
+<button onclick="buyArmor()">COMPRAR</button>
+</div>
+
+<div class="shop-item">
+<h3>💍 Ring of Power</h3>
+<p>+8 dano.</p>
+<div class="price">💰 350</div>
+<button onclick="buyRing()">COMPRAR</button>
+</div>
+
+</div>
+
+<button class="shop-close" onclick="closeShop()">
+ENTRAR NA DUNGEON
+</button>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     INVENTORY
+===================================================== -->
+
+<div id="inventory">
+
+<div class="inventory-panel">
+
+<h1>🎒 INVENTÁRIO</h1>
+
+<div class="inventory-grid" id="inventoryGrid"></div>
+
+<button class="close-modal" onclick="toggleInventory()">
+FECHAR
+</button>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     DEATH
+===================================================== -->
 
 <div id="death">
 
 <h1>DERROTADO</h1>
 
-<button onclick="respawn()">
-Tentar novamente
-</button>
+<p>Os monstros venceram esta batalha.</p>
+
+<button onclick="respawn()">TENTAR NOVAMENTE</button>
 
 </div>
 
@@ -468,9 +1045,9 @@ Tentar novamente
 
 <script>
 
-/* =====================================================
+/* =========================================================
    CANVAS
-===================================================== */
+========================================================= */
 
 const canvas=document.getElementById("canvas");
 const ctx=canvas.getContext("2d");
@@ -494,18 +1071,20 @@ function resize(){
 }
 
 addEventListener("resize",resize);
+
 resize();
 
 
-/* =====================================================
-   ESTADO
-===================================================== */
+/* =========================================================
+   GAME STATE
+========================================================= */
 
 const keys={};
 
 let mobs=[];
 let particles=[];
 let numbers=[];
+let floatingLoot=[];
 
 let target=null;
 let destination=null;
@@ -524,10 +1103,9 @@ let attackAnimation=0;
 
 let toastTimer=0;
 
+let paused=false;
 
-/* =====================================================
-   PROGRESSÃO
-===================================================== */
+let shopDungeon=1;
 
 const completedDungeons={
   1:false,
@@ -538,9 +1116,9 @@ const completedDungeons={
 };
 
 
-/* =====================================================
+/* =========================================================
    PLAYER
-===================================================== */
+========================================================= */
 
 const player={
 
@@ -551,6 +1129,7 @@ const player={
   maxHp:100,
 
   level:1,
+
   xp:0,
   xpMax:100,
 
@@ -560,6 +1139,10 @@ const player={
 
   weapon:"Mini Espada de Bosta",
 
+  armor:"Roupa de Aventureiro",
+
+  ring:"Nenhum",
+
   potions:3,
 
   speed:190,
@@ -567,6 +1150,7 @@ const player={
   direction:1,
 
   anim:0,
+
   hit:0,
 
   dead:false
@@ -574,162 +1158,381 @@ const player={
 };
 
 
-/* =====================================================
-   MOBS
-===================================================== */
+/* =========================================================
+   INVENTORY
+========================================================= */
+
+const inventory=[];
+
+function addItem(item){
+
+  inventory.push({
+    ...item,
+    id:Math.random()
+  });
+
+  renderInventory();
+
+}
+
+
+/* =========================================================
+   RARITIES
+========================================================= */
+
+const rarities={
+
+  common:{
+    name:"Comum",
+    color:"#aaa"
+  },
+
+  uncommon:{
+    name:"Incomum",
+    color:"#69c77a"
+  },
+
+  rare:{
+    name:"Raro",
+    color:"#4c9ee8"
+  },
+
+  epic:{
+    name:"Épico",
+    color:"#b66cff"
+  },
+
+  legendary:{
+    name:"Lendário",
+    color:"#e9ad42"
+  }
+
+};
+
+
+/* =========================================================
+   MOB TYPES
+========================================================= */
 
 const types={
 
-slime:{
-  name:"Slime",
-  hp:25,
-  damage:4,
-  speed:35,
-  size:21,
-  xp:12,
-  gold:4,
-  color:"#58d77a"
-},
+ slime:{
+   name:"Slime",
+   hp:25,
+   damage:4,
+   speed:35,
+   size:21,
+   xp:12,
+   gold:4,
+   color:"#55d47a"
+ },
 
-goblin:{
-  name:"Goblin",
-  hp:38,
-  damage:6,
-  speed:48,
-  size:22,
-  xp:20,
-  gold:8,
-  color:"#73a951"
-},
+ goblin:{
+   name:"Goblin",
+   hp:38,
+   damage:6,
+   speed:48,
+   size:22,
+   xp:20,
+   gold:8,
+   color:"#70a54e"
+ },
 
-bat:{
-  name:"Morcego",
-  hp:32,
-  damage:6,
-  speed:65,
-  size:20,
-  xp:18,
-  gold:7,
-  color:"#80509c"
-},
+ bat:{
+   name:"Morcego",
+   hp:32,
+   damage:6,
+   speed:65,
+   size:20,
+   xp:18,
+   gold:7,
+   color:"#8050a0"
+ },
 
-spider:{
-  name:"Aranha",
-  hp:42,
-  damage:8,
-  speed:58,
-  size:21,
-  xp:25,
-  gold:10,
-  color:"#403347"
-},
+ spider:{
+   name:"Aranha",
+   hp:42,
+   damage:8,
+   speed:58,
+   size:21,
+   xp:25,
+   gold:10,
+   color:"#453548"
+ },
 
-wolf:{
-  name:"Lobo",
-  hp:55,
-  damage:10,
-  speed:72,
-  size:25,
-  xp:32,
-  gold:13,
-  color:"#92969e"
-},
+ wolf:{
+   name:"Lobo",
+   hp:55,
+   damage:10,
+   speed:72,
+   size:25,
+   xp:32,
+   gold:13,
+   color:"#969aa1"
+ },
 
-skeleton:{
-  name:"Esqueleto",
-  hp:65,
-  damage:12,
-  speed:48,
-  size:25,
-  xp:45,
-  gold:18,
-  color:"#d7cfb6"
-},
+ skeleton:{
+   name:"Esqueleto",
+   hp:65,
+   damage:12,
+   speed:48,
+   size:25,
+   xp:45,
+   gold:18,
+   color:"#d8d0b9"
+ },
 
-orc:{
-  name:"Orc",
-  hp:90,
-  damage:15,
-  speed:35,
-  size:29,
-  xp:65,
-  gold:25,
-  color:"#5b8b4e"
-},
+ orc:{
+   name:"Orc",
+   hp:90,
+   damage:15,
+   speed:35,
+   size:29,
+   xp:65,
+   gold:25,
+   color:"#5d8e4d"
+ },
 
-troll:{
-  name:"Troll",
-  hp:150,
-  damage:22,
-  speed:27,
-  size:36,
-  xp:100,
-  gold:40,
-  color:"#667d4e"
-},
+ troll:{
+   name:"Troll",
+   hp:150,
+   damage:22,
+   speed:27,
+   size:36,
+   xp:100,
+   gold:40,
+   color:"#687f50"
+ },
 
-knight:{
-  name:"Cavaleiro Negro",
-  hp:220,
-  damage:30,
-  speed:31,
-  size:34,
-  xp:160,
-  gold:65,
-  color:"#384052"
-},
+ knight:{
+   name:"Cavaleiro Negro",
+   hp:220,
+   damage:30,
+   speed:31,
+   size:34,
+   xp:160,
+   gold:65,
+   color:"#394153"
+ },
 
-demon:{
-  name:"Demónio",
-  hp:330,
-  damage:40,
-  speed:38,
-  size:38,
-  xp:260,
-  gold:100,
-  color:"#9b3f49"
-}
+ demon:{
+   name:"Demónio",
+   hp:330,
+   damage:40,
+   speed:38,
+   size:38,
+   xp:260,
+   gold:100,
+   color:"#9e414c"
+ }
 
 };
 
 
-/* =====================================================
+/* =========================================================
+   BOSS TYPES
+========================================================= */
+
+const bosses={
+
+  cryptLord:{
+    name:"LORD OF THE CATACOMBS",
+    hp:1200,
+    damage:48,
+    speed:27,
+    size:60,
+    color:"#674f79",
+    xp:800,
+    gold:500
+  },
+
+  fireKing:{
+    name:"FIRE KING",
+    hp:1800,
+    damage:65,
+    speed:30,
+    size:65,
+    color:"#b34d31",
+    xp:1200,
+    gold:750
+  },
+
+  frostLord:{
+    name:"FROST LORD",
+    hp:2500,
+    damage:82,
+    speed:25,
+    size:68,
+    color:"#5e9eb4",
+    xp:1700,
+    gold:1000
+  },
+
+  deadKing:{
+    name:"DEAD KING",
+    hp:3400,
+    damage:105,
+    speed:24,
+    size:72,
+    color:"#52576b",
+    xp:2400,
+    gold:1400
+  },
+
+  blackKing:{
+    name:"THE BLACK KING",
+    hp:5000,
+    damage:140,
+    speed:22,
+    size:80,
+    color:"#6d293b",
+    xp:4000,
+    gold:2500
+  }
+
+};
+
+
+/* =========================================================
    DUNGEONS
-===================================================== */
+========================================================= */
 
 const dungeonData={
 
-1:{
-  name:"As Catacumbas",
-  difficulty:1
-},
+  1:{
+    name:"As Catacumbas",
+    difficulty:1,
+    boss:"cryptLord",
+    accent:"#75608a"
+  },
 
-2:{
-  name:"Cripta de Fogo",
-  difficulty:1.5
-},
+  2:{
+    name:"Cripta de Fogo",
+    difficulty:1.5,
+    boss:"fireKing",
+    accent:"#a84e35"
+  },
 
-3:{
-  name:"Salão Congelado",
-  difficulty:2
-},
+  3:{
+    name:"Salão Congelado",
+    difficulty:2,
+    boss:"frostLord",
+    accent:"#5e96ad"
+  },
 
-4:{
-  name:"Abismo Morto",
-  difficulty:2.5
-},
+  4:{
+    name:"Abismo Morto",
+    difficulty:2.5,
+    boss:"deadKing",
+    accent:"#5c6075"
+  },
 
-5:{
-  name:"Castelo do Rei Negro",
-  difficulty:3
-}
+  5:{
+    name:"Castelo do Rei Negro",
+    difficulty:3,
+    boss:"blackKing",
+    accent:"#862d43"
+  }
 
 };
 
 
-/* =====================================================
-   ESCOLHER MOB
-===================================================== */
+/* =========================================================
+   SAVE
+========================================================= */
+
+function saveGame(){
+
+  const save={
+
+    player:{
+      hp:player.hp,
+      maxHp:player.maxHp,
+      level:player.level,
+      xp:player.xp,
+      xpMax:player.xpMax,
+      gold:player.gold,
+      damage:player.damage,
+      weapon:player.weapon,
+      armor:player.armor,
+      ring:player.ring,
+      potions:player.potions
+    },
+
+    completedDungeons,
+
+    inventory
+
+  };
+
+  localStorage.setItem(
+    "runevale_save",
+    JSON.stringify(save)
+  );
+
+}
+
+
+function loadGame(){
+
+  try{
+
+    const raw=localStorage.getItem("runevale_save");
+
+    if(!raw)return;
+
+    const save=JSON.parse(raw);
+
+    if(save.player){
+
+      Object.assign(player,save.player);
+
+    }
+
+    if(save.completedDungeons){
+
+      Object.assign(
+        completedDungeons,
+        save.completedDungeons
+      );
+
+    }
+
+    if(Array.isArray(save.inventory)){
+
+      inventory.length=0;
+
+      for(const item of save.inventory){
+
+        inventory.push(item);
+
+      }
+
+    }
+
+  }catch(e){
+
+    console.warn("Save inválido",e);
+
+  }
+
+}
+
+
+/* =========================================================
+   AUTO SAVE
+========================================================= */
+
+setInterval(()=>{
+
+  saveGame();
+
+},10000);
+
+
+/* =========================================================
+   MOB CREATION
+========================================================= */
 
 function randomMobType(wave){
 
@@ -765,22 +1568,19 @@ function randomMobType(wave){
   return available[
     Math.floor(Math.random()*available.length)
   ];
+
 }
 
-
-/* =====================================================
-   CRIAR MOB
-===================================================== */
 
 function createMob(type){
 
   const t=types[type];
 
-  const angle=
-    Math.random()*Math.PI*2;
+  const angle=Math.random()*Math.PI*2;
 
   const distance=
-    260+Math.random()*250;
+    350+
+    Math.random()*300;
 
   const dungeonScale=
     dungeonData[currentDungeon].difficulty;
@@ -789,13 +1589,14 @@ function createMob(type){
     1+(currentWave-1)*.13;
 
   const scale=
-    dungeonScale*waveScale;
+    dungeonScale*
+    waveScale;
 
   return{
 
     id:Math.random(),
 
-    type:type,
+    type,
 
     x:Math.cos(angle)*distance,
     y:Math.sin(angle)*distance,
@@ -823,20 +1624,384 @@ function createMob(type){
 
     anim:Math.random()*10,
 
-    attackCooldown:.5+Math.random()
+    attackCooldown:.5+Math.random(),
+
+    elite:false
 
   };
 
 }
 
 
-/* =====================================================
-   COMEÇAR HORDA
-===================================================== */
+/* =========================================================
+   BOSS CREATION
+========================================================= */
+
+function createBoss(){
+
+  const data=
+    bosses[
+      dungeonData[currentDungeon].boss
+    ];
+
+  const scale=
+    dungeonData[currentDungeon].difficulty;
+
+  return{
+
+    id:Math.random(),
+
+    type:"boss",
+
+    boss:true,
+
+    bossName:data.name,
+
+    x:0,
+
+    y:-380,
+
+    hp:Math.round(data.hp*scale),
+
+    maxHp:Math.round(data.hp*scale),
+
+    damage:Math.round(data.damage*scale),
+
+    speed:data.speed,
+
+    size:data.size,
+
+    xp:Math.round(data.xp*scale),
+
+    gold:Math.round(data.gold*scale),
+
+    color:data.color,
+
+    dead:false,
+
+    deathTime:0,
+
+    hit:0,
+
+    anim:0,
+
+    attackCooldown:1,
+
+    elite:true
+
+  };
+
+}
+
+
+/* =========================================================
+   START DUNGEON
+========================================================= */
+
+function enterDungeon(number){
+
+  if(
+    number>1 &&
+    !completedDungeons[number-1]
+  ){
+
+    showToast(
+      "🔒 Completa a dungeon anterior!"
+    );
+
+    return;
+
+  }
+
+  if(number===1){
+
+    beginDungeon(1);
+
+  }else{
+
+    openShop(number);
+
+  }
+
+}
+
+
+function beginDungeon(number){
+
+  currentDungeon=number;
+
+  currentWave=1;
+
+  player.dead=false;
+
+  player.x=0;
+  player.y=0;
+
+  player.hp=player.maxHp;
+
+  attackCooldown=0;
+
+  attackAnimation=0;
+
+  destination=null;
+
+  target=null;
+
+  dungeonComplete=false;
+
+  paused=false;
+
+  document.getElementById("menu")
+    .classList.add("hidden");
+
+  document.getElementById("game")
+    .classList.remove("hidden");
+
+  document.getElementById("death")
+    .style.display="none";
+
+  document.getElementById("pause")
+    .style.display="none";
+
+  document.getElementById("dungeonName")
+    .textContent=
+    dungeonData[number].name;
+
+  startWave();
+
+}
+
+
+/* =========================================================
+   SHOP
+========================================================= */
+
+function openShop(number){
+
+  shopDungeon=number;
+
+  document.getElementById("shop")
+    .style.display="flex";
+
+  updateShop();
+
+}
+
+
+function closeShop(){
+
+  document.getElementById("shop")
+    .style.display="none";
+
+  beginDungeon(shopDungeon);
+
+}
+
+
+function updateShop(){
+
+  document.getElementById("shopGold")
+    .textContent=player.gold;
+
+}
+
+
+/* =========================================================
+   BUY ITEMS
+========================================================= */
+
+function buyPotion(){
+
+  if(player.gold<15){
+
+    showToast("❌ Ouro insuficiente.");
+
+    return;
+
+  }
+
+  player.gold-=15;
+
+  player.potions++;
+
+  updateShop();
+
+  saveGame();
+
+  showToast("🧪 Poção comprada!");
+
+}
+
+
+function buyDamage(){
+
+  if(player.gold<60){
+
+    showToast("❌ Ouro insuficiente.");
+
+    return;
+
+  }
+
+  player.gold-=60;
+
+  player.damage+=2;
+
+  updateShop();
+
+  saveGame();
+
+  showToast("⚔️ +2 dano!");
+
+}
+
+
+function buyHealth(){
+
+  if(player.gold<75){
+
+    showToast("❌ Ouro insuficiente.");
+
+    return;
+
+  }
+
+  player.gold-=75;
+
+  player.maxHp+=20;
+
+  player.hp=player.maxHp;
+
+  updateShop();
+
+  saveGame();
+
+  showToast("❤️ +20 HP máximo!");
+
+}
+
+
+function buyWeapon(name,damage,price){
+
+  if(player.gold<price){
+
+    showToast("❌ Ouro insuficiente.");
+
+    return;
+
+  }
+
+  player.gold-=price;
+
+  player.damage+=damage;
+
+  player.weapon=name;
+
+  addItem({
+
+    name,
+
+    icon:"🗡️",
+
+    rarity:"rare",
+
+    description:"Arma equipada · +"+damage+" dano"
+
+  });
+
+  updateShop();
+
+  saveGame();
+
+  showToast("🗡️ "+name+" equipada!");
+
+}
+
+
+function buyArmor(){
+
+  if(player.gold<220){
+
+    showToast("❌ Ouro insuficiente.");
+
+    return;
+
+  }
+
+  player.gold-=220;
+
+  player.maxHp+=35;
+
+  player.hp=player.maxHp;
+
+  player.armor="Guardian Armor";
+
+  addItem({
+
+    name:"Guardian Armor",
+
+    icon:"🛡️",
+
+    rarity:"epic",
+
+    description:"+35 HP máximo"
+
+  });
+
+  updateShop();
+
+  saveGame();
+
+  showToast("🛡️ Guardian Armor equipada!");
+
+}
+
+
+function buyRing(){
+
+  if(player.gold<350){
+
+    showToast("❌ Ouro insuficiente.");
+
+    return;
+
+  }
+
+  player.gold-=350;
+
+  player.damage+=8;
+
+  player.ring="Ring of Power";
+
+  addItem({
+
+    name:"Ring of Power",
+
+    icon:"💍",
+
+    rarity:"legendary",
+
+    description:"+8 dano"
+
+  });
+
+  updateShop();
+
+  saveGame();
+
+  showToast("💍 Ring of Power equipado!");
+
+}
+
+
+/* =========================================================
+   WAVES
+========================================================= */
 
 function startWave(){
 
   mobs=[];
+
   target=null;
 
   waveStarting=true;
@@ -850,10 +2015,6 @@ function startWave(){
 
     if(player.dead)return;
 
-    /*
-       MAIS MOBS
-    */
-
     const count=
       6+
       currentWave*2+
@@ -861,12 +2022,17 @@ function startWave(){
 
     for(let i=0;i<count;i++){
 
-      const type=
-        randomMobType(currentWave);
-
       mobs.push(
-        createMob(type)
+        createMob(
+          randomMobType(currentWave)
+        )
       );
+
+    }
+
+    if(currentWave===10){
+
+      mobs.push(createBoss());
 
     }
 
@@ -881,82 +2047,9 @@ function startWave(){
 }
 
 
-/* =====================================================
-   START DUNGEON
-===================================================== */
-
-function startDungeon(number){
-
-  if(number>1 &&
-     !completedDungeons[number-1]){
-
-    showToast(
-      "Completa a dungeon anterior primeiro!"
-    );
-
-    return;
-  }
-
-  currentDungeon=number;
-  currentWave=1;
-
-  player.dead=false;
-
-  player.x=0;
-  player.y=0;
-
-  player.hp=player.maxHp;
-
-  attackCooldown=0;
-  attackAnimation=0;
-
-  destination=null;
-  target=null;
-
-  dungeonComplete=false;
-
-  document.getElementById("menu")
-    .classList.add("hidden");
-
-  document.getElementById("game")
-    .classList.remove("hidden");
-
-  document.getElementById("dungeonName")
-    .textContent=
-      dungeonData[number].name;
-
-  document.getElementById("death")
-    .style.display="none";
-
-  startWave();
-
-}
-
-
-/* =====================================================
-   VOLTAR
-===================================================== */
-
-function backToDungeons(){
-
-  document.getElementById("game")
-    .classList.add("hidden");
-
-  document.getElementById("menu")
-    .classList.remove("hidden");
-
-  mobs=[];
-  target=null;
-  destination=null;
-
-  updateDungeonMenu();
-
-}
-
-
-/* =====================================================
-   MOVIMENTO
-===================================================== */
+/* =========================================================
+   PLAYER
+========================================================= */
 
 function updatePlayer(dt){
 
@@ -976,18 +2069,17 @@ function updatePlayer(dt){
     vx++;
 
   const keyboard=
-    vx!==0||vy!==0;
-
-  /*
-     WASD tem prioridade
-  */
+    vx!==0||
+    vy!==0;
 
   if(keyboard){
 
     destination=null;
 
-  }
-  else if(target && !target.dead){
+  }else if(
+    target &&
+    !target.dead
+  ){
 
     const dx=
       target.x-player.x;
@@ -998,10 +2090,6 @@ function updatePlayer(dt){
     const dist=
       Math.hypot(dx,dy);
 
-    /*
-       Aproxima do alvo
-    */
-
     if(dist>78){
 
       vx=dx/dist;
@@ -1009,17 +2097,11 @@ function updatePlayer(dt){
 
     }else{
 
-      /*
-         CHEGOU AO MOB
-         COMEÇA O ATAQUE AUTOMÁTICO
-      */
-
       areaAttack();
 
     }
 
-  }
-  else if(destination){
+  }else if(destination){
 
     const dx=
       destination.x-player.x;
@@ -1052,17 +2134,23 @@ function updatePlayer(dt){
     vy/=len;
 
     player.x+=
-      vx*player.speed*dt;
+      vx*
+      player.speed*
+      dt;
 
     player.y+=
-      vy*player.speed*dt;
+      vy*
+      player.speed*
+      dt;
 
-    player.anim+=
-      dt*10;
+    player.anim+=dt*10;
 
-    if(vx!==0)
+    if(vx!==0){
+
       player.direction=
         vx>0?1:-1;
+
+    }
 
   }else{
 
@@ -1073,31 +2161,25 @@ function updatePlayer(dt){
 }
 
 
-/* =====================================================
-   ATAQUE AoE
-===================================================== */
+/* =========================================================
+   AOE ATTACK
+========================================================= */
 
 function areaAttack(){
 
-  if(player.dead)
-    return;
+  if(player.dead)return;
 
-  if(attackCooldown>0)
-    return;
+  if(paused)return;
 
-  const radius=110;
+  if(attackCooldown>0)return;
+
+  const radius=115;
 
   let nearby=false;
 
-  /*
-     Verificar se há mobs
-     perto do jogador.
-  */
-
   for(const mob of mobs){
 
-    if(mob.dead)
-      continue;
+    if(mob.dead)continue;
 
     const dist=
       Math.hypot(
@@ -1114,28 +2196,17 @@ function areaAttack(){
 
   }
 
-  if(!nearby)
-    return;
+  if(!nearby)return;
 
-  /*
-     COOLDOWN
-  */
-
-  attackCooldown=.65;
+  attackCooldown=.58;
 
   attackAnimation=.42;
 
   let hits=0;
 
-  /*
-     TODOS os mobs dentro da área
-     recebem dano.
-  */
-
   for(const mob of mobs){
 
-    if(mob.dead)
-      continue;
+    if(mob.dead)continue;
 
     const dist=
       Math.hypot(
@@ -1147,11 +2218,16 @@ function areaAttack(){
 
       hits++;
 
-      const damage=
+      let damage=
         player.damage+
-        Math.floor(
-          Math.random()*4
-        );
+        Math.floor(Math.random()*5);
+
+      if(mob.boss){
+
+        damage=
+          Math.floor(damage*.75);
+
+      }
 
       mob.hp-=damage;
 
@@ -1176,7 +2252,7 @@ function areaAttack(){
       burst(
         mob.x,
         mob.y,
-        7,
+        9,
         "#f1c957"
       );
 
@@ -1190,27 +2266,28 @@ function areaAttack(){
 
   }
 
-  /*
-     GRANDE efeito AoE
-  */
+  if(hits>0){
 
-  burst(
-    player.x,
-    player.y,
-    20,
-    "#e6bd4e"
-  );
+    burst(
+      player.x,
+      player.y,
+      25,
+      "#e6bd4e"
+    );
+
+  }
 
 }
 
 
-/* =====================================================
-   MATAR MOB
-===================================================== */
+/* =========================================================
+   KILL MOB
+========================================================= */
 
 function killMob(mob){
 
   mob.dead=true;
+
   mob.deathTime=0;
 
   player.gold+=mob.gold;
@@ -1220,6 +2297,7 @@ function killMob(mob){
   numbers.push({
 
     x:mob.x,
+
     y:mob.y-30,
 
     text:"+"+mob.gold+" ouro",
@@ -1227,44 +2305,184 @@ function killMob(mob){
     color:"#ffd65a",
 
     life:1,
+
     maxLife:1
 
   });
 
-  /*
-     DROP DE POÇÃO
-  */
+  /* loot */
 
-  if(Math.random()<.10){
+  const chance=
+    mob.boss?
+    .65:
+    .10;
 
-    player.potions++;
+  if(Math.random()<chance){
 
-    showToast(
-      "🧪 "+types[mob.type].name+
-      " deixou cair uma poção!"
-    );
+    dropLoot(mob);
 
   }
 
   burst(
     mob.x,
     mob.y,
-    18,
+    mob.boss?50:18,
     mob.color
   );
 
 }
 
 
-/* =====================================================
+/* =========================================================
+   LOOT
+========================================================= */
+
+function dropLoot(mob){
+
+  const roll=Math.random();
+
+  let rarity;
+
+  if(mob.boss){
+
+    rarity=
+      roll<.2?
+      "legendary":
+      roll<.55?
+      "epic":
+      "rare";
+
+  }else{
+
+    rarity=
+      roll<.05?
+      "epic":
+      roll<.2?
+      "rare":
+      roll<.5?
+      "uncommon":
+      "common";
+
+  }
+
+  const items=[
+
+    {
+      name:"Ruby Fragment",
+      icon:"🔴",
+      description:"+3 dano",
+      stat:3
+    },
+
+    {
+      name:"Moon Crystal",
+      icon:"🔷",
+      description:"+10 HP",
+      stat:10
+    },
+
+    {
+      name:"Ancient Coin",
+      icon:"🪙",
+      description:"+25 ouro",
+      stat:25
+    },
+
+    {
+      name:"Shadow Shard",
+      icon:"🟣",
+      description:"+7 dano",
+      stat:7
+    },
+
+    {
+      name:"Guardian Fragment",
+      icon:"🛡️",
+      description:"+25 HP",
+      stat:25
+    }
+
+  ];
+
+  const item=
+    items[
+      Math.floor(
+        Math.random()*items.length
+      )
+    ];
+
+  const loot={
+
+    name:item.name,
+
+    icon:item.icon,
+
+    rarity,
+
+    description:item.description,
+
+    stat:item.stat
+
+  };
+
+  if(item.name==="Ancient Coin"){
+
+    player.gold+=25;
+
+  }else if(
+    item.name==="Ruby Fragment"||
+    item.name==="Shadow Shard"
+  ){
+
+    player.damage+=item.stat;
+
+  }else{
+
+    player.maxHp+=item.stat;
+
+    player.hp+=item.stat;
+
+  }
+
+  addItem(loot);
+
+  floatingLoot.push({
+
+    x:mob.x,
+
+    y:mob.y,
+
+    text:item.icon+" "+item.name,
+
+    life:2,
+
+    maxLife:2,
+
+    color:rarities[rarity].color
+
+  });
+
+  showToast(
+    "🎁 "+item.name+
+    " ["+
+    rarities[rarity].name+
+    "]"
+  );
+
+}
+
+
+/* =========================================================
    XP
-===================================================== */
+========================================================= */
 
 function gainXP(amount){
 
   player.xp+=amount;
 
-  while(player.xp>=player.xpMax){
+  while(
+    player.xp>=player.xpMax
+  ){
 
     player.xp-=player.xpMax;
 
@@ -1284,7 +2502,7 @@ function gainXP(amount){
     burst(
       player.x,
       player.y,
-      35,
+      40,
       "#ffe16b"
     );
 
@@ -1298,9 +2516,9 @@ function gainXP(amount){
 }
 
 
-/* =====================================================
-   MOB AI
-===================================================== */
+/* =========================================================
+   MOB UPDATE
+========================================================= */
 
 function updateMobs(dt){
 
@@ -1330,12 +2548,8 @@ function updateMobs(dt){
     const dist=
       Math.hypot(dx,dy);
 
-    /*
-       Persegue
-    */
-
     if(
-      dist<450 &&
+      dist<500 &&
       dist>55
     ){
 
@@ -1351,18 +2565,14 @@ function updateMobs(dt){
 
     }
 
-    /*
-       Dano dos mobs
-    */
-
     if(
       dist<=55 &&
       mob.attackCooldown<=0
     ){
 
       mob.attackCooldown=
-        1.15+
-        Math.random()*.45;
+        1.1+
+        Math.random()*.5;
 
       const damage=
         mob.damage;
@@ -1374,6 +2584,7 @@ function updateMobs(dt){
       numbers.push({
 
         x:player.x,
+
         y:player.y-35,
 
         text:"-"+damage,
@@ -1381,6 +2592,7 @@ function updateMobs(dt){
         color:"#ff6565",
 
         life:.7,
+
         maxLife:.7
 
       });
@@ -1388,20 +2600,19 @@ function updateMobs(dt){
       burst(
         player.x,
         player.y,
-        8,
+        10,
         "#e65353"
       );
 
-      if(player.hp<=0)
+      if(player.hp<=0){
+
         die();
+
+      }
 
     }
 
   }
-
-  /*
-     Verificar se a horda terminou
-  */
 
   if(
     !waveStarting &&
@@ -1425,9 +2636,9 @@ function updateMobs(dt){
 }
 
 
-/* =====================================================
-   PRÓXIMA HORDA
-===================================================== */
+/* =========================================================
+   NEXT WAVE
+========================================================= */
 
 function nextWave(){
 
@@ -1457,9 +2668,9 @@ function nextWave(){
 }
 
 
-/* =====================================================
-   DUNGEON COMPLETA
-===================================================== */
+/* =========================================================
+   COMPLETE DUNGEON
+========================================================= */
 
 function completeDungeon(){
 
@@ -1467,38 +2678,40 @@ function completeDungeon(){
 
   const reward=
     100+
-    currentDungeon*100;
+    currentDungeon*150;
 
   player.gold+=reward;
 
+  saveGame();
+
   showCenter(
     "🏆 DUNGEON COMPLETA!",
-    "10 hordas derrotadas · +"+
+    "Recompensa: +"+
     reward+
     " ouro"
   );
 
   setTimeout(()=>{
 
-    backToDungeons();
+    exitToMenu();
 
-  },2800);
+  },3000);
 
 }
 
 
-/* =====================================================
-   MORTE
-===================================================== */
+/* =========================================================
+   DEATH
+========================================================= */
 
 function die(){
 
-  if(player.dead)
-    return;
+  if(player.dead)return;
 
   player.dead=true;
 
   target=null;
+
   destination=null;
 
   document.getElementById("death")
@@ -1514,9 +2727,11 @@ function respawn(){
   player.hp=player.maxHp;
 
   player.x=0;
+
   player.y=0;
 
   mobs=[];
+
   target=null;
 
   attackCooldown=0;
@@ -1529,27 +2744,26 @@ function respawn(){
 }
 
 
-/* =====================================================
-   POÇÃO
-===================================================== */
+/* =========================================================
+   POTION
+========================================================= */
 
 function usePotion(){
 
   if(player.potions<=0){
 
-    showToast(
-      "Não tens poções!"
-    );
+    showToast("Não tens poções!");
 
     return;
 
   }
 
-  if(player.hp>=player.maxHp){
+  if(
+    player.hp>=
+    player.maxHp
+  ){
 
-    showToast(
-      "O HP já está cheio."
-    );
+    showToast("O HP já está cheio.");
 
     return;
 
@@ -1563,16 +2777,14 @@ function usePotion(){
       player.hp+40
     );
 
-  showToast(
-    "🧪 +40 HP"
-  );
+  showToast("🧪 +40 HP");
 
 }
 
 
-/* =====================================================
+/* =========================================================
    PARTICLES
-===================================================== */
+========================================================= */
 
 function burst(
   x,
@@ -1581,29 +2793,36 @@ function burst(
   color
 ){
 
-  for(let i=0;i<count;i++){
+  for(
+    let i=0;
+    i<count;
+    i++
+  ){
 
     const angle=
-      Math.random()*Math.PI*2;
+      Math.random()*
+      Math.PI*2;
 
     const speed=
       40+
-      Math.random()*100;
+      Math.random()*130;
 
     particles.push({
 
-      x:x,
-      y:y,
+      x,
+      y,
 
       vx:
-        Math.cos(angle)*speed,
+        Math.cos(angle)*
+        speed,
 
       vy:
-        Math.sin(angle)*speed,
+        Math.sin(angle)*
+        speed,
 
       life:
-        .4+
-        Math.random()*.5,
+        .35+
+        Math.random()*.6,
 
       maxLife:.9,
 
@@ -1611,7 +2830,7 @@ function burst(
         2+
         Math.random()*4,
 
-      color:color
+      color
 
     });
 
@@ -1619,6 +2838,10 @@ function burst(
 
 }
 
+
+/* =========================================================
+   PARTICLE UPDATE
+========================================================= */
 
 function updateParticles(dt){
 
@@ -1633,13 +2856,18 @@ function updateParticles(dt){
     p.life-=dt;
 
     p.x+=p.vx*dt;
+
     p.y+=p.vy*dt;
 
     p.vx*=.96;
+
     p.vy*=.96;
 
-    if(p.life<=0)
+    if(p.life<=0){
+
       particles.splice(i,1);
+
+    }
 
   }
 
@@ -1655,54 +2883,77 @@ function updateParticles(dt){
 
     n.y-=35*dt;
 
-    if(n.life<=0)
+    if(n.life<=0){
+
       numbers.splice(i,1);
+
+    }
+
+  }
+
+  for(
+    let i=floatingLoot.length-1;
+    i>=0;
+    i--
+  ){
+
+    const l=floatingLoot[i];
+
+    l.life-=dt;
+
+    l.y-=20*dt;
+
+    if(l.life<=0){
+
+      floatingLoot.splice(i,1);
+
+    }
 
   }
 
 }
 
 
-/* =====================================================
+/* =========================================================
    HUD
-===================================================== */
+========================================================= */
 
 function updateHUD(){
 
   document.getElementById("hp")
     .textContent=
-      Math.max(
-        0,
-        Math.ceil(player.hp)
-      )+
-      " / "+
-      player.maxHp;
+    Math.max(
+      0,
+      Math.ceil(player.hp)
+    )+
+    " / "+
+    player.maxHp;
 
   document.getElementById("xp")
     .textContent=
-      player.xp+
-      " / "+
-      player.xpMax;
+    player.xp+
+    " / "+
+    player.xpMax;
 
   document.getElementById("level")
     .textContent=
-      player.level;
+    player.level;
 
   document.getElementById("gold")
     .textContent=
-      player.gold;
+    player.gold;
 
   document.getElementById("damage")
     .textContent=
-      player.damage;
+    player.damage;
 
   document.getElementById("potions")
     .textContent=
-      player.potions;
+    player.potions;
 
   document.getElementById("wave")
     .textContent=
-      currentWave;
+    currentWave;
 
   const alive=
     mobs.filter(
@@ -1711,32 +2962,33 @@ function updateHUD(){
 
   document.getElementById("enemyCount")
     .textContent=
-      alive+
-      " inimigo"+
-      (alive===1?"":"s");
+    alive+
+    " inimigo"+
+    (alive===1?"":"s");
 
   const killed=
     mobs.length-alive;
 
   document.getElementById("waveProgress")
     .style.width=
-      (mobs.length?
-        killed/mobs.length*100:
-        0
-      )+"%";
+    (
+      mobs.length?
+      killed/mobs.length*100:
+      0
+    )+"%";
 
   if(
     target &&
     !target.dead
   ){
 
-    document.getElementById(
-      "targetBox"
-    ).style.display="block";
+    document.getElementById("targetBox")
+      .style.display="block";
 
-    document.getElementById(
-      "targetName"
-    ).textContent=
+    document.getElementById("targetName")
+      .textContent=
+      target.boss?
+      target.bossName:
       types[target.type].name;
 
     document.querySelector(
@@ -1744,53 +2996,50 @@ function updateHUD(){
     ).style.width=
       Math.max(
         0,
-        target.hp/target.maxHp*100
+        target.hp/
+        target.maxHp*
+        100
       )+"%";
 
   }else{
 
-    document.getElementById(
-      "targetBox"
-    ).style.display="none";
+    document.getElementById("targetBox")
+      .style.display="none";
 
   }
 
 }
 
 
-/* =====================================================
-   MENSAGEM
-===================================================== */
+/* =========================================================
+   CENTER MESSAGE
+========================================================= */
 
 function showCenter(title,text){
 
-  document.getElementById(
-    "messageTitle"
-  ).textContent=title;
+  document.getElementById("messageTitle")
+    .textContent=title;
 
-  document.getElementById(
-    "messageText"
-  ).textContent=text;
+  document.getElementById("messageText")
+    .textContent=text;
 
-  document.getElementById(
-    "message"
-  ).style.opacity=1;
+  document.getElementById("message")
+    .style.opacity=1;
 
 }
 
 
 function hideCenter(){
 
-  document.getElementById(
-    "message"
-  ).style.opacity=0;
+  document.getElementById("message")
+    .style.opacity=0;
 
 }
 
 
-/* =====================================================
+/* =========================================================
    TOAST
-===================================================== */
+========================================================= */
 
 function showToast(text){
 
@@ -1806,13 +3055,233 @@ function showToast(text){
 }
 
 
-/* =====================================================
-   DUNGEON VISUAL
-===================================================== */
+/* =========================================================
+   PAUSE
+========================================================= */
+
+function togglePause(){
+
+  if(
+    document.getElementById("shop")
+      .style.display==="flex"
+  )return;
+
+  paused=!paused;
+
+  document.getElementById("pause")
+    .style.display=
+    paused?
+    "flex":
+    "none";
+
+  document.getElementById("pauseDungeon")
+    .textContent=
+    currentDungeon;
+
+  document.getElementById("pauseWave")
+    .textContent=
+    currentWave+
+    " / 10";
+
+  document.getElementById("pauseLevel")
+    .textContent=
+    player.level;
+
+  document.getElementById("pauseGold")
+    .textContent=
+    player.gold;
+
+}
+
+
+/* =========================================================
+   INVENTORY
+========================================================= */
+
+function toggleInventory(){
+
+  const el=
+    document.getElementById("inventory");
+
+  if(el.style.display==="flex"){
+
+    el.style.display="none";
+
+  }else{
+
+    renderInventory();
+
+    el.style.display="flex";
+
+  }
+
+}
+
+
+function renderInventory(){
+
+  const grid=
+    document.getElementById("inventoryGrid");
+
+  grid.innerHTML="";
+
+  if(inventory.length===0){
+
+    grid.innerHTML=
+      "<p style='color:#777'>O inventário está vazio.</p>";
+
+    return;
+
+  }
+
+  for(const item of inventory){
+
+    const card=
+      document.createElement("div");
+
+    card.className="item-card";
+
+    const rarity=
+      rarities[item.rarity]||
+      rarities.common;
+
+    card.style.borderColor=
+      rarity.color;
+
+    card.innerHTML=`
+
+      <div class="item-icon">
+        ${item.icon}
+      </div>
+
+      <h3 style="color:${rarity.color}">
+        ${item.name}
+      </h3>
+
+      <small style="color:${rarity.color}">
+        ${rarity.name}
+      </small>
+
+      <p>
+        ${item.description}
+      </p>
+
+    `;
+
+    grid.appendChild(card);
+
+  }
+
+}
+
+
+/* =========================================================
+   MENU
+========================================================= */
+
+function updateMenu(){
+
+  document.getElementById("menuLevel")
+    .textContent=
+    player.level;
+
+  document.getElementById("menuGold")
+    .textContent=
+    player.gold;
+
+  const completed=
+    Object.values(
+      completedDungeons
+    ).filter(Boolean).length;
+
+  document.getElementById("menuDungeons")
+    .textContent=
+    completed+
+    "/5";
+
+  const cards=
+    document.querySelectorAll(
+      ".dungeon[data-dungeon]"
+    );
+
+  cards.forEach(card=>{
+
+    const n=
+      Number(
+        card.dataset.dungeon
+      );
+
+    const unlocked=
+      completedDungeons[n-1];
+
+    if(unlocked){
+
+      card.classList.remove("locked");
+
+      const lock=
+        card.querySelector(".lock");
+
+      if(lock)lock.remove();
+
+      const button=
+        card.querySelector("button");
+
+      button.disabled=false;
+
+      button.textContent="ENTRAR";
+
+      button.onclick=()=>{
+        enterDungeon(n);
+      };
+
+    }
+
+  });
+
+}
+
+
+/* =========================================================
+   EXIT MENU
+========================================================= */
+
+function exitToMenu(){
+
+  saveGame();
+
+  paused=false;
+
+  mobs=[];
+
+  target=null;
+
+  destination=null;
+
+  document.getElementById("pause")
+    .style.display="none";
+
+  document.getElementById("game")
+    .classList.add("hidden");
+
+  document.getElementById("menu")
+    .classList.remove("hidden");
+
+  updateMenu();
+
+}
+
+
+/* =========================================================
+   WORLD
+========================================================= */
 
 function drawDungeon(){
 
-  ctx.fillStyle="#171820";
+  const data=
+    dungeonData[currentDungeon]||
+    dungeonData[1];
+
+  ctx.fillStyle="#11141b";
 
   ctx.fillRect(
     0,
@@ -1820,6 +3289,8 @@ function drawDungeon(){
     W,
     H
   );
+
+  /* floor */
 
   const size=70;
 
@@ -1829,7 +3300,8 @@ function drawDungeon(){
   const oy=
     ((-player.y)%size+size)%size;
 
-  ctx.strokeStyle="#252936";
+  ctx.strokeStyle="#252a34";
+
   ctx.lineWidth=1;
 
   for(
@@ -1841,6 +3313,7 @@ function drawDungeon(){
     ctx.beginPath();
 
     ctx.moveTo(x,0);
+
     ctx.lineTo(x,H);
 
     ctx.stroke();
@@ -1856,17 +3329,20 @@ function drawDungeon(){
     ctx.beginPath();
 
     ctx.moveTo(0,y);
+
     ctx.lineTo(W,y);
 
     ctx.stroke();
 
   }
 
-  /*
-     Pedra no chão
-  */
+  /* tiles */
 
-  for(let i=0;i<35;i++){
+  for(
+    let i=0;
+    i<60;
+    i++
+  ){
 
     const x=
       ((i*173)%W);
@@ -1874,22 +3350,47 @@ function drawDungeon(){
     const y=
       ((i*97)%H);
 
-    ctx.fillStyle="#22252e";
+    ctx.fillStyle=
+      i%3===0?
+      "#20242d":
+      "#191d25";
 
     ctx.fillRect(
       x,
       y,
-      3,
-      3
+      3+i%4,
+      3+i%3
     );
 
   }
 
-  /*
-     Paredes
-  */
+  /* dungeon-specific atmosphere */
 
-  ctx.fillStyle="#101219";
+  if(currentDungeon===1){
+
+    drawPurpleFog();
+
+  }else if(currentDungeon===2){
+
+    drawFireAtmosphere();
+
+  }else if(currentDungeon===3){
+
+    drawIceAtmosphere();
+
+  }else if(currentDungeon===4){
+
+    drawDeadAtmosphere();
+
+  }else{
+
+    drawCastleAtmosphere();
+
+  }
+
+  /* border */
+
+  ctx.fillStyle="#090b10";
 
   ctx.fillRect(0,0,W,12);
   ctx.fillRect(0,H-12,W,12);
@@ -1899,32 +3400,191 @@ function drawDungeon(){
 }
 
 
-/* =====================================================
-   COORDENADAS
-===================================================== */
+function drawPurpleFog(){
+
+  const g=
+    ctx.createRadialGradient(
+      W/2,H/2,100,
+      W/2,H/2,Math.max(W,H)*.7
+    );
+
+  g.addColorStop(
+    0,
+    "rgba(100,70,130,.02)"
+  );
+
+  g.addColorStop(
+    1,
+    "rgba(60,30,90,.25)"
+  );
+
+  ctx.fillStyle=g;
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+}
+
+
+function drawFireAtmosphere(){
+
+  ctx.fillStyle=
+    "rgba(130,45,25,.08)";
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+  for(
+    let i=0;
+    i<12;
+    i++
+  ){
+
+    const x=
+      (i*131+
+      gameTime*15)%
+      W;
+
+    const y=
+      (i*71-
+      gameTime*20)%
+      H;
+
+    ctx.fillStyle="#ef713344";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      x,
+      y,
+      2+i%3,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+  }
+
+}
+
+
+function drawIceAtmosphere(){
+
+  ctx.fillStyle=
+    "rgba(70,150,180,.09)";
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+  for(
+    let i=0;
+    i<18;
+    i++
+  ){
+
+    const x=
+      (i*101+
+      Math.sin(gameTime+i)*20)%
+      W;
+
+    const y=
+      (i*67+
+      gameTime*12)%
+      H;
+
+    ctx.fillStyle="#b9f0ff55";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      x,
+      y,
+      2+i%3,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+  }
+
+}
+
+
+function drawDeadAtmosphere(){
+
+  ctx.fillStyle=
+    "rgba(20,20,35,.15)";
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+}
+
+
+function drawCastleAtmosphere(){
+
+  ctx.fillStyle=
+    "rgba(80,10,25,.12)";
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+}
+
+
+/* =========================================================
+   WORLD TO SCREEN
+========================================================= */
 
 function worldToScreen(x,y){
 
   return{
 
     x:
-      x-player.x+W/2,
+      x-
+      player.x+
+      W/2,
 
     y:
-      y-player.y+H/2
+      y-
+      player.y+
+      H/2
 
   };
 
 }
 
 
-/* =====================================================
-   PLAYER
-===================================================== */
+/* =========================================================
+   PLAYER DRAW
+========================================================= */
 
 function drawPlayer(){
 
   const x=W/2;
+
   const y=H/2;
 
   const moving=
@@ -1937,8 +3597,8 @@ function drawPlayer(){
 
   const bob=
     moving?
-      Math.sin(player.anim)*3:
-      Math.sin(gameTime*2)*1.5;
+    Math.sin(player.anim)*3:
+    Math.sin(gameTime*2)*1.5;
 
   const leg=
     Math.sin(player.anim)*5;
@@ -1955,9 +3615,7 @@ function drawPlayer(){
     1
   );
 
-  /*
-     sombra
-  */
+  /* shadow */
 
   ctx.fillStyle="#0009";
 
@@ -1965,8 +3623,8 @@ function drawPlayer(){
 
   ctx.ellipse(
     0,
+    31,
     29,
-    28,
     8,
     0,
     0,
@@ -1975,25 +3633,23 @@ function drawPlayer(){
 
   ctx.fill();
 
-  /*
-     capa
-  */
+  /* cape */
 
-  ctx.fillStyle="#572b70";
+  ctx.fillStyle="#54276e";
 
   ctx.beginPath();
 
-  ctx.moveTo(-14,-7);
-  ctx.lineTo(-28,29);
-  ctx.lineTo(0,21);
+  ctx.moveTo(-14,-8);
+
+  ctx.lineTo(-30,31);
+
+  ctx.lineTo(0,22);
 
   ctx.closePath();
 
   ctx.fill();
 
-  /*
-     pernas
-  */
+  /* legs */
 
   ctx.fillStyle="#272d3b";
 
@@ -2001,41 +3657,37 @@ function drawPlayer(){
     -11+leg*.35,
     7,
     8,
-    20
+    21
   );
 
   ctx.fillRect(
     3-leg*.35,
     7,
     8,
-    20
+    21
   );
 
-  /*
-     botas
-  */
+  /* boots */
 
-  ctx.fillStyle="#111318";
+  ctx.fillStyle="#101218";
 
   ctx.fillRect(
-    -14+leg*.35,
-    23,
-    12,
+    -15+leg*.35,
+    24,
+    13,
     6
   );
 
   ctx.fillRect(
     2-leg*.35,
-    23,
-    12,
+    24,
+    13,
     6
   );
 
-  /*
-     corpo
-  */
+  /* body armor */
 
-  ctx.fillStyle="#4c6383";
+  ctx.fillStyle="#425879";
 
   ctx.beginPath();
 
@@ -2049,11 +3701,9 @@ function drawPlayer(){
 
   ctx.fill();
 
-  /*
-     cinto
-  */
+  /* belt */
 
-  ctx.fillStyle="#bd8840";
+  ctx.fillStyle="#b18442";
 
   ctx.fillRect(
     -16,
@@ -2062,9 +3712,7 @@ function drawPlayer(){
     5
   );
 
-  /*
-     cabeça
-  */
+  /* head */
 
   ctx.fillStyle="#d99b70";
 
@@ -2080,11 +3728,9 @@ function drawPlayer(){
 
   ctx.fill();
 
-  /*
-     cabelo
-  */
+  /* hair */
 
-  ctx.fillStyle="#33252b";
+  ctx.fillStyle="#30232b";
 
   ctx.beginPath();
 
@@ -2098,9 +3744,7 @@ function drawPlayer(){
 
   ctx.fill();
 
-  /*
-     olho
-  */
+  /* eye */
 
   ctx.fillStyle="#111";
 
@@ -2111,9 +3755,7 @@ function drawPlayer(){
     3
   );
 
-  /*
-     braço
-  */
+  /* arm */
 
   ctx.fillStyle="#d99b70";
 
@@ -2121,12 +3763,10 @@ function drawPlayer(){
     12,
     -7,
     8,
-    20
+    13
   );
 
-  /*
-     espada
-  */
+  /* sword */
 
   ctx.save();
 
@@ -2143,32 +3783,45 @@ function drawPlayer(){
 
   }
 
-  ctx.strokeStyle="#e6e9ef";
+  ctx.strokeStyle="#e8ecf5";
+
   ctx.lineWidth=5;
 
   ctx.beginPath();
 
-  ctx.moveTo(16,8);
-  ctx.lineTo(48,8);
+  ctx.moveTo(
+    16,
+    8
+  );
+
+  ctx.lineTo(
+    51,
+    8
+  );
 
   ctx.stroke();
 
-  ctx.strokeStyle="#a36e3b";
+  ctx.strokeStyle="#9c6d3b";
+
   ctx.lineWidth=5;
 
   ctx.beginPath();
 
-  ctx.moveTo(12,6);
-  ctx.lineTo(23,6);
+  ctx.moveTo(
+    12,
+    6
+  );
+
+  ctx.lineTo(
+    24,
+    6
+  );
 
   ctx.stroke();
 
   ctx.restore();
 
-
-  /*
-     CÍRCULO AoE
-  */
+  /* attack arc */
 
   if(attackAnimation>0){
 
@@ -2180,14 +3833,14 @@ function drawPlayer(){
       alpha+
       ")";
 
-    ctx.lineWidth=4;
+    ctx.lineWidth=5;
 
     ctx.beginPath();
 
     ctx.arc(
       0,
       0,
-      110,
+      115,
       -Math.PI*.85,
       Math.PI*.85
     );
@@ -2201,9 +3854,9 @@ function drawPlayer(){
 }
 
 
-/* =====================================================
+/* =========================================================
    MOB DRAW
-===================================================== */
+========================================================= */
 
 function drawMob(mob){
 
@@ -2214,12 +3867,11 @@ function drawMob(mob){
     );
 
   if(
-    s.x<-100||
-    s.x>W+100||
-    s.y<-100||
-    s.y>H+100
-  )
-    return;
+    s.x<-150||
+    s.x>W+150||
+    s.y<-150||
+    s.y>H+150
+  )return;
 
   ctx.save();
 
@@ -2230,23 +3882,25 @@ function drawMob(mob){
 
   const deathScale=
     mob.dead?
-      Math.max(
-        0,
-        1-mob.deathTime/.7
-      ):
-      1;
+    Math.max(
+      0,
+      1-
+      mob.deathTime/.7
+    ):
+    1;
 
   ctx.scale(
     1,
     deathScale
   );
 
-  if(mob.hit>0)
+  if(mob.hit>0){
+
     ctx.globalAlpha=.5;
 
-  /*
-     alvo
-  */
+  }
+
+  /* target */
 
   if(
     target===mob &&
@@ -2254,6 +3908,7 @@ function drawMob(mob){
   ){
 
     ctx.strokeStyle="#f4d35e";
+
     ctx.lineWidth=3;
 
     ctx.beginPath();
@@ -2270,9 +3925,7 @@ function drawMob(mob){
 
   }
 
-  /*
-     sombra
-  */
+  /* shadow */
 
   ctx.fillStyle="#0009";
 
@@ -2290,13 +3943,17 @@ function drawMob(mob){
 
   ctx.fill();
 
+  if(mob.boss){
 
-  drawMobBody(mob);
+    drawBoss(mob);
 
+  }else{
 
-  /*
-     HP
-  */
+    drawMobBody(mob);
+
+  }
+
+  /* hp */
 
   if(!mob.dead){
 
@@ -2329,9 +3986,138 @@ function drawMob(mob){
 }
 
 
-/* =====================================================
-   MOB BODIES
-===================================================== */
+/* =========================================================
+   BOSS DRAW
+========================================================= */
+
+function drawBoss(m){
+
+  const s=m.size;
+
+  const pulse=
+    1+
+    Math.sin(
+      gameTime*3
+    )*.04;
+
+  ctx.scale(
+    pulse,
+    pulse
+  );
+
+  /* aura */
+
+  ctx.strokeStyle=
+    m.color+
+    "66";
+
+  ctx.lineWidth=7;
+
+  ctx.beginPath();
+
+  ctx.arc(
+    0,
+    0,
+    s+14,
+    0,
+    Math.PI*2
+  );
+
+  ctx.stroke();
+
+  /* body */
+
+  ctx.fillStyle=m.color;
+
+  ctx.beginPath();
+
+  ctx.arc(
+    0,
+    -10,
+    s*.65,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+  ctx.fillRect(
+    -s*.65,
+    8,
+    s*1.3,
+    s*.7
+  );
+
+  /* horns */
+
+  ctx.fillStyle="#ddd0ae";
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    -s*.3,
+    -s*.65
+  );
+
+  ctx.lineTo(
+    -s*.7,
+    -s*1.15
+  );
+
+  ctx.lineTo(
+    -s*.05,
+    -s*.75
+  );
+
+  ctx.closePath();
+
+  ctx.fill();
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    s*.3,
+    -s*.65
+  );
+
+  ctx.lineTo(
+    s*.7,
+    -s*1.15
+  );
+
+  ctx.lineTo(
+    s*.05,
+    -s*.75
+  );
+
+  ctx.closePath();
+
+  ctx.fill();
+
+  /* eyes */
+
+  ctx.fillStyle="#ff5353";
+
+  ctx.fillRect(
+    -s*.25,
+    -s*.18,
+    9,
+    6
+  );
+
+  ctx.fillRect(
+    s*.08,
+    -s*.18,
+    9,
+    6
+  );
+
+}
+
+
+/* =========================================================
+   MOB BODY
+========================================================= */
 
 function drawMobBody(m){
 
@@ -2410,8 +4196,8 @@ function drawMobBody(m){
     ctx.moveTo(-10,-9);
     ctx.lineTo(-24,-18);
     ctx.lineTo(-13,1);
-
     ctx.closePath();
+
     ctx.fill();
 
     ctx.beginPath();
@@ -2419,8 +4205,8 @@ function drawMobBody(m){
     ctx.moveTo(10,-9);
     ctx.lineTo(24,-18);
     ctx.lineTo(13,1);
-
     ctx.closePath();
+
     ctx.fill();
 
     ctx.fillStyle="#111";
@@ -2442,33 +4228,21 @@ function drawMobBody(m){
     ctx.beginPath();
 
     ctx.moveTo(-5,0);
-    ctx.lineTo(
-      -s-10,
-      -10-flap
-    );
-    ctx.lineTo(
-      -s+2,
-      8
-    );
+    ctx.lineTo(-s-10,-10-flap);
+    ctx.lineTo(-s+2,8);
     ctx.lineTo(-10,10);
-
     ctx.closePath();
+
     ctx.fill();
 
     ctx.beginPath();
 
     ctx.moveTo(5,0);
-    ctx.lineTo(
-      s+10,
-      -10+flap
-    );
-    ctx.lineTo(
-      s-2,
-      8
-    );
+    ctx.lineTo(s+10,-10+flap);
+    ctx.lineTo(s-2,8);
     ctx.lineTo(10,10);
-
     ctx.closePath();
+
     ctx.fill();
 
     ctx.fillStyle="#9d65c4";
@@ -2511,9 +4285,14 @@ function drawMobBody(m){
     ctx.fill();
 
     ctx.strokeStyle="#916b9b";
+
     ctx.lineWidth=3;
 
-    for(let i=0;i<4;i++){
+    for(
+      let i=0;
+      i<4;
+      i++
+    ){
 
       const yy=-10+i*7;
 
@@ -2579,8 +4358,8 @@ function drawMobBody(m){
     ctx.moveTo(10,-15);
     ctx.lineTo(12,-29);
     ctx.lineTo(20,-17);
-
     ctx.closePath();
+
     ctx.fill();
 
     ctx.fillStyle="#222";
@@ -2621,6 +4400,7 @@ function drawMobBody(m){
     ctx.fillRect(4,-13,4,6);
 
     ctx.strokeStyle="#ddd5bd";
+
     ctx.lineWidth=5;
 
     ctx.beginPath();
@@ -2676,8 +4456,8 @@ function drawMobBody(m){
     ctx.moveTo(-8,5);
     ctx.lineTo(-3,16);
     ctx.lineTo(1,5);
-
     ctx.closePath();
+
     ctx.fill();
 
     ctx.beginPath();
@@ -2685,8 +4465,8 @@ function drawMobBody(m){
     ctx.moveTo(4,5);
     ctx.lineTo(9,16);
     ctx.lineTo(13,5);
-
     ctx.closePath();
+
     ctx.fill();
 
   }
@@ -2763,6 +4543,7 @@ function drawMobBody(m){
     ctx.fillRect(4,-8,4,3);
 
     ctx.strokeStyle="#bbc2ce";
+
     ctx.lineWidth=5;
 
     ctx.beginPath();
@@ -2797,8 +4578,8 @@ function drawMobBody(m){
     ctx.moveTo(-10,-17);
     ctx.lineTo(-23,-38);
     ctx.lineTo(-3,-22);
-
     ctx.closePath();
+
     ctx.fill();
 
     ctx.beginPath();
@@ -2806,8 +4587,8 @@ function drawMobBody(m){
     ctx.moveTo(10,-17);
     ctx.lineTo(23,-38);
     ctx.lineTo(3,-22);
-
     ctx.closePath();
+
     ctx.fill();
 
     ctx.fillStyle="#2a1015";
@@ -2829,9 +4610,9 @@ function drawMobBody(m){
 }
 
 
-/* =====================================================
+/* =========================================================
    EFFECTS
-===================================================== */
+========================================================= */
 
 function drawEffects(){
 
@@ -2883,11 +4664,42 @@ function drawEffects(){
 
     ctx.fillStyle=n.color;
 
-    ctx.font="bold 15px Arial";
+    ctx.font=
+      "bold 15px Arial";
+
     ctx.textAlign="center";
 
     ctx.fillText(
       n.text,
+      s.x,
+      s.y
+    );
+
+  }
+
+  for(const l of floatingLoot){
+
+    const s=
+      worldToScreen(
+        l.x,
+        l.y
+      );
+
+    ctx.globalAlpha=
+      Math.max(
+        0,
+        l.life/l.maxLife
+      );
+
+    ctx.fillStyle=l.color;
+
+    ctx.font=
+      "bold 14px Arial";
+
+    ctx.textAlign="center";
+
+    ctx.fillText(
+      l.text,
       s.x,
       s.y
     );
@@ -2899,11 +4711,13 @@ function drawEffects(){
 }
 
 
-/* =====================================================
-   UPDATE
-===================================================== */
+/* =========================================================
+   GAME UPDATE
+========================================================= */
 
 function update(dt){
+
+  if(paused)return;
 
   gameTime+=dt;
 
@@ -2931,9 +4745,8 @@ function update(dt){
 
     if(toastTimer<=0){
 
-      document.getElementById(
-        "toast"
-      ).style.opacity=0;
+      document.getElementById("toast")
+        .style.opacity=0;
 
     }
 
@@ -2942,9 +4755,9 @@ function update(dt){
 }
 
 
-/* =====================================================
+/* =========================================================
    RENDER
-===================================================== */
+========================================================= */
 
 function render(){
 
@@ -2958,13 +4771,17 @@ function render(){
   drawDungeon();
 
   const sorted=
-    [...mobs]
-    .sort(
+    [...mobs].sort(
       (a,b)=>a.y-b.y
     );
 
-  for(const mob of sorted)
+  for(
+    const mob of sorted
+  ){
+
     drawMob(mob);
+
+  }
 
   drawPlayer();
 
@@ -2973,15 +4790,40 @@ function render(){
 }
 
 
-/* =====================================================
-   TECLADO
-===================================================== */
+/* =========================================================
+   INPUT
+========================================================= */
 
 addEventListener(
   "keydown",
   e=>{
 
+    if(
+      e.key==="Escape"
+    ){
+
+      e.preventDefault();
+
+      if(
+        document.getElementById("inventory")
+          .style.display==="flex"
+      ){
+
+        toggleInventory();
+
+        return;
+
+      }
+
+      togglePause();
+
+      return;
+
+    }
+
     keys[e.key]=true;
+
+    keys[e.key.toLowerCase()]=true;
 
     if(e.code==="Space"){
 
@@ -3001,20 +4843,24 @@ addEventListener(
 
     keys[e.key]=false;
 
+    keys[e.key.toLowerCase()]=false;
+
   }
 );
 
 
-/* =====================================================
-   CLIQUE
-===================================================== */
+/* =========================================================
+   CANVAS CLICK
+========================================================= */
 
 canvas.addEventListener(
   "pointerdown",
   e=>{
 
-    if(player.dead)
-      return;
+    if(
+      player.dead||
+      paused
+    )return;
 
     const rect=
       canvas.getBoundingClientRect();
@@ -3028,19 +4874,22 @@ canvas.addEventListener(
       rect.top;
 
     const wx=
-      sx-W/2+player.x;
+      sx-
+      W/2+
+      player.x;
 
     const wy=
-      sy-H/2+player.y;
+      sy-
+      H/2+
+      player.y;
 
     let clicked=null;
 
-    let closest=70;
+    let closest=80;
 
     for(const mob of mobs){
 
-      if(mob.dead)
-        continue;
+      if(mob.dead)continue;
 
       const d=
         Math.hypot(
@@ -3051,13 +4900,14 @@ canvas.addEventListener(
       if(
         d<
         Math.max(
-          45,
+          50,
           mob.size+20
         ) &&
         d<closest
       ){
 
         closest=d;
+
         clicked=mob;
 
       }
@@ -3066,21 +4916,11 @@ canvas.addEventListener(
 
     if(clicked){
 
-      /*
-         Selecionar mob.
-         O jogador vai automaticamente
-         até ele e ataca.
-      */
-
       target=clicked;
 
       destination=null;
 
     }else{
-
-      /*
-         Clique no chão.
-      */
 
       target=null;
 
@@ -3095,82 +4935,42 @@ canvas.addEventListener(
 );
 
 
-/* =====================================================
-   MENU DUNGEONS
-===================================================== */
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
 
-function updateDungeonMenu(){
+loadGame();
 
-  const cards=
-    document.querySelectorAll(
-      ".dungeon"
-    );
-
-  for(let i=1;i<cards.length;i++){
-
-    const dungeonNumber=i+1;
-
-    if(
-      completedDungeons[i]
-    ){
-
-      cards[i]
-        .classList
-        .remove("locked");
-
-      const lock=
-        cards[i]
-        .querySelector(".lock");
-
-      if(lock)
-        lock.remove();
-
-      const button=
-        cards[i]
-        .querySelector("button");
-
-      button.disabled=false;
-
-      button.textContent="ENTRAR";
-
-      button.onclick=()=>{
-        startDungeon(
-          dungeonNumber
-        );
-      };
-
-    }
-
-  }
-
-}
-
-
-/* =====================================================
-   LOOP
-===================================================== */
-
-function loop(now){
-
-  const dt=
-    Math.min(
-      .033,
-      (now-lastTime)/1000
-    );
-
-  lastTime=now;
-
-  update(dt);
-
-  render();
-
-  requestAnimationFrame(loop);
-
-}
+updateMenu();
 
 updateHUD();
 
-requestAnimationFrame(loop);
+renderInventory();
+
+
+/* =========================================================
+   GAME LOOP
+========================================================= */
+
+requestAnimationFrame(
+  function loop(now){
+
+    const dt=
+      Math.min(
+        .033,
+        (now-lastTime)/1000
+      );
+
+    lastTime=now;
+
+    update(dt);
+
+    render();
+
+    requestAnimationFrame(loop);
+
+  }
+);
 
 </script>
 
