@@ -1205,7 +1205,7 @@ const player={
 const SUPABASE_URL="https://lqzzvufqrggudnnvfrdv.supabase.co";
 const SUPABASE_KEY="sb_publishable_r4OlSxiIe1_rBZ3q5V_K2w_GfxDWVyb";
 const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let roomChannel=null,roomCode="",roomHost=false,roomHostId=null,multiplayerPlayers={},playerId=crypto.randomUUID();
+let roomChannel=null,roomCode="",roomHost=false,roomHostId=null,multiplayerPlayers={},playerId=crypto.randomUUID(),guestActive=false;
 function makeRoomCode(){const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let x="RV-";for(let i=0;i<4;i++)x+=c[Math.floor(Math.random()*c.length)];return x;}
 function setRoomStatus(t){const e=document.getElementById("roomStatus");if(e)e.innerHTML=t;}
 function playerName(){const e=document.getElementById("playerNameInput");return(e?.value||localStorage.getItem("runevale-name")||"Player").trim().slice(0,16)||"Player";}
@@ -1221,11 +1221,12 @@ async function updateRoomPresence(){await trackPresence();renderParty();}
 async function broadcastRoom(data){if(!roomChannel)return;try{await roomChannel.send({type:"broadcast",event:"runevale",payload:data});}catch(e){}}
 function serializeMobs(){return mobs.map(m=>({...m,boss:!!m.boss}));}
 function applyRemoteMobs(a){if(Array.isArray(a))mobs=a.map(m=>({...m}));}
-function broadcastFullState(){if(roomHost&&roomChannel)broadcastRoom({type:"state",from:playerId,dungeon:currentDungeon,wave:currentWave,waveStarting,dungeonComplete,player:{hp:player.hp,maxHp:player.maxHp,level:player.level,gold:player.gold,xp:player.xp},mobs:serializeMobs()});}
-function handleRoomMessage(d){if(!d)return;if(d.type==="start_game"&&!roomHost){beginDungeon(1);return;}if(d.type==="request_state"&&roomHost)return broadcastFullState();if(d.type==="request_dungeon"&&roomHost&&d.dungeon===1)return beginDungeon(1);if(d.type==="request_attack"&&roomHost&&d.dungeon===currentDungeon&&!waveStarting)return performRemoteAttack(d);if(d.type==="damage"&&d.to===playerId){player.hp=Math.max(0,player.hp-(d.amount||0));player.hit=.15;updateHUD();return;}if(d.type==="state"&&!roomHost){if(typeof d.dungeon==="number"&&d.dungeon!==currentDungeon)beginDungeon(d.dungeon,true);currentWave=d.wave||currentWave;waveStarting=!!d.waveStarting;dungeonComplete=!!d.dungeonComplete;applyRemoteMobs(d.mobs);if(d.player){player.hp=d.player.hp;player.maxHp=d.player.maxHp;player.level=d.player.level;player.gold=d.player.gold;player.xp=d.player.xp;}updateHUD();}}
+function enterGameView(dungeonNumber){document.getElementById("menu").classList.add("hidden");document.getElementById("game").classList.remove("hidden");document.getElementById("death").style.display="none";document.getElementById("pause").style.display="none";document.getElementById("dungeonName").textContent=(dungeonData[dungeonNumber]||dungeonData[1]).name;guestActive=true;}
+function broadcastFullState(){if(roomHost&&roomChannel){const inGame=!document.getElementById("game").classList.contains("hidden");broadcastRoom({type:"state",from:playerId,dungeon:currentDungeon,wave:currentWave,waveStarting,dungeonComplete,inGame,player:{hp:player.hp,maxHp:player.maxHp,level:player.level,gold:player.gold,xp:player.xp},mobs:serializeMobs()});}}
+function handleRoomMessage(d){if(!d)return;if(d.type==="start_game"&&!roomHost){beginDungeon(d.dungeon||1);guestActive=true;return;}if(d.type==="request_state"&&roomHost)return broadcastFullState();if(d.type==="request_dungeon"&&roomHost&&d.dungeon===1)return beginDungeon(1);if(d.type==="request_attack"&&roomHost&&d.dungeon===currentDungeon&&!waveStarting)return performRemoteAttack(d);if(d.type==="damage"&&d.to===playerId){player.hp=Math.max(0,player.hp-(d.amount||0));player.hit=.15;updateHUD();return;}if(d.type==="state"&&!roomHost){if(typeof d.dungeon==="number")currentDungeon=d.dungeon;if(d.inGame&&!guestActive)enterGameView(d.dungeon||1);currentWave=d.wave||currentWave;waveStarting=!!d.waveStarting;dungeonComplete=!!d.dungeonComplete;applyRemoteMobs(d.mobs);if(d.player){player.hp=d.player.hp;player.maxHp=d.player.maxHp;player.level=d.player.level;player.gold=d.player.gold;player.xp=d.player.xp;}updateHUD();}}
 function performRemoteAttack(d){for(const m of mobs){if(!m.dead&&Math.hypot(m.x-d.x,m.y-d.y)<=115){m.hp-=Math.max(1,Math.floor(d.damage||1));m.hit=.16;if(m.hp<=0)killMob(m);}}broadcastFullState();}
 async function copyRoomCode(){if(!roomCode)return;try{await navigator.clipboard.writeText(roomCode);showToast("📋 Código copiado: "+roomCode);}catch(e){showToast(roomCode);}}
-function leaveRoom(){if(roomChannel)supabaseClient.removeChannel(roomChannel);roomChannel=null;roomCode="";roomHost=false;roomHostId=null;multiplayerPlayers={};document.getElementById("copyRoom").style.display="none";document.getElementById("roomCodeInput").value="";setRoomStatus("Sem sala — podes jogar normalmente.");renderParty();}
+function leaveRoom(){guestActive=false;if(roomChannel)supabaseClient.removeChannel(roomChannel);roomChannel=null;roomCode="";roomHost=false;roomHostId=null;multiplayerPlayers={};document.getElementById("copyRoom").style.display="none";document.getElementById("roomCodeInput").value="";setRoomStatus("Sem sala — podes jogar normalmente.");renderParty();}
 
 /* =========================================================
    INVENTORY
@@ -3218,6 +3219,8 @@ function updateMenu(){
 ========================================================= */
 
 function exitToMenu(){
+
+  guestActive=false;
 
   saveGame();
   if(roomChannel) leaveRoom();
