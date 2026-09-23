@@ -2,2889 +2,2840 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RuneVale — Dark Dungeons</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 *{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    user-select:none;
-    -webkit-user-select:none;
+  box-sizing:border-box;
+  user-select:none;
 }
 
 html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#07080c;
-    color:#eee;
-    font-family:Arial,Helvetica,sans-serif;
-}
-
-body{
-    touch-action:none;
-}
-
-button,input{
-    font-family:inherit;
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#05060a;
+  color:#eee;
+  font-family:Arial,Helvetica,sans-serif;
 }
 
 button{
-    border:1px solid #3a3d4d;
-    background:#151721;
-    color:#eee;
-    border-radius:8px;
-    padding:11px 16px;
-    cursor:pointer;
-    transition:.15s;
-}
-
-button:hover{
-    background:#242837;
-    border-color:#666c80;
-}
-
-button:active{
-    transform:scale(.97);
-}
-
-input{
-    width:100%;
-    padding:12px;
-    border:1px solid #383c4d;
-    border-radius:8px;
-    background:#0e1016;
-    color:#fff;
-    outline:none;
-    margin-top:8px;
-}
-
-input:focus{
-    border-color:#b69250;
+  font:inherit;
+  cursor:pointer;
 }
 
 .hidden{
-    display:none!important;
+  display:none!important;
 }
 
-/* =========================
-   MENU
-========================= */
+/* =========================================================
+   GLOBAL
+========================================================= */
 
-.screen{
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:
-        radial-gradient(circle at center,#171722 0,#090a0e 55%,#050507 100%);
+::-webkit-scrollbar{
+  width:8px;
 }
 
-.panel{
-    width:min(520px,92vw);
-    max-height:92vh;
-    overflow:auto;
-    padding:30px;
-    background:rgba(13,14,20,.97);
-    border:1px solid #353846;
-    border-radius:16px;
-    box-shadow:0 25px 80px #000;
+::-webkit-scrollbar-track{
+  background:#090b10;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#343a48;
+  border-radius:10px;
+}
+
+/* =========================================================
+   MAIN MENU
+========================================================= */
+
+#menu{
+  position:fixed;
+  inset:0;
+  overflow:auto;
+  padding:30px 20px 80px;
+  background:
+    radial-gradient(circle at 50% 10%,#39244d 0,#171321 25%,#090b11 65%,#040509 100%);
+}
+
+#menu:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.25;
+  background-image:
+    radial-gradient(circle,#fff 1px,transparent 1px);
+  background-size:80px 80px;
 }
 
 .logo{
-    text-align:center;
-    font-size:42px;
-    font-weight:bold;
-    color:#d6b46c;
-    text-shadow:0 0 25px rgba(214,180,108,.15);
+  position:relative;
+  text-align:center;
+  font-size:clamp(44px,8vw,82px);
+  color:#e9c96a;
+  letter-spacing:8px;
+  text-shadow:
+    0 0 8px #e9c96a,
+    0 0 30px #8e5c2e,
+    0 10px 40px #000;
+  margin:20px 0 4px;
 }
 
 .subtitle{
-    text-align:center;
-    color:#8d92a3;
-    margin-top:6px;
-    margin-bottom:28px;
+  position:relative;
+  text-align:center;
+  color:#9299aa;
+  margin-bottom:35px;
 }
 
-.menuButtons{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
+.menu-stats{
+  position:relative;
+  width:min(700px,95vw);
+  margin:0 auto 25px;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
 }
 
-.menuButtons button{
-    width:100%;
-    padding:14px;
-    font-size:16px;
+.menu-stat{
+  background:#0c0f16dd;
+  border:1px solid #353b4a;
+  padding:9px 16px;
+  border-radius:9px;
 }
 
-.goldButton{
-    border-color:#80642f;
-    color:#e1bf75;
+.menu-stat b{
+  color:#e8c75e;
 }
 
-.dangerButton{
-    color:#e37b7b;
+.dungeons{
+  position:relative;
+  width:min(1050px,95vw);
+  margin:auto;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
 }
 
-.small{
-    font-size:12px;
-    color:#777c8c;
-    margin-top:15px;
-    text-align:center;
+.dungeon{
+  position:relative;
+  min-height:220px;
+  padding:22px;
+  overflow:hidden;
+  background:
+    linear-gradient(145deg,#1a1d28ee,#0d1017ee);
+  border:1px solid #383f4f;
+  border-radius:15px;
+  box-shadow:0 15px 45px #0007;
+  transition:.2s;
 }
 
-.title{
-    color:#d6b46c;
-    text-align:center;
-    margin-bottom:20px;
+.dungeon:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 80% 20%,#c69d4a22,transparent 40%);
+  pointer-events:none;
 }
 
-.roomCode{
-    text-align:center;
-    font-size:34px;
-    letter-spacing:7px;
-    color:#d6b46c;
-    margin:15px 0 25px;
+.dungeon:not(.locked):hover{
+  transform:translateY(-5px);
+  border-color:#d0ad51;
+  box-shadow:0 20px 55px #000b,0 0 25px #b18a3c18;
 }
 
-.status{
-    text-align:center;
-    margin-top:14px;
-    min-height:20px;
+.dungeon h2{
+  position:relative;
+  margin:0 0 10px;
+  color:#e6c660;
 }
 
-.ok{
-    color:#65d28c;
+.dungeon p{
+  position:relative;
+  color:#8f96a6;
+  font-size:14px;
 }
 
-.error{
-    color:#e36d6d;
+.dungeon .difficulty{
+  color:#d28b62;
 }
 
-.warning{
-    color:#e0bb62;
+.dungeon button{
+  position:relative;
+  width:100%;
+  margin-top:12px;
+  padding:12px;
+  border-radius:8px;
+  color:white;
+  background:#252b38;
+  border:1px solid #515a6c;
 }
 
-.lobbyPlayers{
-    border:1px solid #292c38;
-    background:#0a0b10;
-    border-radius:10px;
-    padding:12px;
-    margin-top:15px;
+.dungeon button:hover{
+  background:#353e4e;
 }
 
-.lobbyPlayer{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:9px 4px;
-    border-bottom:1px solid #1d2029;
+.locked{
+  opacity:.45;
 }
 
-.lobbyPlayer:last-child{
-    border-bottom:0;
+.lock{
+  position:absolute;
+  right:18px;
+  top:18px;
+  font-size:27px;
+  z-index:2;
 }
 
-.online{
-    color:#63d38b;
-    font-size:12px;
-}
-
-.buttonRow{
-    display:flex;
-    gap:10px;
-    margin-top:12px;
-}
-
-.buttonRow button{
-    flex:1;
-}
-
-/* =========================
+/* =========================================================
    GAME
-========================= */
+========================================================= */
 
 #game{
-    position:absolute;
-    inset:0;
-    background:#090b10;
+  position:fixed;
+  inset:0;
+  background:#08090d;
 }
 
-#canvas{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
+canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
 }
+
+/* =========================================================
+   HUD
+========================================================= */
 
 #hud{
-    position:absolute;
-    top:12px;
-    left:12px;
-    right:12px;
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    pointer-events:none;
-}
-
-.hudBox{
-    background:rgba(8,9,13,.88);
-    border:1px solid #353946;
-    border-radius:9px;
-    padding:9px 12px;
-    box-shadow:0 4px 20px rgba(0,0,0,.3);
-}
-
-.stats{
-    display:flex;
-    gap:14px;
-    flex-wrap:wrap;
+  position:absolute;
+  z-index:20;
+  left:12px;
+  top:12px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  max-width:70%;
 }
 
 .stat{
-    color:#b8bdcc;
+  min-width:95px;
+  padding:8px 11px;
+  background:#080b11eF;
+  border:1px solid #3e4657;
+  border-radius:8px;
+  box-shadow:0 5px 20px #0007;
 }
 
-.stat strong{
-    color:#eee;
+.stat small{
+  display:block;
+  color:#7e8697;
+  font-size:10px;
 }
 
-.hpBar{
-    width:170px;
-    height:8px;
-    margin-top:6px;
-    background:#291719;
-    border-radius:5px;
-    overflow:hidden;
+.stat b{
+  font-size:14px;
 }
 
-.hpFill{
-    height:100%;
-    width:100%;
-    background:#bd4d55;
-    transition:.15s;
+#buttons{
+  position:absolute;
+  right:12px;
+  top:12px;
+  z-index:20;
+  display:flex;
+  gap:7px;
 }
+
+.btn{
+  padding:9px 12px;
+  color:#eee;
+  background:#121620ee;
+  border:1px solid #424b5e;
+  border-radius:8px;
+  box-shadow:0 5px 20px #0007;
+}
+
+.btn:hover{
+  background:#252c3a;
+}
+
+#pauseButton{
+  font-size:18px;
+}
+
+/* =========================================================
+   WAVE
+========================================================= */
 
 #waveBox{
-    text-align:center;
+  position:absolute;
+  z-index:20;
+  top:14px;
+  left:50%;
+  transform:translateX(-50%);
+  min-width:280px;
+  padding:10px 18px;
+  text-align:center;
+  background:#080b11ef;
+  border:1px solid #5c563e;
+  border-radius:10px;
+  box-shadow:0 8px 30px #0008;
 }
 
-#waveNumber{
-    color:#d6b46c;
+#waveBox strong{
+  color:#e7c75d;
 }
+
+.progress{
+  height:7px;
+  margin-top:7px;
+  background:#282d37;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.progress i{
+  display:block;
+  width:0;
+  height:100%;
+  background:linear-gradient(90deg,#8e672c,#e9ca61);
+  transition:.2s;
+}
+
+/* =========================================================
+   TARGET
+========================================================= */
 
 #targetBox{
-    position:absolute;
-    left:50%;
-    bottom:100px;
-    transform:translateX(-50%);
-    min-width:180px;
-    text-align:center;
-    pointer-events:none;
+  position:absolute;
+  z-index:20;
+  left:50%;
+  top:105px;
+  transform:translateX(-50%);
+  min-width:240px;
+  padding:9px 14px;
+  display:none;
+  text-align:center;
+  background:#080b11ef;
+  border:1px solid #555e70;
+  border-radius:8px;
 }
 
-#targetName{
-    color:#d6b46c;
-    font-weight:bold;
+#targetBar{
+  height:7px;
+  margin-top:6px;
+  background:#292d36;
 }
+
+#targetBar i{
+  display:block;
+  height:100%;
+  background:#d54d4d;
+}
+
+/* =========================================================
+   CENTER MESSAGE
+========================================================= */
 
 #message{
-    position:absolute;
-    top:70px;
-    left:50%;
-    transform:translateX(-50%);
-    padding:9px 18px;
-    border-radius:8px;
-    background:rgba(10,11,16,.85);
-    border:1px solid #363946;
-    color:#d4d8e2;
-    pointer-events:none;
-    opacity:0;
-    transition:.2s;
+  position:absolute;
+  z-index:30;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:90%;
+  text-align:center;
+  pointer-events:none;
+  opacity:0;
+  transition:.25s;
 }
 
-#message.show{
-    opacity:1;
+#message h1{
+  margin:0;
+  font-size:clamp(32px,6vw,60px);
+  color:#e9c967;
+  text-shadow:0 5px 30px #000;
 }
 
-#playersPanel{
-    position:absolute;
-    right:12px;
-    top:72px;
-    width:185px;
-    background:rgba(8,9,13,.86);
-    border:1px solid #343844;
-    border-radius:9px;
-    padding:10px;
+#message p{
+  color:#ddd;
+  font-size:16px;
 }
 
-#playersTitle{
-    color:#d6b46c;
-    font-weight:bold;
-    margin-bottom:7px;
+/* =========================================================
+   TOAST
+========================================================= */
+
+#toast{
+  position:absolute;
+  z-index:60;
+  left:50%;
+  bottom:40px;
+  transform:translateX(-50%);
+  background:#090c12f5;
+  border:1px solid #515a6b;
+  padding:10px 17px;
+  border-radius:9px;
+  opacity:0;
+  transition:.2s;
+  pointer-events:none;
+  box-shadow:0 8px 30px #0009;
 }
 
-.remotePlayer{
-    padding:4px 0;
-    color:#c1c5d1;
-    font-size:13px;
+/* =========================================================
+   PAUSE
+========================================================= */
+
+#pause{
+  position:absolute;
+  inset:0;
+  z-index:100;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:#020307c9;
+  backdrop-filter:blur(6px);
 }
 
-#connection{
-    position:absolute;
-    right:12px;
-    bottom:8px;
-    color:#777c8b;
-    font-size:11px;
+.pause-panel{
+  width:min(480px,92vw);
+  padding:30px;
+  background:
+    linear-gradient(145deg,#171b26,#0a0d13);
+  border:1px solid #4b5363;
+  border-radius:16px;
+  box-shadow:0 25px 100px #000;
+  text-align:center;
 }
 
-.connected{
-    color:#63d38b!important;
+.pause-panel h1{
+  margin:0 0 8px;
+  color:#e9c967;
+  letter-spacing:3px;
 }
 
-.disconnected{
-    color:#e16d6d!important;
+.pause-panel p{
+  color:#81899a;
+  margin-bottom:25px;
 }
 
-#bottomButtons{
-    position:absolute;
-    bottom:15px;
-    left:15px;
-    display:flex;
-    gap:8px;
+.pause-info{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-bottom:20px;
 }
 
-#bottomButtons button{
-    min-width:100px;
+.pause-info div{
+  background:#0a0d13;
+  border:1px solid #303746;
+  padding:10px;
+  border-radius:8px;
 }
 
-#mobileControls{
-    display:none;
-    position:absolute;
-    left:15px;
-    bottom:15px;
-    width:150px;
-    height:150px;
+.pause-info small{
+  display:block;
+  color:#70798b;
 }
 
-.touchButton{
-    position:absolute;
-    width:48px;
-    height:48px;
-    padding:0;
-    opacity:.75;
+.pause-panel button{
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  color:#eee;
+  background:#222936;
+  border:1px solid #505a6d;
+  border-radius:8px;
 }
 
-#upBtn{
-    left:51px;
-    top:0;
+.pause-panel button:hover{
+  background:#343e50;
 }
 
-#leftBtn{
-    left:0;
-    top:51px;
+/* =========================================================
+   SHOP
+========================================================= */
+
+#shop{
+  position:absolute;
+  inset:0;
+  z-index:90;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:#020307dd;
+  backdrop-filter:blur(5px);
 }
 
-#downBtn{
-    left:51px;
-    top:51px;
+.shop-panel{
+  width:min(850px,94vw);
+  max-height:90vh;
+  overflow:auto;
+  padding:26px;
+  background:
+    radial-gradient(circle at 50% 0,#4d332522,transparent 45%),
+    linear-gradient(145deg,#171a24,#0a0d13);
+  border:1px solid #5a5260;
+  border-radius:16px;
+  box-shadow:0 25px 100px #000;
 }
 
-#rightBtn{
-    left:102px;
-    top:51px;
+.shop-title{
+  text-align:center;
+  margin-bottom:20px;
 }
 
-#actionButtons{
-    display:none;
-    position:absolute;
-    right:15px;
-    bottom:15px;
-    gap:8px;
+.shop-title h1{
+  margin:0 0 8px;
+  color:#e9c967;
+  font-size:28px;
 }
 
-.actionCircle{
-    width:58px;
-    height:58px;
-    border-radius:50%;
-    padding:0;
+.shop-title p{
+  color:#b7bcc6;
+  font-family:monospace;
+  font-size:15px;
 }
 
-#pauseOverlay{
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:rgba(0,0,0,.7);
-    z-index:20;
+.shop-gold{
+  text-align:center;
+  color:#e6c65c;
+  margin-bottom:15px;
 }
 
-.pausePanel{
-    width:min(380px,90vw);
-    background:#101119;
-    border:1px solid #383c4c;
-    border-radius:14px;
-    padding:28px;
-    text-align:center;
+.shop-items{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:10px;
 }
 
-.pausePanel h2{
-    color:#d6b46c;
-    margin-bottom:20px;
+.shop-item{
+  padding:15px;
+  background:#0b0e15;
+  border:1px solid #353c4b;
+  border-radius:10px;
 }
 
-/* =========================
-   SHOP / INVENTORY
-========================= */
-
-.overlay{
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:rgba(0,0,0,.7);
-    z-index:15;
+.shop-item h3{
+  margin:0 0 6px;
+  color:#ddd;
 }
 
-.overlayPanel{
-    width:min(600px,92vw);
-    max-height:85vh;
-    overflow:auto;
-    background:#101119;
-    border:1px solid #3a3d4d;
-    border-radius:14px;
-    padding:24px;
+.shop-item p{
+  color:#858d9e;
+  font-size:13px;
+  min-height:35px;
 }
 
-.overlayPanel h2{
-    text-align:center;
-    color:#d6b46c;
-    margin-bottom:20px;
+.shop-item .price{
+  color:#e4bf54;
+  margin-bottom:9px;
 }
 
-.shopGrid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:10px;
+.shop-item button{
+  width:100%;
+  padding:9px;
+  background:#252c39;
+  border:1px solid #4d5668;
+  color:#fff;
+  border-radius:7px;
 }
 
-.shopItem{
-    border:1px solid #2f3340;
-    border-radius:10px;
-    padding:15px;
-    background:#0b0c11;
+.shop-item button:hover{
+  background:#374152;
 }
 
-.shopItem h3{
-    color:#d6b46c;
-    margin-bottom:6px;
+.shop-close{
+  display:block;
+  width:100%;
+  margin-top:16px;
+  padding:11px;
+  background:#161b25;
+  border:1px solid #4a5364;
+  color:#ddd;
+  border-radius:8px;
 }
 
-.shopItem p{
-    color:#9297a7;
-    font-size:13px;
-    margin-bottom:12px;
+/* =========================================================
+   INVENTORY
+========================================================= */
+
+#inventory{
+  position:absolute;
+  inset:0;
+  z-index:85;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:#020307dd;
+  backdrop-filter:blur(5px);
 }
 
-.inventoryItem{
-    border:1px solid #2f3340;
-    padding:14px;
-    border-radius:9px;
-    margin-bottom:8px;
-    background:#0b0c11;
+.inventory-panel{
+  width:min(850px,94vw);
+  max-height:90vh;
+  overflow:auto;
+  padding:25px;
+  background:#10141c;
+  border:1px solid #495264;
+  border-radius:15px;
+  box-shadow:0 25px 100px #000;
 }
 
-.inventoryItem strong{
-    color:#d6b46c;
+.inventory-panel h1{
+  color:#e8c65e;
+  text-align:center;
 }
 
-/* =========================
+.inventory-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:10px;
+}
+
+.item-card{
+  min-height:130px;
+  padding:13px;
+  background:#090c12;
+  border:1px solid #343b4b;
+  border-radius:9px;
+}
+
+.item-icon{
+  font-size:32px;
+}
+
+.item-card h3{
+  margin:5px 0;
+}
+
+.item-card p{
+  color:#858c9d;
+  font-size:12px;
+}
+
+.item-card button{
+  width:100%;
+  padding:7px;
+  background:#252c39;
+  border:1px solid #485266;
+  color:white;
+  border-radius:6px;
+}
+
+.close-modal{
+  width:100%;
+  margin-top:15px;
+  padding:11px;
+  background:#1a202c;
+  border:1px solid #4b5567;
+  color:#fff;
+  border-radius:8px;
+}
+
+/* =========================================================
+   DEATH
+========================================================= */
+
+#death{
+  position:absolute;
+  inset:0;
+  z-index:110;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  background:#000d;
+}
+
+#death h1{
+  font-size:clamp(40px,8vw,75px);
+  color:#d95454;
+  text-shadow:0 0 30px #7d2020;
+}
+
+#death button{
+  padding:13px 28px;
+  background:#252d3b;
+  border:1px solid #606b7f;
+  color:white;
+  border-radius:8px;
+}
+
+/* =========================================================
+   CONTROLS
+========================================================= */
+
+#controls{
+  position:absolute;
+  z-index:20;
+  left:12px;
+  bottom:10px;
+  color:#727a8b;
+  font-size:11px;
+}
+
+/* =========================================================
    RESPONSIVE
-========================= */
+========================================================= */
 
 @media(max-width:700px){
+  #hud{
+    max-width:62%;
+  }
 
-    #mobileControls{
-        display:block;
-    }
+  .stat{
+    min-width:72px;
+    padding:6px;
+  }
 
-    #actionButtons{
-        display:flex;
-        flex-direction:column;
-    }
+  #buttons{
+    flex-direction:column;
+  }
 
-    #bottomButtons{
-        display:none;
-    }
+  #waveBox{
+    top:130px;
+  }
 
-    #playersPanel{
-        width:145px;
-        top:105px;
-        right:7px;
-    }
-
-    #hud{
-        font-size:12px;
-    }
-
-    .stats{
-        gap:7px;
-    }
-
-    .hpBar{
-        width:110px;
-    }
-
-    .shopGrid{
-        grid-template-columns:1fr;
-    }
-
-    .panel{
-        padding:22px;
-    }
-
-    .logo{
-        font-size:34px;
-    }
+  #controls{
+    display:none;
+  }
 }
+
+/* =========================================================
+   MULTIPLAYER LOBBY — ADDED WITHOUT CHANGING GAME UI
+========================================================= */
+#multiplayer{
+  position:relative;
+  width:min(700px,95vw);
+  margin:0 auto 25px;
+  padding:16px;
+  background:#0c0f16ee;
+  border:1px solid #353b4a;
+  border-radius:12px;
+  box-shadow:0 12px 35px #0006;
+}
+#multiplayer h3{margin:0 0 10px;color:#e8c75e;text-align:center}
+.mp-row{display:flex;gap:8px;flex-wrap:wrap}
+.mp-row input{flex:1;min-width:150px;padding:10px;background:#080b11;color:#eee;border:1px solid #454e60;border-radius:7px}
+.mp-row button{padding:10px 13px;background:#252c39;color:#eee;border:1px solid #515a6c;border-radius:7px}
+.mp-row button:hover{background:#353e4e}
+#roomStatus{text-align:center;margin-top:9px;color:#8f96a6;font-size:13px}
+#roomStatus b{color:#e8c75e}
+#partyList{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:9px}
+.party-player{padding:5px 9px;background:#111620;border:1px solid #384153;border-radius:7px;color:#ddd;font-size:12px}
+#copyRoom{display:none}
+#roomCodeInput{text-transform:uppercase}
 </style>
 </head>
 
 <body>
 
-<!-- =========================
-     MAIN MENU
-========================= -->
+<!-- =======================================================
+     MENU
+======================================================= -->
 
-<div id="menu" class="screen">
+<section id="menu">
 
-    <div class="panel">
+<div class="logo">RUNEVALE</div>
 
-        <div class="logo">RuneVale</div>
-        <div class="subtitle">Dark Dungeons</div>
-
-        <div class="menuButtons">
-
-            <button class="goldButton" onclick="openSoloMenu()">
-                PLAY
-            </button>
-
-            <button onclick="openMultiplayer()">
-                MULTIPLAYER
-            </button>
-
-            <button onclick="openControls()">
-                CONTROLS
-            </button>
-
-            <button onclick="showAbout()">
-                ABOUT
-            </button>
-
-        </div>
-
-        <div class="small">
-            RuneVale — Dark Dungeons
-        </div>
-
-    </div>
-
+<div class="subtitle">
+Dark Dungeons · Loot · Monsters · Adventure
 </div>
 
-
-<!-- =========================
-     SOLO MENU
-========================= -->
-
-<div id="soloMenu" class="screen hidden">
-
-    <div class="panel">
-
-        <h2 class="title">Enter the Dungeon</h2>
-
-        <label>Nome</label>
-
-        <input
-            id="soloName"
-            maxlength="16"
-            placeholder="Nome do jogador"
-        >
-
-        <label style="display:block;margin-top:15px">
-            Dungeon
-        </label>
-
-        <select
-            id="soloDungeon"
-            style="
-                width:100%;
-                padding:12px;
-                margin-top:8px;
-                background:#0e1016;
-                color:white;
-                border:1px solid #383c4d;
-                border-radius:8px;
-            "
-        >
-            <option value="1">As Catacumbas</option>
-            <option value="2">Cripta de Fogo</option>
-            <option value="3">Salão Congelado</option>
-            <option value="4">Abismo Morto</option>
-            <option value="5">Castelo do Rei Negro</option>
-        </select>
-
-        <div class="buttonRow">
-
-            <button
-                class="goldButton"
-                onclick="startSolo()"
-            >
-                START
-            </button>
-
-            <button onclick="backToMenu()">
-                VOLTAR
-            </button>
-
-        </div>
-
-    </div>
-
+<div class="menu-stats">
+  <div class="menu-stat">⚔️ Level <b id="menuLevel">1</b></div>
+  <div class="menu-stat">💰 <b id="menuGold">25</b> ouro</div>
+  <div class="menu-stat">🏆 Dungeons <b id="menuDungeons">0/5</b></div>
 </div>
 
-
-<!-- =========================
-     MULTIPLAYER MENU
-========================= -->
-
-<div id="multiplayer" class="screen hidden">
-
-    <div class="panel">
-
-        <h2 class="title">Multiplayer</h2>
-
-        <input
-            id="playerName"
-            maxlength="16"
-            placeholder="Nome do jogador"
-        >
-
-        <div class="buttonRow">
-
-            <button
-                class="goldButton"
-                onclick="createRoom()"
-            >
-                CRIAR SALA
-            </button>
-
-            <button onclick="joinRoom()">
-                ENTRAR
-            </button>
-
-        </div>
-
-        <input
-            id="roomInput"
-            maxlength="8"
-            placeholder="Código da sala"
-            style="text-transform:uppercase"
-        >
-
-        <div
-            id="roomStatus"
-            class="status"
-        ></div>
-
-        <button
-            style="width:100%;margin-top:15px"
-            onclick="backToMenu()"
-        >
-            VOLTAR
-        </button>
-
-    </div>
-
+<div id="multiplayer">
+  <h3>🌐 MULTIPLAYER</h3>
+  <div class="mp-row">
+    <input id="playerNameInput" maxlength="16" placeholder="Nome do jogador">
+    <button onclick="createRoom()">🏠 CRIAR SALA</button>
+  </div>
+  <div class="mp-row" style="margin-top:8px">
+    <input id="roomCodeInput" maxlength="7" placeholder="Código da sala (RV-XXXX)">
+    <button onclick="joinRoom()">👥 ENTRAR</button>
+    <button id="copyRoom" onclick="copyRoomCode()">📋 COPIAR</button>
+  </div>
+  <div id="roomStatus">Sem sala — podes jogar normalmente.</div>
+  <div id="partyList"></div><button id="startRoomBtn" onclick="startRoomGame()" style="display:none;margin:12px auto 0;padding:11px 25px;background:#7b5b20;color:#fff;border:1px solid #d9ad4b;border-radius:8px;font-weight:bold">▶ START DUNGEON</button>
 </div>
 
+<div class="dungeons">
 
-<!-- =========================
-     LOBBY
-========================= -->
-
-<div id="lobby" class="screen hidden">
-
-    <div class="panel">
-
-        <h2 class="title">Dungeon Lobby</h2>
-
-        <div class="small">
-            Código da sala
-        </div>
-
-        <div
-            id="roomCodeDisplay"
-            class="roomCode"
-        >
-            -----
-        </div>
-
-        <div
-            id="lobbyConnection"
-            class="status"
-        >
-            A ligar...
-        </div>
-
-        <div
-            id="lobbyPlayers"
-            class="lobbyPlayers"
-        ></div>
-
-        <div class="buttonRow">
-
-            <button
-                id="startDungeonButton"
-                class="goldButton"
-                onclick="startMultiplayerDungeon()"
-            >
-                START DUNGEON
-            </button>
-
-            <button
-                onclick="leaveRoom()"
-                class="dangerButton"
-            >
-                SAIR
-            </button>
-
-        </div>
-
-    </div>
-
+<div class="dungeon">
+<h2>⚔️ Dungeon I</h2>
+<p>As Catacumbas</p>
+<p>10 hordas · inimigos básicos</p>
+<p class="difficulty">Dificuldade: Normal</p>
+<button onclick="enterDungeon(1)">ENTRAR</button>
 </div>
 
+<div class="dungeon locked" data-dungeon="2">
+<span class="lock">🔒</span>
+<h2>🔥 Dungeon II</h2>
+<p>Cripta de Fogo</p>
+<p>10 hordas · inimigos mais fortes</p>
+<p class="difficulty">Dificuldade: Difícil</p>
+<button disabled>LOCKED</button>
+</div>
 
-<!-- =========================
+<div class="dungeon locked" data-dungeon="3">
+<span class="lock">🔒</span>
+<h2>❄️ Dungeon III</h2>
+<p>Salão Congelado</p>
+<p>10 hordas · monstros poderosos</p>
+<p class="difficulty">Dificuldade: Muito difícil</p>
+<button disabled>LOCKED</button>
+</div>
+
+<div class="dungeon locked" data-dungeon="4">
+<span class="lock">🔒</span>
+<h2>☠️ Dungeon IV</h2>
+<p>Abismo Morto</p>
+<p>10 hordas · criaturas mortais</p>
+<p class="difficulty">Dificuldade: Brutal</p>
+<button disabled>LOCKED</button>
+</div>
+
+<div class="dungeon locked" data-dungeon="5">
+<span class="lock">👑</span>
+<h2>👑 Dungeon V</h2>
+<p>Castelo do Rei Negro</p>
+<p>10 hordas · inimigos lendários</p>
+<p class="difficulty">Dificuldade: Infernal</p>
+<button disabled>LOCKED</button>
+</div>
+
+</div>
+</section>
+
+
+<!-- =======================================================
      GAME
-========================= -->
-
-<div id="game" class="hidden">
-
-    <canvas id="canvas"></canvas>
-
-    <div id="hud">
-
-        <div class="hudBox">
-
-            <div class="stats">
-
-                <div class="stat">
-                    ❤️ <strong id="hpText">100/100</strong>
-                </div>
-
-                <div class="stat">
-                    🪙 <strong id="goldText">25</strong>
-                </div>
-
-                <div class="stat">
-                    ⭐ <strong id="levelText">1</strong>
-                </div>
-
-                <div class="stat">
-                    🧪 <strong id="potionText">3</strong>
-                </div>
-
-            </div>
-
-            <div class="hpBar">
-                <div
-                    id="hpFill"
-                    class="hpFill"
-                ></div>
-            </div>
-
-        </div>
-
-        <div
-            id="waveBox"
-            class="hudBox"
-        >
-            WAVE
-            <strong id="waveNumber">1</strong>/10
-        </div>
-
-    </div>
-
-
-    <div id="message"></div>
-
-
-    <div
-        id="targetBox"
-        class="hudBox hidden"
-    >
-        <div id="targetName"></div>
-
-        <div class="hpBar">
-            <div
-                id="targetHp"
-                class="hpFill"
-            ></div>
-        </div>
-    </div>
-
-
-    <div id="playersPanel">
-
-        <div id="playersTitle">
-            Players
-        </div>
-
-        <div id="playersList"></div>
-
-    </div>
-
-
-    <div id="bottomButtons">
-
-        <button onclick="areaAttack()">
-            ⚔ AREA
-        </button>
-
-        <button onclick="usePotion()">
-            🧪 POTION
-        </button>
-
-        <button onclick="openInventory()">
-            🎒 INVENTORY
-        </button>
-
-        <button onclick="togglePause()">
-            ⏸ PAUSE
-        </button>
-
-        <button onclick="exitGame()">
-            EXIT
-        </button>
-
-    </div>
-
-
-    <div id="mobileControls">
-
-        <button
-            id="upBtn"
-            class="touchButton"
-        >
-            ▲
-        </button>
-
-        <button
-            id="leftBtn"
-            class="touchButton"
-        >
-            ◀
-        </button>
-
-        <button
-            id="downBtn"
-            class="touchButton"
-        >
-            ▼
-        </button>
-
-        <button
-            id="rightBtn"
-            class="touchButton"
-        >
-            ▶
-        </button>
-
-    </div>
-
-
-    <div id="actionButtons">
-
-        <button
-            class="actionCircle"
-            onclick="areaAttack()"
-        >
-            ⚔
-        </button>
-
-        <button
-            class="actionCircle"
-            onclick="usePotion()"
-        >
-            🧪
-        </button>
-
-    </div>
-
-
-    <div id="connection">
-        <span id="connectionText">
-            Offline
-        </span>
-    </div>
-
-
-    <!-- PAUSE -->
-
-    <div
-        id="pauseOverlay"
-        class="hidden"
-    >
-
-        <div class="pausePanel">
-
-            <h2>Paused</h2>
-
-            <button
-                style="width:100%"
-                onclick="togglePause()"
-            >
-                CONTINUE
-            </button>
-
-            <button
-                style="width:100%;margin-top:10px"
-                onclick="exitGame()"
-            >
-                EXIT
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <!-- INVENTORY -->
-
-    <div
-        id="inventoryOverlay"
-        class="overlay hidden"
-    >
-
-        <div class="overlayPanel">
-
-            <h2>Inventory</h2>
-
-            <div class="inventoryItem">
-                ⚔ <strong>Mini Sword</strong>
-                <br>
-                <span class="small">
-                    Damage: +5
-                </span>
-            </div>
-
-            <div class="inventoryItem">
-                🧪 <strong>Health Potion</strong>
-                <br>
-                <span class="small">
-                    Restores 40 HP
-                </span>
-            </div>
-
-            <button
-                style="width:100%;margin-top:10px"
-                onclick="closeInventory()"
-            >
-                CLOSE
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <!-- SHOP -->
-
-    <div
-        id="shopOverlay"
-        class="overlay hidden"
-    >
-
-        <div class="overlayPanel">
-
-            <h2>Merchant</h2>
-
-            <div class="shopGrid">
-
-                <div class="shopItem">
-
-                    <h3>🧪 Potion</h3>
-
-                    <p>
-                        Restores 40 HP.
-                    </p>
-
-                    <button
-                        onclick="buyPotion()"
-                    >
-                        Buy — 10 Gold
-                    </button>
-
-                </div>
-
-
-                <div class="shopItem">
-
-                    <h3>⚔ Sharp Blade</h3>
-
-                    <p>
-                        +3 damage.
-                    </p>
-
-                    <button
-                        onclick="buySword()"
-                    >
-                        Buy — 40 Gold
-                    </button>
-
-                </div>
-
-            </div>
-
-            <button
-                style="width:100%;margin-top:15px"
-                onclick="closeShop()"
-            >
-                CONTINUE
-            </button>
-
-        </div>
-
-    </div>
+======================================================= -->
+
+<section id="game" class="hidden">
+
+<canvas id="canvas"></canvas>
+
+<div id="hud">
+
+<div class="stat">
+<small>HP</small>
+<b id="hp">100 / 100</b>
+</div>
+
+<div class="stat">
+<small>XP</small>
+<b id="xp">0 / 100</b>
+</div>
+
+<div class="stat">
+<small>NÍVEL</small>
+<b id="level">1</b>
+</div>
+
+<div class="stat">
+<small>OURO</small>
+<b id="gold">25</b>
+</div>
+
+<div class="stat">
+<small>DANO</small>
+<b id="damage">5</b>
+</div>
+
+<div class="stat">
+<small>POÇÕES</small>
+<b id="potions">3</b>
+</div>
 
 </div>
+
+
+<div id="buttons">
+
+<button class="btn" onclick="toggleInventory()">🎒</button>
+
+<button class="btn" onclick="usePotion()">🧪</button>
+
+<button class="btn" onclick="areaAttack()">⚔️</button>
+
+<button class="btn" id="pauseButton" onclick="togglePause()">⏸</button>
+
+</div>
+
+
+<div id="waveBox">
+
+<strong id="dungeonName">As Catacumbas</strong>
+
+<br>
+
+Horda <b id="wave">1</b> / 10
+
+<div class="progress">
+<i id="waveProgress"></i>
+</div>
+
+<small id="enemyCount">0 inimigos</small>
+
+</div>
+
+
+<div id="targetBox">
+
+<b id="targetName">Alvo</b>
+
+<div id="targetBar">
+<i></i>
+</div>
+
+</div>
+
+
+<div id="message">
+
+<h1 id="messageTitle"></h1>
+
+<p id="messageText"></p>
+
+</div>
+
+
+<div id="toast"></div>
+
+
+<div id="controls">
+WASD mover · Clique no chão mover · Clique num inimigo atacar · ESPAÇO AoE · ESC pausa
+</div>
+
+
+<!-- =====================================================
+     PAUSE
+===================================================== -->
+
+<div id="pause">
+
+<div class="pause-panel">
+
+<h1>PAUSADO</h1>
+
+<p>O tempo está parado.</p>
+
+<div class="pause-info">
+
+<div>
+<small>Dungeon</small>
+<b id="pauseDungeon">I</b>
+</div>
+
+<div>
+<small>Horda</small>
+<b id="pauseWave">1 / 10</b>
+</div>
+
+<div>
+<small>Nível</small>
+<b id="pauseLevel">1</b>
+</div>
+
+<div>
+<small>Ouro</small>
+<b id="pauseGold">25</b>
+</div>
+
+</div>
+
+<button onclick="togglePause()">▶ CONTINUAR</button>
+
+<button onclick="saveGame();showToast('💾 Jogo guardado!')">💾 GUARDAR</button>
+
+<button onclick="toggleInventory()">🎒 INVENTÁRIO</button>
+
+<button onclick="exitToMenu()">🏰 SAIR PARA DUNGEONS</button>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     SHOP
+===================================================== -->
+
+<div id="shop">
+
+<div class="shop-panel">
+
+<div class="shop-title">
+
+<h1>🧙 MERCHANT</h1>
+
+<p>HELLO, WHAT DO YOU WANT TO BUY?</p>
+
+</div>
+
+<div class="shop-gold">
+💰 Ouro: <b id="shopGold">0</b>
+</div>
+
+<div class="shop-items">
+
+<div class="shop-item">
+<h3>🧪 Poção</h3>
+<p>Restaura 40 HP.</p>
+<div class="price">💰 15</div>
+<button onclick="buyPotion()">COMPRAR</button>
+</div>
+
+<div class="shop-item">
+<h3>⚔️ Sharp Stone</h3>
+<p>Aumenta o dano em +2.</p>
+<div class="price">💰 60</div>
+<button onclick="buyDamage()">COMPRAR</button>
+</div>
+
+<div class="shop-item">
+<h3>❤️ Vital Crystal</h3>
+<p>Aumenta o HP máximo em +20.</p>
+<div class="price">💰 75</div>
+<button onclick="buyHealth()">COMPRAR</button>
+</div>
+
+<div class="shop-item">
+<h3>🗡️ Iron Blade</h3>
+<p>Espada melhorada. +5 dano.</p>
+<div class="price">💰 180</div>
+<button onclick="buyWeapon('Iron Blade',5,180)">COMPRAR</button>
+</div>
+
+<div class="shop-item">
+<h3>🛡️ Guardian Armor</h3>
+<p>+35 HP máximo.</p>
+<div class="price">💰 220</div>
+<button onclick="buyArmor()">COMPRAR</button>
+</div>
+
+<div class="shop-item">
+<h3>💍 Ring of Power</h3>
+<p>+8 dano.</p>
+<div class="price">💰 350</div>
+<button onclick="buyRing()">COMPRAR</button>
+</div>
+
+</div>
+
+<button class="shop-close" onclick="closeShop()">
+ENTRAR NA DUNGEON
+</button>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     INVENTORY
+===================================================== -->
+
+<div id="inventory">
+
+<div class="inventory-panel">
+
+<h1>🎒 INVENTÁRIO</h1>
+
+<div class="inventory-grid" id="inventoryGrid"></div>
+
+<button class="close-modal" onclick="toggleInventory()">
+FECHAR
+</button>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     DEATH
+===================================================== -->
+
+<div id="death">
+
+<h1>DERROTADO</h1>
+
+<p>Os monstros venceram esta batalha.</p>
+
+<button onclick="respawn()">TENTAR NOVAMENTE</button>
+
+</div>
+
+</section>
 
 
 <script>
 
 /* =========================================================
-   SUPABASE
-========================================================= */
-
-const SUPABASE_URL =
-    "https://lqzzvufqrggudnnvfrdv.supabase.co";
-
-const SUPABASE_KEY =
-    "sb_publishable_r4OlSxiIe1_rBZ3q5V_K2w_GfxDWVyb";
-
-const supabaseClient =
-    supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
-
-
-/* =========================================================
    CANVAS
 ========================================================= */
 
-const canvas =
-    document.getElementById("canvas");
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
 
-const ctx =
-    canvas.getContext("2d");
+let W=innerWidth;
+let H=innerHeight;
+let DPR=Math.min(devicePixelRatio||1,2);
 
-let W = innerWidth;
-let H = innerHeight;
+function resize(){
 
-function resizeCanvas(){
+  W=innerWidth;
+  H=innerHeight;
 
-    W = innerWidth;
-    H = innerHeight;
+  canvas.width=W*DPR;
+  canvas.height=H*DPR;
 
-    canvas.width = W;
-    canvas.height = H;
+  canvas.style.width=W+"px";
+  canvas.style.height=H+"px";
+
+  ctx.setTransform(DPR,0,0,DPR,0,0);
 }
 
-resizeCanvas();
+addEventListener("resize",resize);
 
-window.addEventListener(
-    "resize",
-    resizeCanvas
-);
-
-
-/* =========================================================
-   PLAYER
-========================================================= */
-
-const player = {
-
-    id: crypto.randomUUID(),
-
-    name:"",
-
-    x:400,
-
-    y:300,
-
-    hp:100,
-
-    maxHp:100,
-
-    level:1,
-
-    gold:25,
-
-    damage:5,
-
-    potions:3,
-
-    speed:220
-};
+resize();
 
 
 /* =========================================================
    GAME STATE
 ========================================================= */
 
-let gameRunning = false;
-let paused = false;
-let solo = false;
+const keys={};
 
-let dungeon = 1;
-let wave = 1;
+let mobs=[];
+let particles=[];
+let numbers=[];
+let floatingLoot=[];
 
-let monsters = [];
+let target=null;
+let destination=null;
 
-let effects = [];
+let currentDungeon=1;
+let currentWave=1;
 
-let floatingTexts = [];
+let waveStarting=false;
+let dungeonComplete=false;
 
-let remotePlayers = {};
+let gameTime=0;
+let lastTime=performance.now();
 
-let targetMonster = null;
+let attackCooldown=0;
+let attackAnimation=0;
 
-let roomCode = null;
-let channel = null;
+let toastTimer=0;
 
-let connected = false;
+let paused=false;
 
-let roomHost = false;
+let shopDungeon=1;
 
-let lastNetworkSend = 0;
+const completedDungeons={
+  1:false,
+  2:false,
+  3:false,
+  4:false,
+  5:false
+};
 
-let lastTime =
-    performance.now();
+
+/* =========================================================
+   PLAYER
+========================================================= */
+
+const player={
+
+  x:0,
+  y:0,
+
+  hp:100,
+  maxHp:100,
+
+  level:1,
+
+  xp:0,
+  xpMax:100,
+
+  gold:25,
+
+  damage:5,
+
+  weapon:"Mini Espada de Bosta",
+
+  armor:"Roupa de Aventureiro",
+
+  ring:"Nenhum",
+
+  potions:3,
+
+  speed:190,
+
+  direction:1,
+
+  anim:0,
+
+  hit:0,
+
+  dead:false
+
+};
+
+
+/* =========================================================
+   MULTIPLAYER — CO-OP DUNGEON (AUTHORITATIVE HOST)
+========================================================= */
+const SUPABASE_URL="https://lqzzvufqrggudnnvfrdv.supabase.co";
+const SUPABASE_KEY="sb_publishable_r4OlSxiIe1_rBZ3q5V_K2w_GfxDWVyb";
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let roomChannel=null,roomCode="",roomHost=false,roomHostId=null,multiplayerPlayers={},playerId=crypto.randomUUID(),guestActive=false;
+let mpLastState=0,mpLastPresence=0;
+
+function makeRoomCode(){
+  const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let x="RV-";
+  for(let i=0;i<4;i++)x+=c[Math.floor(Math.random()*c.length)];
+  return x;
+}
+function setRoomStatus(t){const e=document.getElementById("roomStatus");if(e)e.innerHTML=t;}
+function playerName(){const e=document.getElementById("playerNameInput");return(e?.value||localStorage.getItem("runevale-name")||"Player").trim().slice(0,16)||"Player";}
+function renderParty(){
+  const e=document.getElementById("partyList");if(!e)return;e.innerHTML="";
+  [{id:playerId,name:playerName()},...Object.values(multiplayerPlayers)].forEach(p=>{
+    const d=document.createElement("div");d.className="party-player";
+    d.textContent="🟢 "+(p.name||"Player")+(p.id===roomHostId?" 👑":"");e.appendChild(d);
+  });
+}
+function updateStartButton(){const b=document.getElementById("startRoomBtn");if(b)b.style.display=(roomChannel&&roomHost)?"block":"none";}
+function startRoomGame(){
+  if(!roomChannel||!roomHost)return;
+  broadcastRoom({type:"start_game",from:playerId,dungeon:1});
+  beginDungeon(1);
+}
+async function createRoom(){await connectRoom(makeRoomCode(),true);}
+async function joinRoom(){
+  const c=(document.getElementById("roomCodeInput")?.value||"").trim().toUpperCase();
+  if(!/^RV-[A-Z0-9]{4}$/.test(c)){showToast("❌ Código inválido. Ex: RV-AB12");return;}
+  await connectRoom(c,false);
+}
+async function connectRoom(code,host){
+  try{
+    if(roomChannel){try{await supabaseClient.removeChannel(roomChannel);}catch(e){}}
+    roomCode=code;roomHost=!!host;roomHostId=host?playerId:null;guestActive=false;
+    localStorage.setItem("runevale-name",playerName());
+    const input=document.getElementById("roomCodeInput");if(input)input.value=code;
+    const copy=document.getElementById("copyRoom");if(copy)copy.style.display="inline-block";
+    setRoomStatus("A ligar à sala <b>"+code+"</b>...");
+    roomChannel=supabaseClient.channel("runevale-room:"+code,{config:{presence:{key:playerId}}});
+    roomChannel.on("presence",{event:"sync"},syncRoomPlayers);
+    roomChannel.on("broadcast",{event:"runevale"},({payload})=>handleRoomMessage(payload));
+    await roomChannel.subscribe(async status=>{
+      if(status==="SUBSCRIBED"){
+        await trackPresence();renderParty();updateStartButton();
+        setRoomStatus("Sala <b>"+roomCode+"</b> · "+(roomHost?"és o host 👑":"ligado"));
+        showToast("🌐 Sala ligada: "+roomCode);
+        if(!roomHost)await broadcastRoom({type:"request_state",from:playerId});
+      }else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){
+        setRoomStatus("❌ Erro de ligação ao multiplayer.");
+        showToast("❌ Multiplayer sem ligação");
+      }
+    });
+  }catch(e){console.error(e);showToast("❌ Erro ao ligar ao multiplayer");setRoomStatus("❌ Não foi possível ligar.");}
+}
+function syncRoomPlayers(){
+  if(!roomChannel)return;
+  const state=roomChannel.presenceState();
+  const next={};
+  let foundHost=roomHostId;
+  for(const key of Object.keys(state)){
+    const arr=state[key]||[];const p=arr[arr.length-1];if(!p)continue;
+    const id=p.id||key;if(p.host)foundHost=id;
+    if(id!==playerId)next[id]={...(multiplayerPlayers[id]||{}),...p,id};
+  }
+  multiplayerPlayers=next;
+  if(foundHost){roomHostId=foundHost;roomHost=foundHost===playerId;}
+  renderParty();updateStartButton();
+}
+async function trackPresence(){
+  if(!roomChannel)return;
+  try{await roomChannel.track({id:playerId,name:playerName(),host:roomHost,x:player.x,y:player.y,dungeon:currentDungeon,wave:currentWave,hp:player.hp,maxHp:player.maxHp,level:player.level});}catch(e){console.warn(e);}
+}
+async function updateRoomPresence(){
+  if(!roomChannel)return;
+  const now=performance.now();
+  if(now-mpLastPresence<80)return;
+  mpLastPresence=now;
+  try{await roomChannel.track({id:playerId,name:playerName(),host:roomHost,x:player.x,y:player.y,dungeon:currentDungeon,wave:currentWave,hp:player.hp,maxHp:player.maxHp,level:player.level});}catch(e){}
+  renderParty();
+}
+async function broadcastRoom(data){if(!roomChannel)return;try{await roomChannel.send({type:"broadcast",event:"runevale",payload:data});}catch(e){console.warn(e);}}
+function serializeMobs(){return mobs.map(m=>({...m,boss:!!m.boss}));}
+function applyRemoteMobs(a){if(Array.isArray(a))mobs=a.map(m=>({...m}));}
+function enterGameView(dungeonNumber){
+  document.getElementById("menu").classList.add("hidden");
+  document.getElementById("game").classList.remove("hidden");
+  document.getElementById("death").style.display="none";
+  document.getElementById("pause").style.display="none";
+  document.getElementById("dungeonName").textContent=(dungeonData[dungeonNumber]||dungeonData[1]).name;
+  guestActive=true;
+}
+function broadcastFullState(force=false){
+  if(!roomHost||!roomChannel)return;
+  const now=performance.now();if(!force&&now-mpLastState<80)return;mpLastState=now;
+  broadcastRoom({type:"state",from:playerId,dungeon:currentDungeon,wave:currentWave,waveStarting,dungeonComplete,inGame:!document.getElementById("game").classList.contains("hidden"),mobs:serializeMobs()});
+}
+function handleRoomMessage(d){
+  if(!d||d.from===playerId&&d.type!=="request_state")return;
+  if(d.type==="start_game"&&!roomHost){
+    currentDungeon=d.dungeon||1;beginDungeon(currentDungeon);guestActive=true;return;
+  }
+  if(d.type==="request_state"&&roomHost){broadcastFullState(true);return;}
+  if(d.type==="player_state"&&d.id!==playerId){
+    multiplayerPlayers[d.id]={...(multiplayerPlayers[d.id]||{}),id:d.id,name:d.name||"Player",x:Number(d.x)||0,y:Number(d.y)||0,hp:Number(d.hp)||0,maxHp:Number(d.maxHp)||100,level:Number(d.level)||1};
+    return;
+  }
+  if(d.type==="request_attack"&&roomHost&&d.dungeon===currentDungeon&&!waveStarting){performRemoteAttack(d);return;}
+  if(d.type==="damage"&&d.to===playerId){
+    player.hp=Math.max(0,player.hp-(Number(d.amount)||0));player.hit=.15;updateHUD();
+    if(player.hp<=0&&!player.dead)die();return;
+  }
+  if(d.type==="reward"&&d.to===playerId){player.gold+=Number(d.gold)||0;gainXP(Number(d.xp)||0);updateHUD();saveGame();return;}
+  if(d.type==="state"&&!roomHost){
+    if(typeof d.dungeon==="number")currentDungeon=d.dungeon;
+    currentWave=Number(d.wave)||currentWave;waveStarting=!!d.waveStarting;dungeonComplete=!!d.dungeonComplete;
+    if(d.inGame&&!guestActive)enterGameView(currentDungeon);
+    applyRemoteMobs(d.mobs);
+    updateHUD();
+  }
+}
+function performRemoteAttack(d){
+  const damage=Math.max(1,Math.floor(Number(d.damage)||1));
+  for(const m of mobs){
+    if(m.dead||Math.hypot(m.x-d.x,m.y-d.y)>115)continue;
+    const gold=m.gold||0,xp=m.xp||0;
+    m.hp-=damage;m.hit=.16;
+    numbers.push({x:m.x,y:m.y-m.size-10,text:"-"+damage,color:"#ffe16b",life:.7,maxLife:.7});
+    burst(m.x,m.y,9,"#f1c957");
+    if(m.hp<=0){killMob(m);if(d.from&&d.from!==playerId)broadcastRoom({type:"reward",to:d.from,gold,xp});}
+  }
+  broadcastFullState(true);
+}
+async function copyRoomCode(){if(!roomCode)return;try{await navigator.clipboard.writeText(roomCode);showToast("📋 Código copiado: "+roomCode);}catch(e){showToast(roomCode);}}
+function leaveRoom(){
+  guestActive=false;if(roomChannel)supabaseClient.removeChannel(roomChannel);roomChannel=null;roomCode="";roomHost=false;roomHostId=null;multiplayerPlayers={};
+  const c=document.getElementById("copyRoom");if(c)c.style.display="none";
+  const i=document.getElementById("roomCodeInput");if(i)i.value="";
+  setRoomStatus("Sem sala — podes jogar normalmente.");renderParty();updateStartButton();
+}
+
+/* =========================================================
+   INVENTORY
+========================================================= */
+
+const inventory=[];
+
+function addItem(item){
+
+  inventory.push({
+    ...item,
+    id:Math.random()
+  });
+
+  renderInventory();
+
+}
+
+
+/* =========================================================
+   RARITIES
+========================================================= */
+
+const rarities={
+
+  common:{
+    name:"Comum",
+    color:"#aaa"
+  },
+
+  uncommon:{
+    name:"Incomum",
+    color:"#69c77a"
+  },
+
+  rare:{
+    name:"Raro",
+    color:"#4c9ee8"
+  },
+
+  epic:{
+    name:"Épico",
+    color:"#b66cff"
+  },
+
+  legendary:{
+    name:"Lendário",
+    color:"#e9ad42"
+  }
+
+};
+
+
+/* =========================================================
+   MOB TYPES
+========================================================= */
+
+const types={
+
+ slime:{
+   name:"Slime",
+   hp:25,
+   damage:4,
+   speed:35,
+   size:21,
+   xp:12,
+   gold:4,
+   color:"#55d47a"
+ },
+
+ goblin:{
+   name:"Goblin",
+   hp:38,
+   damage:6,
+   speed:48,
+   size:22,
+   xp:20,
+   gold:8,
+   color:"#70a54e"
+ },
+
+ bat:{
+   name:"Morcego",
+   hp:32,
+   damage:6,
+   speed:65,
+   size:20,
+   xp:18,
+   gold:7,
+   color:"#8050a0"
+ },
+
+ spider:{
+   name:"Aranha",
+   hp:42,
+   damage:8,
+   speed:58,
+   size:21,
+   xp:25,
+   gold:10,
+   color:"#453548"
+ },
+
+ wolf:{
+   name:"Lobo",
+   hp:55,
+   damage:10,
+   speed:72,
+   size:25,
+   xp:32,
+   gold:13,
+   color:"#969aa1"
+ },
+
+ skeleton:{
+   name:"Esqueleto",
+   hp:65,
+   damage:12,
+   speed:48,
+   size:25,
+   xp:45,
+   gold:18,
+   color:"#d8d0b9"
+ },
+
+ orc:{
+   name:"Orc",
+   hp:90,
+   damage:15,
+   speed:35,
+   size:29,
+   xp:65,
+   gold:25,
+   color:"#5d8e4d"
+ },
+
+ troll:{
+   name:"Troll",
+   hp:150,
+   damage:22,
+   speed:27,
+   size:36,
+   xp:100,
+   gold:40,
+   color:"#687f50"
+ },
+
+ knight:{
+   name:"Cavaleiro Negro",
+   hp:220,
+   damage:30,
+   speed:31,
+   size:34,
+   xp:160,
+   gold:65,
+   color:"#394153"
+ },
+
+ demon:{
+   name:"Demónio",
+   hp:330,
+   damage:40,
+   speed:38,
+   size:38,
+   xp:260,
+   gold:100,
+   color:"#9e414c"
+ }
+
+};
+
+
+/* =========================================================
+   BOSS TYPES
+========================================================= */
+
+const bosses={
+
+  cryptLord:{
+    name:"LORD OF THE CATACOMBS",
+    hp:1200,
+    damage:48,
+    speed:27,
+    size:60,
+    color:"#674f79",
+    xp:800,
+    gold:500
+  },
+
+  fireKing:{
+    name:"FIRE KING",
+    hp:1800,
+    damage:65,
+    speed:30,
+    size:65,
+    color:"#b34d31",
+    xp:1200,
+    gold:750
+  },
+
+  frostLord:{
+    name:"FROST LORD",
+    hp:2500,
+    damage:82,
+    speed:25,
+    size:68,
+    color:"#5e9eb4",
+    xp:1700,
+    gold:1000
+  },
+
+  deadKing:{
+    name:"DEAD KING",
+    hp:3400,
+    damage:105,
+    speed:24,
+    size:72,
+    color:"#52576b",
+    xp:2400,
+    gold:1400
+  },
+
+  blackKing:{
+    name:"THE BLACK KING",
+    hp:5000,
+    damage:140,
+    speed:22,
+    size:80,
+    color:"#6d293b",
+    xp:4000,
+    gold:2500
+  }
+
+};
 
 
 /* =========================================================
    DUNGEONS
 ========================================================= */
 
-const dungeons = [
+const dungeonData={
 
-    {
-        name:"As Catacumbas",
-        bg:"#111319",
-        enemy:"Skeleton"
+  1:{
+    name:"As Catacumbas",
+    difficulty:1,
+    boss:"cryptLord",
+    accent:"#75608a"
+  },
+
+  2:{
+    name:"Cripta de Fogo",
+    difficulty:1.5,
+    boss:"fireKing",
+    accent:"#a84e35"
+  },
+
+  3:{
+    name:"Salão Congelado",
+    difficulty:2,
+    boss:"frostLord",
+    accent:"#5e96ad"
+  },
+
+  4:{
+    name:"Abismo Morto",
+    difficulty:2.5,
+    boss:"deadKing",
+    accent:"#5c6075"
+  },
+
+  5:{
+    name:"Castelo do Rei Negro",
+    difficulty:3,
+    boss:"blackKing",
+    accent:"#862d43"
+  }
+
+};
+
+
+/* =========================================================
+   SAVE
+========================================================= */
+
+function saveGame(){
+
+  const save={
+
+    player:{
+      hp:player.hp,
+      maxHp:player.maxHp,
+      level:player.level,
+      xp:player.xp,
+      xpMax:player.xpMax,
+      gold:player.gold,
+      damage:player.damage,
+      weapon:player.weapon,
+      armor:player.armor,
+      ring:player.ring,
+      potions:player.potions
     },
 
-    {
-        name:"Cripta de Fogo",
-        bg:"#21120f",
-        enemy:"Fire Demon"
-    },
+    completedDungeons,
 
-    {
-        name:"Salão Congelado",
-        bg:"#101b25",
-        enemy:"Ice Beast"
-    },
+    inventory
 
-    {
-        name:"Abismo Morto",
-        bg:"#130e1c",
-        enemy:"Void Walker"
-    },
+  };
 
-    {
-        name:"Castelo do Rei Negro",
-        bg:"#181014",
-        enemy:"Dark Knight"
+  localStorage.setItem(
+    "runevale_save",
+    JSON.stringify(save)
+  );
+
+}
+
+
+function loadGame(){
+
+  try{
+
+    const raw=localStorage.getItem("runevale_save");
+
+    if(!raw)return;
+
+    const save=JSON.parse(raw);
+
+    if(save.player){
+
+      Object.assign(player,save.player);
+
     }
 
-];
+    if(save.completedDungeons){
+
+      Object.assign(
+        completedDungeons,
+        save.completedDungeons
+      );
+
+    }
+
+    if(Array.isArray(save.inventory)){
+
+      inventory.length=0;
+
+      for(const item of save.inventory){
+
+        inventory.push(item);
+
+      }
+
+    }
+
+  }catch(e){
+
+    console.warn("Save inválido",e);
+
+  }
+
+}
 
 
 /* =========================================================
-   INPUT
+   AUTO SAVE
 ========================================================= */
 
-const keys = {};
+setInterval(()=>{
 
-window.addEventListener(
-    "keydown",
-    e=>{
+  saveGame();
 
-        keys[
-            e.key.toLowerCase()
-        ] = true;
-
-        if(e.key === " "){
-            e.preventDefault();
-            areaAttack();
-        }
-
-        if(e.key === "Escape"){
-            togglePause();
-        }
-
-        if(e.key.toLowerCase()==="i"){
-            openInventory();
-        }
-
-    }
-);
-
-window.addEventListener(
-    "keyup",
-    e=>{
-        keys[
-            e.key.toLowerCase()
-        ] = false;
-    }
-);
+},10000);
 
 
 /* =========================================================
-   TOUCH MOVEMENT
+   MOB CREATION
 ========================================================= */
 
-function holdButton(
-    id,
-    key
-){
+function randomMobType(wave){
 
-    const el =
-        document.getElementById(id);
+  const available=[
+    "slime",
+    "goblin"
+  ];
 
-    if(!el) return;
+  if(wave>=2)
+    available.push("bat");
 
-    const down = e=>{
-        e.preventDefault();
-        keys[key] = true;
-    };
+  if(wave>=3)
+    available.push("spider");
 
-    const up = e=>{
-        e.preventDefault();
-        keys[key] = false;
-    };
+  if(wave>=4)
+    available.push("wolf");
 
-    el.addEventListener(
-        "pointerdown",
-        down
+  if(wave>=5)
+    available.push("skeleton");
+
+  if(wave>=6)
+    available.push("orc");
+
+  if(wave>=8)
+    available.push("troll");
+
+  if(wave>=9)
+    available.push("knight");
+
+  if(wave>=10)
+    available.push("demon");
+
+  return available[
+    Math.floor(Math.random()*available.length)
+  ];
+
+}
+
+
+function createMob(type){
+
+  const t=types[type];
+
+  const angle=Math.random()*Math.PI*2;
+
+  const distance=
+    350+
+    Math.random()*300;
+
+  const dungeonScale=
+    dungeonData[currentDungeon].difficulty;
+
+  const waveScale=
+    1+(currentWave-1)*.13;
+
+  const scale=
+    dungeonScale*
+    waveScale;
+
+  return{
+
+    id:Math.random(),
+
+    type,
+
+    x:Math.cos(angle)*distance,
+    y:Math.sin(angle)*distance,
+
+    hp:Math.round(t.hp*scale),
+    maxHp:Math.round(t.hp*scale),
+
+    damage:Math.round(t.damage*scale),
+
+    speed:t.speed,
+
+    size:t.size,
+
+    xp:Math.round(t.xp*scale),
+
+    gold:Math.round(t.gold*scale),
+
+    color:t.color,
+
+    dead:false,
+
+    deathTime:0,
+
+    hit:0,
+
+    anim:Math.random()*10,
+
+    attackCooldown:.5+Math.random(),
+
+    elite:false
+
+  };
+
+}
+
+
+/* =========================================================
+   BOSS CREATION
+========================================================= */
+
+function createBoss(){
+
+  const data=
+    bosses[
+      dungeonData[currentDungeon].boss
+    ];
+
+  const scale=
+    dungeonData[currentDungeon].difficulty;
+
+  return{
+
+    id:Math.random(),
+
+    type:"boss",
+
+    boss:true,
+
+    bossName:data.name,
+
+    x:0,
+
+    y:-380,
+
+    hp:Math.round(data.hp*scale),
+
+    maxHp:Math.round(data.hp*scale),
+
+    damage:Math.round(data.damage*scale),
+
+    speed:data.speed,
+
+    size:data.size,
+
+    xp:Math.round(data.xp*scale),
+
+    gold:Math.round(data.gold*scale),
+
+    color:data.color,
+
+    dead:false,
+
+    deathTime:0,
+
+    hit:0,
+
+    anim:0,
+
+    attackCooldown:1,
+
+    elite:true
+
+  };
+
+}
+
+
+/* =========================================================
+   START DUNGEON
+========================================================= */
+
+function enterDungeon(number){
+
+  if(
+    number>1 &&
+    !completedDungeons[number-1]
+  ){
+
+    showToast(
+      "🔒 Completa a dungeon anterior!"
     );
 
-    el.addEventListener(
-        "pointerup",
-        up
-    );
+    return;
 
-    el.addEventListener(
-        "pointercancel",
-        up
-    );
+  }
 
-    el.addEventListener(
-        "pointerleave",
-        up
-    );
-}
+  if(number===1){
+    if(roomChannel&&!roomHost){broadcastRoom({type:"request_dungeon",from:playerId,dungeon:1});showToast("⏳ A pedir ao host para iniciar...");return;}
+    beginDungeon(1);
+  }else{
 
-holdButton("upBtn","w");
-holdButton("downBtn","s");
-holdButton("leftBtn","a");
-holdButton("rightBtn","d");
+    openShop(number);
 
+  }
 
-/* =========================================================
-   MOUSE
-========================================================= */
-
-canvas.addEventListener(
-    "pointerdown",
-    e=>{
-
-        if(!gameRunning || paused)
-            return;
-
-        const rect =
-            canvas.getBoundingClientRect();
-
-        const x =
-            (e.clientX-rect.left) *
-            canvas.width /
-            rect.width;
-
-        const y =
-            (e.clientY-rect.top) *
-            canvas.height /
-            rect.height;
-
-        let closest = null;
-        let distance = Infinity;
-
-        for(const monster of monsters){
-
-            const d =
-                Math.hypot(
-                    monster.x-x,
-                    monster.y-y
-                );
-
-            if(d < distance){
-
-                distance = d;
-                closest = monster;
-            }
-        }
-
-        if(
-            closest &&
-            distance < 55
-        ){
-
-            targetMonster = closest;
-
-            showTarget();
-        }
-
-    }
-);
-
-
-/* =========================================================
-   MENU
-========================================================= */
-
-function hideScreens(){
-
-    [
-        "menu",
-        "soloMenu",
-        "multiplayer",
-        "lobby"
-    ].forEach(id=>{
-        document
-            .getElementById(id)
-            .classList.add("hidden");
-    });
 }
 
 
-function backToMenu(){
+function beginDungeon(number){
 
-    hideScreens();
+  currentDungeon=number;
 
-    document
-        .getElementById("menu")
-        .classList.remove("hidden");
-}
+  currentWave=1;
 
+  player.dead=false;
 
-function openSoloMenu(){
+  player.x=0;
+  player.y=0;
 
-    hideScreens();
+  player.hp=player.maxHp;
 
-    document
-        .getElementById("soloMenu")
-        .classList.remove("hidden");
+  attackCooldown=0;
 
-    document.getElementById(
-        "soloName"
-    ).value =
-        player.name ||
-        "Player" +
-        Math.floor(
-            Math.random()*999
-        );
-}
+  attackAnimation=0;
 
+  destination=null;
 
-function openMultiplayer(){
+  target=null;
 
-    hideScreens();
+  dungeonComplete=false;
 
-    document
-        .getElementById("multiplayer")
-        .classList.remove("hidden");
+  paused=false;
 
-    document.getElementById(
-        "playerName"
-    ).value =
-        player.name ||
-        "Player" +
-        Math.floor(
-            Math.random()*999
-        );
-}
+  document.getElementById("menu")
+    .classList.add("hidden");
 
+  document.getElementById("game")
+    .classList.remove("hidden");
 
-function openControls(){
+  document.getElementById("death")
+    .style.display="none";
 
-    alert(
-`CONTROLS
+  document.getElementById("pause")
+    .style.display="none";
 
-W A S D / Setas
-Mover
+  document.getElementById("dungeonName")
+    .textContent=
+    dungeonData[number].name;
 
-Clique num inimigo
-Selecionar alvo
-
-SPACE
-Ataque de área
-
-E
-Usar poção
-
-I
-Inventário
-
-ESC
-Pausa`
-    );
-}
-
-
-function showAbout(){
-
-    alert(
-`RuneVale — Dark Dungeons
-
-Um dungeon crawler de fantasia negra.
-
-5 dungeons
-10 waves por dungeon
-Combate
-Loot
-Loja
-Inventário
-Multiplayer`
-    );
-}
-
-
-/* =========================================================
-   SOLO
-========================================================= */
-
-function startSolo(){
-
-    player.name =
-        document.getElementById(
-            "soloName"
-        ).value.trim()
-        .slice(0,16)
-        ||
-        "Player";
-
-    dungeon =
-        Number(
-            document.getElementById(
-                "soloDungeon"
-            ).value
-        );
-
-    solo = true;
-
-    roomCode = null;
-
-    disconnectRealtime();
-
-    resetPlayer();
-
-    startGame();
-}
-
-
-/* =========================================================
-   RESET PLAYER
-========================================================= */
-
-function resetPlayer(){
-
-    player.x = W/2;
-    player.y = H/2;
-
-    player.hp = 100;
-    player.maxHp = 100;
-
-    player.level = 1;
-
-    player.gold = 25;
-
-    player.damage = 5;
-
-    player.potions = 3;
-
-    wave = 1;
-
-    monsters = [];
-
-    remotePlayers = {};
-
-    targetMonster = null;
-}
-
-
-/* =========================================================
-   GAME START
-========================================================= */
-
-function startGame(){
-
-    hideScreens();
-
-    document
-        .getElementById("game")
-        .classList.remove("hidden");
-
-    document
-        .getElementById("pauseOverlay")
-        .classList.add("hidden");
-
-    document
-        .getElementById("inventoryOverlay")
-        .classList.add("hidden");
-
-    document
-        .getElementById("shopOverlay")
-        .classList.add("hidden");
-
-    gameRunning = true;
-
-    paused = false;
-
-    spawnWave();
-
-    updateHUD();
-
-    showMessage(
-        dungeons[dungeon-1].name
-    );
-}
-
-
-/* =========================================================
-   ROOM CODE
-========================================================= */
-
-function generateRoomCode(){
-
-    const chars =
-        "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-
-    let code = "";
-
-    for(let i=0;i<5;i++){
-
-        code +=
-            chars[
-                Math.floor(
-                    Math.random() *
-                    chars.length
-                )
-            ];
-    }
-
-    return code;
-}
-
-
-/* =========================================================
-   CREATE ROOM
-========================================================= */
-
-async function createRoom(){
-
-    player.name =
-        document.getElementById(
-            "playerName"
-        ).value.trim()
-        .slice(0,16)
-        ||
-        "Player";
-
-    roomCode =
-        generateRoomCode();
-
-    dungeon = 1;
-
-    setRoomStatus(
-        "A criar sala...",
-        "warning"
-    );
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-        .from("game_rooms")
-        .insert({
-
-            room_code:roomCode,
-
-            host_id:player.id,
-
-            host_name:player.name,
-
-            status:"waiting",
-
-            dungeon:1,
-
-            wave:1
-
-        })
-        .select()
-        .single();
-
-    if(error){
-
-        console.error(error);
-
-        setRoomStatus(
-            "Erro: " +
-            error.message,
-            "error"
-        );
-
-        return;
-    }
-
-    roomHost = true;
-
-    const connectedOK =
-        await connectRealtime();
-
-    if(!connectedOK)
-        return;
-
-    openLobby();
+  if(roomChannel)updateRoomPresence();
+  if(!roomChannel||roomHost)startWave();
 
 }
 
 
 /* =========================================================
-   JOIN ROOM
+   SHOP
 ========================================================= */
 
-async function joinRoom(){
+function openShop(number){
 
-    player.name =
-        document.getElementById(
-            "playerName"
-        ).value.trim()
-        .slice(0,16)
-        ||
-        "Player";
+  shopDungeon=number;
 
-    roomCode =
-        document.getElementById(
-            "roomInput"
-        ).value
-        .trim()
-        .toUpperCase();
+  document.getElementById("shop")
+    .style.display="flex";
 
-    if(!roomCode){
+  updateShop();
 
-        setRoomStatus(
-            "Escreve o código da sala.",
-            "error"
-        );
+}
 
-        return;
-    }
 
-    setRoomStatus(
-        "A procurar sala...",
-        "warning"
-    );
+function closeShop(){
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-        .from("game_rooms")
-        .select("*")
-        .eq("room_code",roomCode)
-        .maybeSingle();
+  document.getElementById("shop")
+    .style.display="none";
 
-    if(error){
+  beginDungeon(shopDungeon);
 
-        console.error(error);
+}
 
-        setRoomStatus(
-            error.message,
-            "error"
-        );
 
-        return;
-    }
+function updateShop(){
 
-    if(!data){
+  document.getElementById("shopGold")
+    .textContent=player.gold;
 
-        setRoomStatus(
-            "Sala não encontrada.",
-            "error"
-        );
-
-        return;
-    }
-
-    if(data.status !== "waiting"){
-
-        setRoomStatus(
-            "Essa dungeon já começou.",
-            "error"
-        );
-
-        return;
-    }
-
-    dungeon =
-        data.dungeon || 1;
-
-    roomHost = false;
-
-    const connectedOK =
-        await connectRealtime();
-
-    if(!connectedOK)
-        return;
-
-    openLobby();
 }
 
 
 /* =========================================================
-   CONNECT REALTIME
+   BUY ITEMS
 ========================================================= */
 
-async function connectRealtime(){
+function buyPotion(){
 
-    if(!roomCode)
-        return false;
+  if(player.gold<15){
 
-    await disconnectRealtime();
+    showToast("❌ Ouro insuficiente.");
 
-    connected = false;
+    return;
 
-    channel =
-        supabaseClient.channel(
-            "runevale-room:" +
-            roomCode,
-            {
-                config:{
-                    broadcast:{
-                        self:false
-                    },
-                    presence:{
-                        key:player.id
-                    }
-                }
-            }
-        );
+  }
+
+  player.gold-=15;
+
+  player.potions++;
+
+  updateShop();
+
+  saveGame();
+
+  showToast("🧪 Poção comprada!");
+
+}
 
 
-    /* PRESENCE */
+function buyDamage(){
 
-    channel.on(
-        "presence",
-        {
-            event:"sync"
-        },
-        ()=>{
-            updateLobby();
-            updatePlayersPanel();
-        }
-    );
+  if(player.gold<60){
 
+    showToast("❌ Ouro insuficiente.");
 
-    channel.on(
-        "presence",
-        {
-            event:"join"
-        },
-        ()=>{
-            updateLobby();
-            updatePlayersPanel();
-        }
-    );
+    return;
+
+  }
+
+  player.gold-=60;
+
+  player.damage+=2;
+
+  updateShop();
+
+  saveGame();
+
+  showToast("⚔️ +2 dano!");
+
+}
 
 
-    channel.on(
-        "presence",
-        {
-            event:"leave"
-        },
-        ({key})=>{
+function buyHealth(){
 
-            delete remotePlayers[key];
+  if(player.gold<75){
 
-            updateLobby();
-            updatePlayersPanel();
-        }
-    );
+    showToast("❌ Ouro insuficiente.");
 
+    return;
 
-    /* BROADCAST */
+  }
 
-    channel.on(
-        "broadcast",
-        {
-            event:"game"
-        },
-        ({payload})=>{
+  player.gold-=75;
 
-            if(!payload)
-                return;
+  player.maxHp+=20;
 
-            receiveNetworkMessage(
-                payload
-            );
-        }
-    );
+  player.hp=player.maxHp;
+
+  updateShop();
+
+  saveGame();
+
+  showToast("❤️ +20 HP máximo!");
+
+}
 
 
-    return new Promise(
-        resolve=>{
+function buyWeapon(name,damage,price){
 
-            let finished = false;
+  if(player.gold<price){
 
-            const finish = value=>{
+    showToast("❌ Ouro insuficiente.");
 
-                if(finished)
-                    return;
+    return;
 
-                finished = true;
+  }
 
-                resolve(value);
-            };
+  player.gold-=price;
 
+  player.damage+=damage;
 
-            channel.subscribe(
-                async status=>{
+  player.weapon=name;
 
-                    console.log(
-                        "RuneVale Realtime:",
-                        status
-                    );
+  addItem({
 
+    name,
 
-                    if(
-                        status ===
-                        "SUBSCRIBED"
-                    ){
+    icon:"🗡️",
 
-                        connected = true;
+    rarity:"rare",
 
-                        setConnection(
-                            "● Connected",
-                            true
-                        );
+    description:"Arma equipada · +"+damage+" dano"
 
-                        setLobbyConnection(
-                            "● Connected",
-                            "ok"
-                        );
+  });
+
+  updateShop();
+
+  saveGame();
+
+  showToast("🗡️ "+name+" equipada!");
+
+}
 
 
-                        try{
+function buyArmor(){
 
-                            await channel.track({
+  if(player.gold<220){
 
-                                id:player.id,
+    showToast("❌ Ouro insuficiente.");
 
-                                name:player.name,
+    return;
 
-                                x:player.x,
+  }
 
-                                y:player.y,
+  player.gold-=220;
 
-                                hp:player.hp,
+  player.maxHp+=35;
 
-                                level:player.level
+  player.hp=player.maxHp;
 
-                            });
+  player.armor="Guardian Armor";
 
-                        }catch(e){
+  addItem({
 
-                            console.error(
-                                "Presence:",
-                                e
-                            );
-                        }
+    name:"Guardian Armor",
 
-                        finish(true);
+    icon:"🛡️",
 
-                    }
+    rarity:"epic",
 
+    description:"+35 HP máximo"
 
-                    if(
-                        status ===
-                        "CHANNEL_ERROR"
-                    ){
+  });
 
-                        connected = false;
+  updateShop();
 
-                        setLobbyConnection(
-                            "Connection error",
-                            "error"
-                        );
+  saveGame();
 
-                        finish(false);
+  showToast("🛡️ Guardian Armor equipada!");
 
-                    }
+}
 
 
-                    if(
-                        status ===
-                        "TIMED_OUT"
-                    ){
+function buyRing(){
 
-                        connected = false;
+  if(player.gold<350){
 
-                        setLobbyConnection(
-                            "Connection timed out",
-                            "error"
-                        );
+    showToast("❌ Ouro insuficiente.");
 
-                        finish(false);
-                    }
+    return;
 
-                }
-            );
+  }
 
-        }
-    );
+  player.gold-=350;
+
+  player.damage+=8;
+
+  player.ring="Ring of Power";
+
+  addItem({
+
+    name:"Ring of Power",
+
+    icon:"💍",
+
+    rarity:"legendary",
+
+    description:"+8 dano"
+
+  });
+
+  updateShop();
+
+  saveGame();
+
+  showToast("💍 Ring of Power equipado!");
+
 }
 
 
 /* =========================================================
-   DISCONNECT
+   WAVES
 ========================================================= */
 
-async function disconnectRealtime(){
+function startWave(){
 
-    connected = false;
+  mobs=[];
 
-    if(channel){
+  target=null;
 
-        try{
-            await channel.untrack();
-        }catch(e){}
+  waveStarting=true;
 
-        try{
-            await supabaseClient
-                .removeChannel(channel);
-        }catch(e){}
+  showCenter(
+    "HORDA "+currentWave,
+    "Prepara-te..."
+  );
 
-        channel = null;
-    }
+  setTimeout(()=>{
 
-    remotePlayers = {};
-}
+    if(player.dead)return;
 
+    const count=
+      6+
+      currentWave*2+
+      currentDungeon*2;
 
-/* =========================================================
-   LOBBY
-========================================================= */
+    for(let i=0;i<count;i++){
 
-function openLobby(){
-
-    hideScreens();
-
-    document
-        .getElementById("lobby")
-        .classList.remove("hidden");
-
-    document.getElementById(
-        "roomCodeDisplay"
-    ).textContent =
-        roomCode;
-
-    updateLobby();
-
-    updateStartButton();
-}
-
-
-function updateLobby(){
-
-    const state =
-        channel
-        ? channel.presenceState()
-        : {};
-
-    const container =
-        document.getElementById(
-            "lobbyPlayers"
-        );
-
-    let html = "";
-
-    const players = [];
-
-    for(
-        const id in state
-    ){
-
-        const entries =
-            state[id];
-
-        if(
-            entries &&
-            entries.length
-        ){
-
-            players.push(
-                entries[
-                    entries.length-1
-                ]
-            );
-        }
-    }
-
-    if(!players.length){
-
-        html =
-            `<div class="lobbyPlayer">
-                A procurar jogadores...
-            </div>`;
-
-    }else{
-
-        players.forEach(p=>{
-
-            const host =
-                p.id === player.id &&
-                roomHost;
-
-            html += `
-                <div class="lobbyPlayer">
-                    <span>
-                        ⚔ ${escapeHTML(
-                            p.name ||
-                            "Player"
-                        )}
-                        ${
-                            host
-                            ? " 👑"
-                            : ""
-                        }
-                    </span>
-
-                    <span class="online">
-                        ● ONLINE
-                    </span>
-                </div>
-            `;
-        });
-    }
-
-    container.innerHTML =
-        html;
-
-    updateStartButton();
-}
-
-
-function updateStartButton(){
-
-    const btn =
-        document.getElementById(
-            "startDungeonButton"
-        );
-
-    if(!btn)
-        return;
-
-    if(roomHost){
-
-        btn.disabled =
-            !connected;
-
-        btn.textContent =
-            "START DUNGEON";
-
-    }else{
-
-        btn.disabled = true;
-
-        btn.textContent =
-            "A AGUARDAR HOST...";
-    }
-}
-
-
-/* =========================================================
-   START MULTIPLAYER
-========================================================= */
-
-async function startMultiplayerDungeon(){
-
-    if(!connected)
-        return;
-
-    if(!roomHost)
-        return;
-
-    await supabaseClient
-        .from("game_rooms")
-        .update({
-            status:"playing",
-            dungeon:dungeon,
-            wave:1
-        })
-        .eq(
-            "room_code",
-            roomCode
-        );
-
-    await sendNetwork({
-
-        type:"start",
-
-        dungeon:dungeon,
-
-        wave:1
-
-    });
-
-    solo = false;
-
-    resetPlayer();
-
-    startGame();
-}
-
-
-/* =========================================================
-   NETWORK SEND
-========================================================= */
-
-async function sendNetwork(data){
-
-    if(
-        !channel ||
-        !connected
-    )
-        return;
-
-    try{
-
-        await channel.send({
-
-            type:"broadcast",
-
-            event:"game",
-
-            payload:{
-                ...data,
-                sender:player.id
-            }
-
-        });
-
-    }catch(error){
-
-        console.error(
-            "Network error:",
-            error
-        );
-    }
-}
-
-
-/* =========================================================
-   NETWORK RECEIVE
-========================================================= */
-
-function receiveNetworkMessage(data){
-
-    if(
-        data.sender === player.id
-    )
-        return;
-
-
-    /* START */
-
-    if(data.type === "start"){
-
-        dungeon =
-            data.dungeon || 1;
-
-        wave =
-            data.wave || 1;
-
-        solo = false;
-
-        resetPlayer();
-
-        startGame();
-
-        return;
-    }
-
-
-    /* PLAYER */
-
-    if(data.type === "player"){
-
-        if(
-            !remotePlayers[
-                data.id
-            ]
-        ){
-
-            remotePlayers[
-                data.id
-            ] = {
-
-                id:data.id,
-
-                name:data.name,
-
-                x:data.x,
-
-                y:data.y,
-
-                targetX:data.x,
-
-                targetY:data.y,
-
-                hp:data.hp,
-
-                maxHp:100,
-
-                level:data.level,
-
-                lastSeen:
-                    performance.now()
-            };
-
-        }else{
-
-            const p =
-                remotePlayers[
-                    data.id
-                ];
-
-            p.name =
-                data.name;
-
-            p.targetX =
-                data.x;
-
-            p.targetY =
-                data.y;
-
-            p.hp =
-                data.hp;
-
-            p.level =
-                data.level;
-
-            p.lastSeen =
-                performance.now();
-        }
-
-        return;
-    }
-
-
-    /* ATTACK */
-
-    if(data.type === "attack"){
-
-        createEffect(
-            data.x,
-            data.y,
-            data.radius || 110
-        );
-
-        return;
-    }
-
-
-    /* WAVE */
-
-    if(data.type === "wave"){
-
-        if(
-            data.wave <= wave
+      mobs.push(
+        createMob(
+          randomMobType(currentWave)
         )
-            return;
+      );
 
-        wave =
-            data.wave;
-
-        spawnWave();
-
-        return;
     }
 
+    if(currentWave===10){
 
-    /* DAMAGE MONSTER */
+      mobs.push(createBoss());
 
-    if(data.type === "monsterDamage"){
-
-        const monster =
-            monsters.find(
-                m=>m.id === data.monsterId
-            );
-
-        if(monster){
-
-            monster.hp -=
-                data.damage;
-
-            monster.flash = .15;
-        }
-
-        checkWave();
-
-        return;
     }
 
+    waveStarting=false;
 
-    /* PLAYER HIT */
-
-    if(data.type === "playerHit"){
-
-        return;
-    }
-
-
-    /* DUNGEON COMPLETE */
-
-    if(data.type === "complete"){
-
-        showMessage(
-            "DUNGEON COMPLETE!"
-        );
-
-        return;
-    }
-
-}
-
-
-/* =========================================================
-   SEND PLAYER POSITION
-========================================================= */
-
-async function syncPlayer(){
-
-    if(
-        solo ||
-        !connected ||
-        !channel
-    )
-        return;
-
-    const now =
-        performance.now();
-
-    if(
-        now-lastNetworkSend <
-        50
-    )
-        return;
-
-    lastNetworkSend =
-        now;
-
-    await sendNetwork({
-
-        type:"player",
-
-        id:player.id,
-
-        name:player.name,
-
-        x:player.x,
-
-        y:player.y,
-
-        hp:player.hp,
-
-        level:player.level
-
-    });
-}
-
-
-/* =========================================================
-   SPAWN WAVE
-========================================================= */
-
-function spawnWave(){
-
-    monsters = [];
-
-    targetMonster = null;
-
-    const amount =
-        Math.min(
-            5 + wave * 2,
-            25
-        );
-
-    for(
-        let i=0;
-        i<amount;
-        i++
-    ){
-
-        const side =
-            Math.floor(
-                Math.random()*4
-            );
-
-        let x;
-        let y;
-
-        if(side===0){
-            x=Math.random()*W;
-            y=-50;
-        }
-
-        else if(side===1){
-            x=W+50;
-            y=Math.random()*H;
-        }
-
-        else if(side===2){
-            x=Math.random()*W;
-            y=H+50;
-        }
-
-        else{
-            x=-50;
-            y=Math.random()*H;
-        }
-
-        const hp =
-            20 +
-            wave*7 +
-            dungeon*5;
-
-        monsters.push({
-
-            id:
-                crypto.randomUUID(),
-
-            x:x,
-
-            y:y,
-
-            hp:hp,
-
-            maxHp:hp,
-
-            speed:
-                30 +
-                wave*3 +
-                dungeon*2,
-
-            radius:16,
-
-            damage:
-                5 +
-                dungeon*2,
-
-            flash:0
-        });
-    }
+    hideCenter();
 
     updateHUD();
 
-    showMessage(
-        "Wave " + wave
-    );
+  },1000);
+
 }
 
 
 /* =========================================================
-   UPDATE PLAYER
+   PLAYER
 ========================================================= */
 
 function updatePlayer(dt){
 
-    let dx=0;
-    let dy=0;
+  let vx=0;
+  let vy=0;
 
+  if(keys.w||keys.ArrowUp)
+    vy--;
 
-    if(
-        keys["w"] ||
-        keys["arrowup"]
-    )
-        dy--;
+  if(keys.s||keys.ArrowDown)
+    vy++;
 
-    if(
-        keys["s"] ||
-        keys["arrowdown"]
-    )
-        dy++;
+  if(keys.a||keys.ArrowLeft)
+    vx--;
 
-    if(
-        keys["a"] ||
-        keys["arrowleft"]
-    )
-        dx--;
+  if(keys.d||keys.ArrowRight)
+    vx++;
 
-    if(
-        keys["d"] ||
-        keys["arrowright"]
-    )
-        dx++;
+  const keyboard=
+    vx!==0||
+    vy!==0;
 
+  if(keyboard){
 
-    if(dx || dy){
+    destination=null;
 
-        const len =
-            Math.hypot(dx,dy);
+  }else if(
+    target &&
+    !target.dead
+  ){
 
-        dx /= len;
-        dy /= len;
+    const dx=
+      target.x-player.x;
 
-        player.x +=
-            dx *
-            player.speed *
-            dt;
+    const dy=
+      target.y-player.y;
 
-        player.y +=
-            dy *
-            player.speed *
-            dt;
+    const dist=
+      Math.hypot(dx,dy);
+
+    if(dist>78){
+
+      vx=dx/dist;
+      vy=dy/dist;
+
+    }else{
+
+      areaAttack();
+
     }
 
+  }else if(destination){
 
-    player.x =
-        Math.max(
-            25,
-            Math.min(
-                W-25,
-                player.x
-            )
-        );
+    const dx=
+      destination.x-player.x;
 
-    player.y =
-        Math.max(
-            75,
-            Math.min(
-                H-25,
-                player.y
-            )
-        );
+    const dy=
+      destination.y-player.y;
 
+    const dist=
+      Math.hypot(dx,dy);
 
-    syncPlayer();
+    if(dist<5){
+
+      destination=null;
+
+    }else{
+
+      vx=dx/dist;
+      vy=dy/dist;
+
+    }
+
+  }
+
+  if(vx!==0||vy!==0){
+
+    const len=
+      Math.hypot(vx,vy);
+
+    vx/=len;
+    vy/=len;
+
+    player.x+=
+      vx*
+      player.speed*
+      dt;
+
+    player.y+=
+      vy*
+      player.speed*
+      dt;
+
+    player.anim+=dt*10;
+
+    if(vx!==0){
+
+      player.direction=
+        vx>0?1:-1;
+
+    }
+
+  }else{
+
+    player.anim+=dt*2;
+
+  }
+
 }
 
 
 /* =========================================================
-   UPDATE REMOTE PLAYERS
+   AOE ATTACK
 ========================================================= */
 
-function updateRemotePlayers(dt){
+function areaAttack(){
 
-    const now =
-        performance.now();
+  if(player.dead)return;
+  if(roomChannel&&!roomHost){if(attackCooldown>0||paused)return;const nearby=mobs.some(m=>!m.dead&&Math.hypot(m.x-player.x,m.y-player.y)<=115);if(!nearby)return;attackCooldown=.58;attackAnimation=.42;broadcastRoom({type:"request_attack",from:playerId,dungeon:currentDungeon,x:player.x,y:player.y,damage:player.damage+Math.floor(Math.random()*5)});return;}
 
-    for(
-        const id in remotePlayers
-    ){
+  if(paused)return;
 
-        const p =
-            remotePlayers[id];
+  if(attackCooldown>0)return;
 
-        p.x +=
-            (
-                p.targetX-p.x
-            ) *
-            Math.min(
-                1,
-                dt*12
-            );
+  const radius=115;
 
-        p.y +=
-            (
-                p.targetY-p.y
-            ) *
-            Math.min(
-                1,
-                dt*12
-            );
+  let nearby=false;
 
+  for(const mob of mobs){
 
-        if(
-            now-p.lastSeen >
-            8000
-        ){
+    if(mob.dead)continue;
 
-            delete remotePlayers[id];
-        }
-    }
-}
+    const dist=
+      Math.hypot(
+        mob.x-player.x,
+        mob.y-player.y
+      );
 
+    if(dist<=radius){
 
-/* =========================================================
-   UPDATE MONSTERS
-========================================================= */
+      nearby=true;
+      break;
 
-function updateMonsters(dt){
-
-    for(
-        const monster of monsters
-    ){
-
-        if(
-            monster.hp <= 0
-        )
-            continue;
-
-
-        monster.flash =
-            Math.max(
-                0,
-                monster.flash-dt
-            );
-
-
-        const dx =
-            player.x-monster.x;
-
-        const dy =
-            player.y-monster.y;
-
-        const dist =
-            Math.hypot(dx,dy);
-
-
-        if(dist > 38){
-
-            monster.x +=
-                dx/dist *
-                monster.speed *
-                dt;
-
-            monster.y +=
-                dy/dist *
-                monster.speed *
-                dt;
-
-        }else{
-
-            player.hp -=
-                monster.damage *
-                dt;
-
-            if(
-                player.hp <= 0
-            ){
-
-                player.hp = 0;
-
-                playerDied();
-
-                return;
-            }
-        }
     }
 
+  }
 
-    checkWave();
-}
+  if(!nearby)return;
 
+  attackCooldown=.58;
 
-/* =========================================================
-   AREA ATTACK
-========================================================= */
+  attackAnimation=.42;
 
-async function areaAttack(){
+  let hits=0;
 
-    if(
-        !gameRunning ||
-        paused
-    )
-        return;
+  for(const mob of mobs){
 
+    if(mob.dead)continue;
 
-    const radius = 120;
+    const dist=
+      Math.hypot(
+        mob.x-player.x,
+        mob.y-player.y
+      );
 
+    if(dist<=radius){
 
-    createEffect(
-        player.x,
-        player.y,
-        radius
+      hits++;
+
+      let damage=
+        player.damage+
+        Math.floor(Math.random()*5);
+
+      if(mob.boss){
+
+        damage=
+          Math.floor(damage*.75);
+
+      }
+
+      mob.hp-=damage;
+
+      mob.hit=.16;
+
+      numbers.push({
+
+        x:mob.x,
+
+        y:mob.y-mob.size-10,
+
+        text:"-"+damage,
+
+        color:"#ffe16b",
+
+        life:.7,
+
+        maxLife:.7
+
+      });
+
+      burst(
+        mob.x,
+        mob.y,
+        9,
+        "#f1c957"
+      );
+
+      if(mob.hp<=0){
+
+        killMob(mob);
+
+      }
+
+    }
+
+  }
+
+  if(hits>0){
+
+    burst(
+      player.x,
+      player.y,
+      25,
+      "#e6bd4e"
     );
 
+  }
 
-    let hitSomething = false;
-
-
-    for(
-        const monster of monsters
-    ){
-
-        if(
-            monster.hp <= 0
-        )
-            continue;
-
-
-        const distance =
-            Math.hypot(
-                player.x-monster.x,
-                player.y-monster.y
-            );
-
-
-        if(
-            distance <= radius
-        ){
-
-            const damage =
-                player.damage * 3;
-
-            monster.hp -=
-                damage;
-
-            monster.flash=.15;
-
-            hitSomething = true;
-
-
-            if(!solo){
-
-                await sendNetwork({
-
-                    type:"monsterDamage",
-
-                    monsterId:
-                        monster.id,
-
-                    damage:damage
-                });
-
-            }
-        }
-    }
-
-
-    if(!solo){
-
-        await sendNetwork({
-
-            type:"attack",
-
-            x:player.x,
-
-            y:player.y,
-
-            radius:radius
-
-        });
-    }
-
-
-    if(hitSomething)
-        addFloatingText(
-            player.x,
-            player.y-30,
-            "ATTACK!"
-        );
-
-    checkWave();
 }
 
 
 /* =========================================================
-   CHECK WAVE
+   KILL MOB
 ========================================================= */
 
-async function checkWave(){
+function killMob(mob){
 
-    const alive =
-        monsters.filter(
-            m=>m.hp>0
-        );
+  mob.dead=true;
+
+  mob.deathTime=0;
+
+  player.gold+=mob.gold;
+
+  gainXP(mob.xp);
+
+  numbers.push({
+
+    x:mob.x,
+
+    y:mob.y-30,
+
+    text:"+"+mob.gold+" ouro",
+
+    color:"#ffd65a",
+
+    life:1,
+
+    maxLife:1
+
+  });
+
+  /* loot */
+
+  const chance=
+    mob.boss?
+    .65:
+    .10;
+
+  if(Math.random()<chance){
+
+    dropLoot(mob);
+
+  }
+
+  burst(
+    mob.x,
+    mob.y,
+    mob.boss?50:18,
+    mob.color
+  );
+
+}
 
 
-    if(alive.length > 0)
-        return;
+/* =========================================================
+   LOOT
+========================================================= */
 
+function dropLoot(mob){
 
-    if(wave >= 10){
+  const roll=Math.random();
 
-        gameRunning=false;
+  let rarity;
 
-        showMessage(
-            "DUNGEON COMPLETE!"
-        );
+  if(mob.boss){
 
-        if(!solo){
+    rarity=
+      roll<.2?
+      "legendary":
+      roll<.55?
+      "epic":
+      "rare";
 
-            await sendNetwork({
-                type:"complete"
-            });
-        }
+  }else{
 
-        setTimeout(
-            openEndScreen,
-            1800
-        );
+    rarity=
+      roll<.05?
+      "epic":
+      roll<.2?
+      "rare":
+      roll<.5?
+      "uncommon":
+      "common";
 
-        return;
+  }
+
+  const items=[
+
+    {
+      name:"Ruby Fragment",
+      icon:"🔴",
+      description:"+3 dano",
+      stat:3
+    },
+
+    {
+      name:"Moon Crystal",
+      icon:"🔷",
+      description:"+10 HP",
+      stat:10
+    },
+
+    {
+      name:"Ancient Coin",
+      icon:"🪙",
+      description:"+25 ouro",
+      stat:25
+    },
+
+    {
+      name:"Shadow Shard",
+      icon:"🟣",
+      description:"+7 dano",
+      stat:7
+    },
+
+    {
+      name:"Guardian Fragment",
+      icon:"🛡️",
+      description:"+25 HP",
+      stat:25
     }
 
+  ];
 
-    /* Only host advances multiplayer wave */
+  const item=
+    items[
+      Math.floor(
+        Math.random()*items.length
+      )
+    ];
 
-    if(
-        !solo &&
-        !roomHost
-    )
-        return;
+  const loot={
+
+    name:item.name,
+
+    icon:item.icon,
+
+    rarity,
+
+    description:item.description,
+
+    stat:item.stat
+
+  };
+
+  if(item.name==="Ancient Coin"){
+
+    player.gold+=25;
+
+  }else if(
+    item.name==="Ruby Fragment"||
+    item.name==="Shadow Shard"
+  ){
+
+    player.damage+=item.stat;
+
+  }else{
+
+    player.maxHp+=item.stat;
+
+    player.hp+=item.stat;
+
+  }
+
+  addItem(loot);
+
+  floatingLoot.push({
+
+    x:mob.x,
+
+    y:mob.y,
+
+    text:item.icon+" "+item.name,
+
+    life:2,
+
+    maxLife:2,
+
+    color:rarities[rarity].color
+
+  });
+
+  showToast(
+    "🎁 "+item.name+
+    " ["+
+    rarities[rarity].name+
+    "]"
+  );
+
+}
 
 
-    wave++;
+/* =========================================================
+   XP
+========================================================= */
+
+function gainXP(amount){
+
+  player.xp+=amount;
+
+  while(
+    player.xp>=player.xpMax
+  ){
+
+    player.xp-=player.xpMax;
+
+    player.level++;
+
+    player.xpMax=
+      Math.floor(
+        player.xpMax*1.35
+      );
+
+    player.maxHp+=15;
+
+    player.hp=player.maxHp;
+
+    player.damage+=2;
+
+    burst(
+      player.x,
+      player.y,
+      40,
+      "#ffe16b"
+    );
+
+    showToast(
+      "✨ LEVEL UP! Nível "+
+      player.level
+    );
+
+  }
+
+}
 
 
-    if(!solo){
+/* =========================================================
+   MOB UPDATE
+========================================================= */
 
-        await sendNetwork({
+function updateMobs(dt){
+  for(const mob of mobs){
+    if(mob.dead){mob.deathTime+=dt;continue;}
+    mob.anim+=dt*5;if(mob.hit>0)mob.hit-=dt;mob.attackCooldown-=dt;
+    if(roomChannel&&!roomHost)continue;
+    const targets=[{id:playerId,x:player.x,y:player.y}];
+    for(const p of Object.values(multiplayerPlayers))if(typeof p.x==="number"&&typeof p.y==="number")targets.push({id:p.id,x:p.x,y:p.y});
+    let t=targets[0],best=Infinity;for(const p of targets){const d=Math.hypot(p.x-mob.x,p.y-mob.y);if(d<best){best=d;t=p;}}
+    if(best>10000){const a=Math.random()*Math.PI*2;mob.x=t.x+Math.cos(a)*300;mob.y=t.y+Math.sin(a)*300;continue;}
+    const dx=t.x-mob.x,dy=t.y-mob.y,dist=Math.hypot(dx,dy);
+    if(dist<500&&dist>55){mob.x+=dx/dist*mob.speed*dt;mob.y+=dy/dist*mob.speed*dt;}
+    if(dist<=55&&mob.attackCooldown<=0){mob.attackCooldown=1.1+Math.random()*.5;const damage=mob.damage;if(t.id===playerId){player.hp-=damage;player.hit=.15;numbers.push({x:player.x,y:player.y-35,text:"-"+damage,color:"#ff6565",life:.7,maxLife:.7});burst(player.x,player.y,10,"#e65353");if(player.hp<=0)die();}else broadcastRoom({type:"damage",to:t.id,amount:damage});}
+  }
+  if(!waveStarting&&!player.dead&&mobs.length>0&&mobs.filter(m=>!m.dead).length===0)nextWave();
+  if(roomHost&&roomChannel&&Math.floor(gameTime*10)!==Math.floor((gameTime-dt)*10))broadcastFullState();
+}
 
-            type:"wave",
 
-            wave:wave
+/* =========================================================
+   NEXT WAVE
+========================================================= */
 
-        });
-    }
+function nextWave(){
+
+  waveStarting=true;
+
+  if(currentWave>=10){
+
+    completeDungeon();
+
+    return;
+
+  }
+
+  currentWave++;
+
+  showCenter(
+    "HORDA LIMPA!",
+    "A próxima horda está a chegar..."
+  );
+
+  setTimeout(()=>{
+
+    startWave();
+
+  },1300);
+
+}
 
 
-    spawnWave();
+/* =========================================================
+   COMPLETE DUNGEON
+========================================================= */
+
+function completeDungeon(){
+
+  completedDungeons[currentDungeon]=true;
+
+  const reward=
+    100+
+    currentDungeon*150;
+
+  player.gold+=reward;
+
+  if(roomChannel&&roomHost){
+    for(const id of Object.keys(multiplayerPlayers)) broadcastRoom({type:"reward",to:id,gold:reward,xp:0});
+    broadcastRoom({type:"dungeon_complete",dungeon:currentDungeon,reward});
+  }
+
+  saveGame();
+
+  showCenter(
+    "🏆 DUNGEON COMPLETA!",
+    "Recompensa: +"+
+    reward+
+    " ouro"
+  );
+
+  setTimeout(()=>{
+
+    exitToMenu();
+
+  },3000);
+
+}
+
+
+/* =========================================================
+   DEATH
+========================================================= */
+
+function die(){
+
+  if(player.dead)return;
+
+  player.dead=true;
+
+  target=null;
+
+  destination=null;
+
+  document.getElementById("death")
+    .style.display="flex";
+
+}
+
+
+function respawn(){
+
+  player.dead=false;
+
+  player.hp=player.maxHp;
+
+  player.x=0;
+
+  player.y=0;
+
+  mobs=[];
+
+  target=null;
+
+  attackCooldown=0;
+
+  document.getElementById("death")
+    .style.display="none";
+
+  startWave();
+
 }
 
 
@@ -2894,687 +2845,167 @@ async function checkWave(){
 
 function usePotion(){
 
-    if(
-        !gameRunning ||
-        paused
-    )
-        return;
+  if(player.potions<=0){
 
-    if(
-        player.potions <= 0
-    ){
+    showToast("Não tens poções!");
 
-        showMessage(
-            "No potions!"
-        );
+    return;
 
-        return;
-    }
+  }
 
+  if(
+    player.hp>=
+    player.maxHp
+  ){
 
-    if(
-        player.hp >=
-        player.maxHp
-    ){
+    showToast("O HP já está cheio.");
 
-        showMessage(
-            "HP already full"
-        );
+    return;
 
-        return;
-    }
+  }
 
+  player.potions--;
 
-    player.potions--;
-
-    player.hp =
-        Math.min(
-            player.maxHp,
-            player.hp+40
-        );
-
-    addFloatingText(
-        player.x,
-        player.y-25,
-        "+40 HP"
+  player.hp=
+    Math.min(
+      player.maxHp,
+      player.hp+40
     );
 
-    syncPlayer();
+  showToast("🧪 +40 HP");
+
 }
 
 
 /* =========================================================
-   SHOP
+   PARTICLES
 ========================================================= */
 
-function openShop(){
-
-    if(!gameRunning)
-        return;
-
-    paused=true;
-
-    document
-        .getElementById(
-            "shopOverlay"
-        )
-        .classList.remove("hidden");
-}
-
-
-function closeShop(){
-
-    document
-        .getElementById(
-            "shopOverlay"
-        )
-        .classList.add("hidden");
-
-    paused=false;
-}
-
-
-function buyPotion(){
-
-    if(player.gold < 10){
-
-        showMessage(
-            "Not enough gold"
-        );
-
-        return;
-    }
-
-    player.gold -= 10;
-
-    player.potions++;
-
-    updateHUD();
-}
-
-
-function buySword(){
-
-    if(player.gold < 40){
-
-        showMessage(
-            "Not enough gold"
-        );
-
-        return;
-    }
-
-    player.gold -= 40;
-
-    player.damage += 3;
-
-    updateHUD();
-
-    showMessage(
-        "Sword upgraded!"
-    );
-}
-
-
-/* =========================================================
-   INVENTORY
-========================================================= */
-
-function openInventory(){
-
-    if(!gameRunning)
-        return;
-
-    paused=true;
-
-    document
-        .getElementById(
-            "inventoryOverlay"
-        )
-        .classList.remove("hidden");
-}
-
-
-function closeInventory(){
-
-    document
-        .getElementById(
-            "inventoryOverlay"
-        )
-        .classList.add("hidden");
-
-    paused=false;
-}
-
-
-/* =========================================================
-   PAUSE
-========================================================= */
-
-function togglePause(){
-
-    if(!gameRunning)
-        return;
-
-    paused =
-        !paused;
-
-    document
-        .getElementById(
-            "pauseOverlay"
-        )
-        .classList.toggle(
-            "hidden",
-            !paused
-        );
-}
-
-
-/* =========================================================
-   TARGET
-========================================================= */
-
-function showTarget(){
-
-    if(!targetMonster){
-
-        document
-            .getElementById(
-                "targetBox"
-            )
-            .classList.add("hidden");
-
-        return;
-    }
-
-
-    document
-        .getElementById(
-            "targetBox"
-        )
-        .classList.remove("hidden");
-
-    document
-        .getElementById(
-            "targetName"
-        )
-        .textContent =
-        dungeons[
-            dungeon-1
-        ].enemy;
-
-
-    document
-        .getElementById(
-            "targetHp"
-        )
-        .style.width =
-        Math.max(
-            0,
-            targetMonster.hp /
-            targetMonster.maxHp *
-            100
-        ) + "%";
-}
-
-
-/* =========================================================
-   EFFECTS
-========================================================= */
-
-function createEffect(
-    x,
-    y,
-    radius
+function burst(
+  x,
+  y,
+  count,
+  color
 ){
 
-    effects.push({
+  for(
+    let i=0;
+    i<count;
+    i++
+  ){
 
-        x:x,
+    const angle=
+      Math.random()*
+      Math.PI*2;
 
-        y:y,
+    const speed=
+      40+
+      Math.random()*130;
 
-        radius:radius,
+    particles.push({
 
-        age:0
+      x,
+      y,
+
+      vx:
+        Math.cos(angle)*
+        speed,
+
+      vy:
+        Math.sin(angle)*
+        speed,
+
+      life:
+        .35+
+        Math.random()*.6,
+
+      maxLife:.9,
+
+      size:
+        2+
+        Math.random()*4,
+
+      color
 
     });
-}
 
+  }
 
-function addFloatingText(
-    x,
-    y,
-    text
-){
-
-    floatingTexts.push({
-
-        x:x,
-
-        y:y,
-
-        text:text,
-
-        age:0
-    });
 }
 
 
 /* =========================================================
-   DRAW
+   PARTICLE UPDATE
 ========================================================= */
 
-function draw(){
+function updateParticles(dt){
 
-    const data =
-        dungeons[
-            dungeon-1
-        ];
+  for(
+    let i=particles.length-1;
+    i>=0;
+    i--
+  ){
 
+    const p=particles[i];
 
-    /* Background */
+    p.life-=dt;
 
-    ctx.fillStyle =
-        data.bg;
+    p.x+=p.vx*dt;
 
-    ctx.fillRect(
-        0,
-        0,
-        W,
-        H
-    );
+    p.y+=p.vy*dt;
 
+    p.vx*=.96;
 
-    /* Floor */
+    p.vy*=.96;
 
-    ctx.strokeStyle =
-        "rgba(255,255,255,.035)";
+    if(p.life<=0){
 
-    ctx.lineWidth=1;
+      particles.splice(i,1);
 
-    const grid=50;
-
-
-    for(
-        let x=0;
-        x<W;
-        x+=grid
-    ){
-
-        ctx.beginPath();
-
-        ctx.moveTo(x,0);
-
-        ctx.lineTo(x,H);
-
-        ctx.stroke();
     }
 
+  }
 
-    for(
-        let y=0;
-        y<H;
-        y+=grid
-    ){
+  for(
+    let i=numbers.length-1;
+    i>=0;
+    i--
+  ){
 
-        ctx.beginPath();
+    const n=numbers[i];
 
-        ctx.moveTo(0,y);
+    n.life-=dt;
 
-        ctx.lineTo(W,y);
+    n.y-=35*dt;
 
-        ctx.stroke();
+    if(n.life<=0){
+
+      numbers.splice(i,1);
+
     }
 
+  }
 
-    /* Decorations */
+  for(
+    let i=floatingLoot.length-1;
+    i>=0;
+    i--
+  ){
 
-    for(
-        let i=0;
-        i<18;
-        i++
-    ){
+    const l=floatingLoot[i];
 
-        const x =
-            (i*173)%W;
+    l.life-=dt;
 
-        const y =
-            (i*97)%H;
+    l.y-=20*dt;
 
-        ctx.fillStyle =
-            "rgba(255,255,255,.025)";
+    if(l.life<=0){
 
-        ctx.fillRect(
-            x,
-            y,
-            35,
-            35
-        );
+      floatingLoot.splice(i,1);
+
     }
 
+  }
 
-    /* Monsters */
-
-    for(
-        const monster of monsters
-    ){
-
-        if(
-            monster.hp <= 0
-        )
-            continue;
-
-
-        drawMonster(
-            monster
-        );
-    }
-
-
-    /* Remote players */
-
-    for(
-        const id in remotePlayers
-    ){
-
-        const p =
-            remotePlayers[id];
-
-        drawPlayer(
-            p.x,
-            p.y,
-            "#559de0",
-            p.name
-        );
-    }
-
-
-    /* Local player */
-
-    drawPlayer(
-        player.x,
-        player.y,
-        "#d6b46c",
-        player.name
-    );
-
-
-    /* Effects */
-
-    for(
-        let i=effects.length-1;
-        i>=0;
-        i--
-    ){
-
-        const e =
-            effects[i];
-
-        e.age += .045;
-
-        const progress =
-            e.age;
-
-        const radius =
-            e.radius *
-            progress;
-
-        ctx.strokeStyle =
-            `rgba(214,180,108,${
-                Math.max(
-                    0,
-                    1-progress
-                )
-            })`;
-
-        ctx.lineWidth=4;
-
-        ctx.beginPath();
-
-        ctx.arc(
-            e.x,
-            e.y,
-            radius,
-            0,
-            Math.PI*2
-        );
-
-        ctx.stroke();
-
-
-        if(
-            e.age>=1
-        ){
-
-            effects.splice(
-                i,
-                1
-            );
-        }
-    }
-
-
-    /* Floating text */
-
-    for(
-        let i=floatingTexts.length-1;
-        i>=0;
-        i--
-    ){
-
-        const f =
-            floatingTexts[i];
-
-        f.age += .016;
-
-        ctx.globalAlpha =
-            Math.max(
-                0,
-                1-f.age
-            );
-
-        ctx.fillStyle="#fff";
-
-        ctx.font="bold 14px Arial";
-
-        ctx.textAlign="center";
-
-        ctx.fillText(
-            f.text,
-            f.x,
-            f.y-f.age*40
-        );
-
-        ctx.globalAlpha=1;
-
-
-        if(
-            f.age>=1
-        ){
-
-            floatingTexts.splice(
-                i,
-                1
-            );
-        }
-    }
-}
-
-
-/* =========================================================
-   DRAW MONSTER
-========================================================= */
-
-function drawMonster(m){
-
-    ctx.save();
-
-    if(m.flash>0){
-
-        ctx.shadowBlur=20;
-
-        ctx.shadowColor="#fff";
-    }
-
-
-    const colors = [
-
-        "#9c4b52",
-
-        "#c66b37",
-
-        "#5595a9",
-
-        "#78559e",
-
-        "#9b3e48"
-
-    ];
-
-
-    ctx.fillStyle =
-        colors[
-            (dungeon-1) %
-            colors.length
-        ];
-
-
-    ctx.beginPath();
-
-    ctx.arc(
-        m.x,
-        m.y,
-        m.radius,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /* Eyes */
-
-    ctx.fillStyle="#111";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        m.x-5,
-        m.y-3,
-        2,
-        0,
-        Math.PI*2
-    );
-
-    ctx.arc(
-        m.x+5,
-        m.y-3,
-        2,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /* HP bar */
-
-    ctx.fillStyle="#291517";
-
-    ctx.fillRect(
-        m.x-19,
-        m.y-27,
-        38,
-        4
-    );
-
-    ctx.fillStyle="#cf555b";
-
-    ctx.fillRect(
-        m.x-19,
-        m.y-27,
-        38 *
-        Math.max(
-            0,
-            m.hp/m.maxHp
-        ),
-        4
-    );
-
-
-    ctx.restore();
-}
-
-
-/* =========================================================
-   DRAW PLAYER
-========================================================= */
-
-function drawPlayer(
-    x,
-    y,
-    color,
-    name
-){
-
-    ctx.save();
-
-    ctx.shadowBlur=12;
-
-    ctx.shadowColor=color;
-
-    ctx.fillStyle=color;
-
-    ctx.beginPath();
-
-    ctx.arc(
-        x,
-        y,
-        18,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-    ctx.shadowBlur=0;
-
-
-    /* sword */
-
-    ctx.strokeStyle="#ddd";
-
-    ctx.lineWidth=3;
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        x+8,
-        y-8
-    );
-
-    ctx.lineTo(
-        x+18,
-        y-18
-    );
-
-    ctx.stroke();
-
-
-    ctx.fillStyle="#fff";
-
-    ctx.font="12px Arial";
-
-    ctx.textAlign="center";
-
-    ctx.fillText(
-        name || "Player",
-        x,
-        y-28
-    );
-
-    ctx.restore();
 }
 
 
@@ -3584,386 +3015,2086 @@ function drawPlayer(
 
 function updateHUD(){
 
-    document.getElementById(
-        "hpText"
-    ).textContent =
-        Math.ceil(player.hp) +
-        "/" +
-        player.maxHp;
+  document.getElementById("hp")
+    .textContent=
+    Math.max(
+      0,
+      Math.ceil(player.hp)
+    )+
+    " / "+
+    player.maxHp;
 
+  document.getElementById("xp")
+    .textContent=
+    player.xp+
+    " / "+
+    player.xpMax;
 
-    document.getElementById(
-        "goldText"
-    ).textContent =
-        player.gold;
+  document.getElementById("level")
+    .textContent=
+    player.level;
 
+  document.getElementById("gold")
+    .textContent=
+    player.gold;
 
-    document.getElementById(
-        "levelText"
-    ).textContent =
-        player.level;
+  document.getElementById("damage")
+    .textContent=
+    player.damage;
 
+  document.getElementById("potions")
+    .textContent=
+    player.potions;
 
-    document.getElementById(
-        "potionText"
-    ).textContent =
-        player.potions;
+  document.getElementById("wave")
+    .textContent=
+    currentWave;
 
+  const alive=
+    mobs.filter(
+      m=>!m.dead
+    ).length;
 
-    document.getElementById(
-        "waveNumber"
-    ).textContent =
-        wave;
+  document.getElementById("enemyCount")
+    .textContent=
+    alive+
+    " inimigo"+
+    (alive===1?"":"s");
 
+  const killed=
+    mobs.length-alive;
 
-    document.getElementById(
-        "hpFill"
-    ).style.width =
-        Math.max(
-            0,
-            player.hp /
-            player.maxHp *
-            100
-        ) + "%";
+  document.getElementById("waveProgress")
+    .style.width=
+    (
+      mobs.length?
+      killed/mobs.length*100:
+      0
+    )+"%";
 
+  if(
+    target &&
+    !target.dead
+  ){
 
-    showTarget();
+    document.getElementById("targetBox")
+      .style.display="block";
 
-    updatePlayersPanel();
+    document.getElementById("targetName")
+      .textContent=
+      target.boss?
+      target.bossName:
+      types[target.type].name;
+
+    document.querySelector(
+      "#targetBar i"
+    ).style.width=
+      Math.max(
+        0,
+        target.hp/
+        target.maxHp*
+        100
+      )+"%";
+
+  }else{
+
+    document.getElementById("targetBox")
+      .style.display="none";
+
+  }
+
 }
 
 
 /* =========================================================
-   PLAYERS PANEL
+   CENTER MESSAGE
 ========================================================= */
 
-function updatePlayersPanel(){
+function showCenter(title,text){
 
-    const list =
-        document.getElementById(
-            "playersList"
-        );
+  document.getElementById("messageTitle")
+    .textContent=title;
 
-    if(!list)
-        return;
+  document.getElementById("messageText")
+    .textContent=text;
+
+  document.getElementById("message")
+    .style.opacity=1;
+
+}
 
 
-    let html =
-        `<div class="remotePlayer">
-            🟡 ${escapeHTML(
-                player.name
-            )} <span class="online">YOU</span>
-        </div>`;
+function hideCenter(){
 
+  document.getElementById("message")
+    .style.opacity=0;
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function showToast(text){
+
+  const toast=
+    document.getElementById("toast");
+
+  toast.textContent=text;
+
+  toast.style.opacity=1;
+
+  toastTimer=2;
+
+}
+
+
+/* =========================================================
+   PAUSE
+========================================================= */
+
+function togglePause(){
+
+  if(
+    document.getElementById("shop")
+      .style.display==="flex"
+  )return;
+
+  paused=!paused;
+
+  document.getElementById("pause")
+    .style.display=
+    paused?
+    "flex":
+    "none";
+
+  document.getElementById("pauseDungeon")
+    .textContent=
+    currentDungeon;
+
+  document.getElementById("pauseWave")
+    .textContent=
+    currentWave+
+    " / 10";
+
+  document.getElementById("pauseLevel")
+    .textContent=
+    player.level;
+
+  document.getElementById("pauseGold")
+    .textContent=
+    player.gold;
+
+}
+
+
+/* =========================================================
+   INVENTORY
+========================================================= */
+
+function toggleInventory(){
+
+  const el=
+    document.getElementById("inventory");
+
+  if(el.style.display==="flex"){
+
+    el.style.display="none";
+
+  }else{
+
+    renderInventory();
+
+    el.style.display="flex";
+
+  }
+
+}
+
+
+function renderInventory(){
+
+  const grid=
+    document.getElementById("inventoryGrid");
+
+  grid.innerHTML="";
+
+  if(inventory.length===0){
+
+    grid.innerHTML=
+      "<p style='color:#777'>O inventário está vazio.</p>";
+
+    return;
+
+  }
+
+  for(const item of inventory){
+
+    const card=
+      document.createElement("div");
+
+    card.className="item-card";
+
+    const rarity=
+      rarities[item.rarity]||
+      rarities.common;
+
+    card.style.borderColor=
+      rarity.color;
+
+    card.innerHTML=`
+
+      <div class="item-icon">
+        ${item.icon}
+      </div>
+
+      <h3 style="color:${rarity.color}">
+        ${item.name}
+      </h3>
+
+      <small style="color:${rarity.color}">
+        ${rarity.name}
+      </small>
+
+      <p>
+        ${item.description}
+      </p>
+
+    `;
+
+    grid.appendChild(card);
+
+  }
+
+}
+
+
+/* =========================================================
+   MENU
+========================================================= */
+
+function updateMenu(){
+
+  document.getElementById("menuLevel")
+    .textContent=
+    player.level;
+
+  document.getElementById("menuGold")
+    .textContent=
+    player.gold;
+
+  const completed=
+    Object.values(
+      completedDungeons
+    ).filter(Boolean).length;
+
+  document.getElementById("menuDungeons")
+    .textContent=
+    completed+
+    "/5";
+
+  const cards=
+    document.querySelectorAll(
+      ".dungeon[data-dungeon]"
+    );
+
+  cards.forEach(card=>{
+
+    const n=
+      Number(
+        card.dataset.dungeon
+      );
+
+    const unlocked=
+      completedDungeons[n-1];
+
+    if(unlocked){
+
+      card.classList.remove("locked");
+
+      const lock=
+        card.querySelector(".lock");
+
+      if(lock)lock.remove();
+
+      const button=
+        card.querySelector("button");
+
+      button.disabled=false;
+
+      button.textContent="ENTRAR";
+
+      button.onclick=()=>{
+        enterDungeon(n);
+      };
+
+    }
+
+  });
+
+}
+
+
+/* =========================================================
+   EXIT MENU
+========================================================= */
+
+function exitToMenu(){
+
+  guestActive=false;
+
+  saveGame();
+  if(roomChannel) leaveRoom();
+
+  paused=false;
+
+  mobs=[];
+
+  target=null;
+
+  destination=null;
+
+  document.getElementById("pause")
+    .style.display="none";
+
+  document.getElementById("game")
+    .classList.add("hidden");
+
+  document.getElementById("menu")
+    .classList.remove("hidden");
+
+  updateMenu();
+
+}
+
+
+/* =========================================================
+   WORLD
+========================================================= */
+
+function drawDungeon(){
+
+  const data=
+    dungeonData[currentDungeon]||
+    dungeonData[1];
+
+  ctx.fillStyle="#11141b";
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+  /* floor */
+
+  const size=70;
+
+  const ox=
+    ((-player.x)%size+size)%size;
+
+  const oy=
+    ((-player.y)%size+size)%size;
+
+  ctx.strokeStyle="#252a34";
+
+  ctx.lineWidth=1;
+
+  for(
+    let x=ox;
+    x<W;
+    x+=size
+  ){
+
+    ctx.beginPath();
+
+    ctx.moveTo(x,0);
+
+    ctx.lineTo(x,H);
+
+    ctx.stroke();
+
+  }
+
+  for(
+    let y=oy;
+    y<H;
+    y+=size
+  ){
+
+    ctx.beginPath();
+
+    ctx.moveTo(0,y);
+
+    ctx.lineTo(W,y);
+
+    ctx.stroke();
+
+  }
+
+  /* tiles */
+
+  for(
+    let i=0;
+    i<60;
+    i++
+  ){
+
+    const x=
+      ((i*173)%W);
+
+    const y=
+      ((i*97)%H);
+
+    ctx.fillStyle=
+      i%3===0?
+      "#20242d":
+      "#191d25";
+
+    ctx.fillRect(
+      x,
+      y,
+      3+i%4,
+      3+i%3
+    );
+
+  }
+
+  /* dungeon-specific atmosphere */
+
+  if(currentDungeon===1){
+
+    drawPurpleFog();
+
+  }else if(currentDungeon===2){
+
+    drawFireAtmosphere();
+
+  }else if(currentDungeon===3){
+
+    drawIceAtmosphere();
+
+  }else if(currentDungeon===4){
+
+    drawDeadAtmosphere();
+
+  }else{
+
+    drawCastleAtmosphere();
+
+  }
+
+  /* border */
+
+  ctx.fillStyle="#090b10";
+
+  ctx.fillRect(0,0,W,12);
+  ctx.fillRect(0,H-12,W,12);
+  ctx.fillRect(0,0,12,H);
+  ctx.fillRect(W-12,0,12,H);
+
+}
+
+
+function drawPurpleFog(){
+
+  const g=
+    ctx.createRadialGradient(
+      W/2,H/2,100,
+      W/2,H/2,Math.max(W,H)*.7
+    );
+
+  g.addColorStop(
+    0,
+    "rgba(100,70,130,.02)"
+  );
+
+  g.addColorStop(
+    1,
+    "rgba(60,30,90,.25)"
+  );
+
+  ctx.fillStyle=g;
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+}
+
+
+function drawFireAtmosphere(){
+
+  ctx.fillStyle=
+    "rgba(130,45,25,.08)";
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+  for(
+    let i=0;
+    i<12;
+    i++
+  ){
+
+    const x=
+      (i*131+
+      gameTime*15)%
+      W;
+
+    const y=
+      (i*71-
+      gameTime*20)%
+      H;
+
+    ctx.fillStyle="#ef713344";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      x,
+      y,
+      2+i%3,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+  }
+
+}
+
+
+function drawIceAtmosphere(){
+
+  ctx.fillStyle=
+    "rgba(70,150,180,.09)";
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+  for(
+    let i=0;
+    i<18;
+    i++
+  ){
+
+    const x=
+      (i*101+
+      Math.sin(gameTime+i)*20)%
+      W;
+
+    const y=
+      (i*67+
+      gameTime*12)%
+      H;
+
+    ctx.fillStyle="#b9f0ff55";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      x,
+      y,
+      2+i%3,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+  }
+
+}
+
+
+function drawDeadAtmosphere(){
+
+  ctx.fillStyle=
+    "rgba(20,20,35,.15)";
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+}
+
+
+function drawCastleAtmosphere(){
+
+  ctx.fillStyle=
+    "rgba(80,10,25,.12)";
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+}
+
+
+/* =========================================================
+   WORLD TO SCREEN
+========================================================= */
+
+function worldToScreen(x,y){
+
+  return{
+
+    x:
+      x-
+      player.x+
+      W/2,
+
+    y:
+      y-
+      player.y+
+      H/2
+
+  };
+
+}
+
+
+/* =========================================================
+   PLAYER DRAW
+========================================================= */
+
+function drawPlayer(){
+
+  const x=W/2;
+
+  const y=H/2;
+
+  const moving=
+    keys.w||
+    keys.a||
+    keys.s||
+    keys.d||
+    destination||
+    (target&&!target.dead);
+
+  const bob=
+    moving?
+    Math.sin(player.anim)*3:
+    Math.sin(gameTime*2)*1.5;
+
+  const leg=
+    Math.sin(player.anim)*5;
+
+  ctx.save();
+
+  ctx.translate(
+    x,
+    y+bob
+  );
+
+  ctx.scale(
+    player.direction,
+    1
+  );
+
+  /* shadow */
+
+  ctx.fillStyle="#0009";
+
+  ctx.beginPath();
+
+  ctx.ellipse(
+    0,
+    31,
+    29,
+    8,
+    0,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+  /* cape */
+
+  ctx.fillStyle="#54276e";
+
+  ctx.beginPath();
+
+  ctx.moveTo(-14,-8);
+
+  ctx.lineTo(-30,31);
+
+  ctx.lineTo(0,22);
+
+  ctx.closePath();
+
+  ctx.fill();
+
+  /* legs */
+
+  ctx.fillStyle="#272d3b";
+
+  ctx.fillRect(
+    -11+leg*.35,
+    7,
+    8,
+    21
+  );
+
+  ctx.fillRect(
+    3-leg*.35,
+    7,
+    8,
+    21
+  );
+
+  /* boots */
+
+  ctx.fillStyle="#101218";
+
+  ctx.fillRect(
+    -15+leg*.35,
+    24,
+    13,
+    6
+  );
+
+  ctx.fillRect(
+    2-leg*.35,
+    24,
+    13,
+    6
+  );
+
+  /* body armor */
+
+  ctx.fillStyle="#425879";
+
+  ctx.beginPath();
+
+  ctx.roundRect(
+    -16,
+    -13,
+    32,
+    30,
+    7
+  );
+
+  ctx.fill();
+
+  /* belt */
+
+  ctx.fillStyle="#b18442";
+
+  ctx.fillRect(
+    -16,
+    3,
+    32,
+    5
+  );
+
+  /* head */
+
+  ctx.fillStyle="#d99b70";
+
+  ctx.beginPath();
+
+  ctx.arc(
+    0,
+    -26,
+    13,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+  /* hair */
+
+  ctx.fillStyle="#30232b";
+
+  ctx.beginPath();
+
+  ctx.arc(
+    0,
+    -30,
+    13,
+    Math.PI,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+  /* eye */
+
+  ctx.fillStyle="#111";
+
+  ctx.fillRect(
+    5,
+    -27,
+    3,
+    3
+  );
+
+  /* arm */
+
+  ctx.fillStyle="#d99b70";
+
+  ctx.fillRect(
+    12,
+    -7,
+    8,
+    13
+  );
+
+  /* sword */
+
+  ctx.save();
+
+  if(attackAnimation>0){
+
+    const progress=
+      1-
+      attackAnimation/.42;
+
+    ctx.rotate(
+      -1+
+      progress*2.7
+    );
+
+  }
+
+  ctx.strokeStyle="#e8ecf5";
+
+  ctx.lineWidth=5;
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    16,
+    8
+  );
+
+  ctx.lineTo(
+    51,
+    8
+  );
+
+  ctx.stroke();
+
+  ctx.strokeStyle="#9c6d3b";
+
+  ctx.lineWidth=5;
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    12,
+    6
+  );
+
+  ctx.lineTo(
+    24,
+    6
+  );
+
+  ctx.stroke();
+
+  ctx.restore();
+
+  /* attack arc */
+
+  if(attackAnimation>0){
+
+    const alpha=
+      attackAnimation/.42;
+
+    ctx.strokeStyle=
+      "rgba(245,205,80,"+
+      alpha+
+      ")";
+
+    ctx.lineWidth=5;
+
+    ctx.beginPath();
+
+    ctx.arc(
+      0,
+      0,
+      115,
+      -Math.PI*.85,
+      Math.PI*.85
+    );
+
+    ctx.stroke();
+
+  }
+
+  ctx.restore();
+
+}
+
+
+/* =========================================================
+   MOB DRAW
+========================================================= */
+
+function drawMob(mob){
+
+  const s=
+    worldToScreen(
+      mob.x,
+      mob.y
+    );
+
+  if(
+    s.x<-150||
+    s.x>W+150||
+    s.y<-150||
+    s.y>H+150
+  )return;
+
+  ctx.save();
+
+  ctx.translate(
+    s.x,
+    s.y
+  );
+
+  const deathScale=
+    mob.dead?
+    Math.max(
+      0,
+      1-
+      mob.deathTime/.7
+    ):
+    1;
+
+  ctx.scale(
+    1,
+    deathScale
+  );
+
+  if(mob.hit>0){
+
+    ctx.globalAlpha=.5;
+
+  }
+
+  /* target */
+
+  if(
+    target===mob &&
+    !mob.dead
+  ){
+
+    ctx.strokeStyle="#f4d35e";
+
+    ctx.lineWidth=3;
+
+    ctx.beginPath();
+
+    ctx.arc(
+      0,
+      0,
+      mob.size+10,
+      0,
+      Math.PI*2
+    );
+
+    ctx.stroke();
+
+  }
+
+  /* shadow */
+
+  ctx.fillStyle="#0009";
+
+  ctx.beginPath();
+
+  ctx.ellipse(
+    0,
+    mob.size*.8,
+    mob.size,
+    mob.size*.35,
+    0,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+  if(mob.boss){
+
+    drawBoss(mob);
+
+  }else{
+
+    drawMobBody(mob);
+
+  }
+
+  /* hp */
+
+  if(!mob.dead){
+
+    ctx.fillStyle="#111318";
+
+    ctx.fillRect(
+      -mob.size,
+      -mob.size-13,
+      mob.size*2,
+      5
+    );
+
+    ctx.fillStyle="#d84c4c";
+
+    ctx.fillRect(
+      -mob.size,
+      -mob.size-13,
+      mob.size*2*
+      Math.max(
+        0,
+        mob.hp/mob.maxHp
+      ),
+      5
+    );
+
+  }
+
+  ctx.restore();
+
+}
+
+
+/* =========================================================
+   BOSS DRAW
+========================================================= */
+
+function drawBoss(m){
+
+  const s=m.size;
+
+  const pulse=
+    1+
+    Math.sin(
+      gameTime*3
+    )*.04;
+
+  ctx.scale(
+    pulse,
+    pulse
+  );
+
+  /* aura */
+
+  ctx.strokeStyle=
+    m.color+
+    "66";
+
+  ctx.lineWidth=7;
+
+  ctx.beginPath();
+
+  ctx.arc(
+    0,
+    0,
+    s+14,
+    0,
+    Math.PI*2
+  );
+
+  ctx.stroke();
+
+  /* body */
+
+  ctx.fillStyle=m.color;
+
+  ctx.beginPath();
+
+  ctx.arc(
+    0,
+    -10,
+    s*.65,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+  ctx.fillRect(
+    -s*.65,
+    8,
+    s*1.3,
+    s*.7
+  );
+
+  /* horns */
+
+  ctx.fillStyle="#ddd0ae";
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    -s*.3,
+    -s*.65
+  );
+
+  ctx.lineTo(
+    -s*.7,
+    -s*1.15
+  );
+
+  ctx.lineTo(
+    -s*.05,
+    -s*.75
+  );
+
+  ctx.closePath();
+
+  ctx.fill();
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    s*.3,
+    -s*.65
+  );
+
+  ctx.lineTo(
+    s*.7,
+    -s*1.15
+  );
+
+  ctx.lineTo(
+    s*.05,
+    -s*.75
+  );
+
+  ctx.closePath();
+
+  ctx.fill();
+
+  /* eyes */
+
+  ctx.fillStyle="#ff5353";
+
+  ctx.fillRect(
+    -s*.25,
+    -s*.18,
+    9,
+    6
+  );
+
+  ctx.fillRect(
+    s*.08,
+    -s*.18,
+    9,
+    6
+  );
+
+}
+
+
+/* =========================================================
+   MOB BODY
+========================================================= */
+
+function drawMobBody(m){
+
+  const s=m.size;
+
+  if(m.type==="slime"){
+
+    const squash=
+      1+
+      Math.sin(
+        gameTime*8+m.anim
+      )*.08;
+
+    ctx.scale(
+      squash,
+      1/squash
+    );
+
+    ctx.fillStyle=m.color;
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+      0,
+      4,
+      s,
+      s*.75,
+      0,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle="#effff7";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      -7,
+      -1,
+      4,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle="#17251d";
+
+    ctx.fillRect(-7,4,4,5);
+    ctx.fillRect(5,4,4,5);
+
+  }
+
+  else if(m.type==="goblin"){
+
+    ctx.fillStyle=m.color;
+
+    ctx.beginPath();
+
+    ctx.arc(
+      0,
+      -2,
+      s*.75,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle="#496d38";
+
+    ctx.beginPath();
+
+    ctx.moveTo(-10,-9);
+    ctx.lineTo(-24,-18);
+    ctx.lineTo(-13,1);
+    ctx.closePath();
+
+    ctx.fill();
+
+    ctx.beginPath();
+
+    ctx.moveTo(10,-9);
+    ctx.lineTo(24,-18);
+    ctx.lineTo(13,1);
+    ctx.closePath();
+
+    ctx.fill();
+
+    ctx.fillStyle="#111";
+
+    ctx.fillRect(-6,-3,4,5);
+    ctx.fillRect(4,-3,4,5);
+
+  }
+
+  else if(m.type==="bat"){
+
+    const flap=
+      Math.sin(
+        gameTime*13+m.anim
+      )*8;
+
+    ctx.fillStyle=m.color;
+
+    ctx.beginPath();
+
+    ctx.moveTo(-5,0);
+    ctx.lineTo(-s-10,-10-flap);
+    ctx.lineTo(-s+2,8);
+    ctx.lineTo(-10,10);
+    ctx.closePath();
+
+    ctx.fill();
+
+    ctx.beginPath();
+
+    ctx.moveTo(5,0);
+    ctx.lineTo(s+10,-10+flap);
+    ctx.lineTo(s-2,8);
+    ctx.lineTo(10,10);
+    ctx.closePath();
+
+    ctx.fill();
+
+    ctx.fillStyle="#9d65c4";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      0,
+      0,
+      10,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle="#ff6565";
+
+    ctx.fillRect(-6,-2,3,4);
+    ctx.fillRect(3,-2,3,4);
+
+  }
+
+  else if(m.type==="spider"){
+
+    ctx.fillStyle=m.color;
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+      0,
+      2,
+      13,
+      18,
+      0,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.strokeStyle="#916b9b";
+
+    ctx.lineWidth=3;
 
     for(
-        const id in remotePlayers
+      let i=0;
+      i<4;
+      i++
     ){
 
-        const p =
-            remotePlayers[id];
+      const yy=-10+i*7;
 
-        html += `
-            <div class="remotePlayer">
-                🔵 ${escapeHTML(
-                    p.name
-                )}
-            </div>
-        `;
+      ctx.beginPath();
+
+      ctx.moveTo(-7,yy);
+      ctx.lineTo(-29,yy-9);
+
+      ctx.stroke();
+
+      ctx.beginPath();
+
+      ctx.moveTo(7,yy);
+      ctx.lineTo(29,yy-9);
+
+      ctx.stroke();
+
     }
 
+    ctx.fillStyle="#ed5a66";
 
-    list.innerHTML =
-        html;
-}
+    ctx.fillRect(-6,-3,4,4);
+    ctx.fillRect(3,-3,4,4);
 
+  }
 
-/* =========================================================
-   MESSAGE
-========================================================= */
+  else if(m.type==="wolf"){
 
-let messageTimer=null;
+    ctx.fillStyle=m.color;
 
-function showMessage(text){
+    ctx.beginPath();
 
-    const el =
-        document.getElementById(
-            "message"
-        );
-
-    el.textContent=text;
-
-    el.classList.add("show");
-
-    clearTimeout(messageTimer);
-
-    messageTimer =
-        setTimeout(
-            ()=>{
-                el.classList.remove(
-                    "show"
-                );
-            },
-            1600
-        );
-}
-
-
-/* =========================================================
-   PLAYER DEATH
-========================================================= */
-
-function playerDied(){
-
-    gameRunning=false;
-
-    showMessage(
-        "YOU DIED"
+    ctx.ellipse(
+      0,
+      3,
+      s*1.05,
+      s*.65,
+      0,
+      0,
+      Math.PI*2
     );
 
-    setTimeout(
-        openEndScreen,
-        1600
+    ctx.fill();
+
+    ctx.fillStyle="#b1b4ba";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      15,
+      -7,
+      12,
+      0,
+      Math.PI*2
     );
+
+    ctx.fill();
+
+    ctx.fillStyle="#777c84";
+
+    ctx.beginPath();
+
+    ctx.moveTo(10,-15);
+    ctx.lineTo(12,-29);
+    ctx.lineTo(20,-17);
+    ctx.closePath();
+
+    ctx.fill();
+
+    ctx.fillStyle="#222";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      23,
+      -7,
+      2,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+  }
+
+  else if(m.type==="skeleton"){
+
+    ctx.fillStyle="#ddd5bd";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      0,
+      -10,
+      12,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle="#282828";
+
+    ctx.fillRect(-7,-13,4,6);
+    ctx.fillRect(4,-13,4,6);
+
+    ctx.strokeStyle="#ddd5bd";
+
+    ctx.lineWidth=5;
+
+    ctx.beginPath();
+
+    ctx.moveTo(0,2);
+    ctx.lineTo(0,20);
+
+    ctx.moveTo(-12,8);
+    ctx.lineTo(12,8);
+
+    ctx.moveTo(-8,26);
+    ctx.lineTo(0,20);
+    ctx.lineTo(8,26);
+
+    ctx.stroke();
+
+  }
+
+  else if(m.type==="orc"){
+
+    ctx.fillStyle=m.color;
+
+    ctx.beginPath();
+
+    ctx.arc(
+      0,
+      -7,
+      s*.7,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle="#42683b";
+
+    ctx.fillRect(
+      -18,
+      4,
+      36,
+      28
+    );
+
+    ctx.fillStyle="#20221e";
+
+    ctx.fillRect(-7,-10,5,6);
+    ctx.fillRect(3,-10,5,6);
+
+    ctx.fillStyle="#f1dfac";
+
+    ctx.beginPath();
+
+    ctx.moveTo(-8,5);
+    ctx.lineTo(-3,16);
+    ctx.lineTo(1,5);
+    ctx.closePath();
+
+    ctx.fill();
+
+    ctx.beginPath();
+
+    ctx.moveTo(4,5);
+    ctx.lineTo(9,16);
+    ctx.lineTo(13,5);
+    ctx.closePath();
+
+    ctx.fill();
+
+  }
+
+  else if(m.type==="troll"){
+
+    ctx.fillStyle=m.color;
+
+    ctx.beginPath();
+
+    ctx.arc(
+      0,
+      -8,
+      s*.7,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle="#52673f";
+
+    ctx.fillRect(
+      -20,
+      4,
+      40,
+      32
+    );
+
+    ctx.fillStyle="#25251f";
+
+    ctx.fillRect(-9,-10,5,7);
+    ctx.fillRect(4,-10,5,7);
+
+  }
+
+  else if(m.type==="knight"){
+
+    ctx.fillStyle="#292f3e";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      0,
+      -8,
+      s*.7,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle="#4d5669";
+
+    ctx.fillRect(
+      -19,
+      3,
+      38,
+      32
+    );
+
+    ctx.fillStyle="#11151d";
+
+    ctx.fillRect(
+      -12,
+      -12,
+      24,
+      10
+    );
+
+    ctx.fillStyle="#e55762";
+
+    ctx.fillRect(-7,-8,4,3);
+    ctx.fillRect(4,-8,4,3);
+
+    ctx.strokeStyle="#bbc2ce";
+
+    ctx.lineWidth=5;
+
+    ctx.beginPath();
+
+    ctx.moveTo(17,10);
+    ctx.lineTo(35,-20);
+
+    ctx.stroke();
+
+  }
+
+  else if(m.type==="demon"){
+
+    ctx.fillStyle="#9b3f49";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      0,
+      -4,
+      s*.7,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle="#ddd0ae";
+
+    ctx.beginPath();
+
+    ctx.moveTo(-10,-17);
+    ctx.lineTo(-23,-38);
+    ctx.lineTo(-3,-22);
+    ctx.closePath();
+
+    ctx.fill();
+
+    ctx.beginPath();
+
+    ctx.moveTo(10,-17);
+    ctx.lineTo(23,-38);
+    ctx.lineTo(3,-22);
+    ctx.closePath();
+
+    ctx.fill();
+
+    ctx.fillStyle="#2a1015";
+
+    ctx.fillRect(-8,-7,5,5);
+    ctx.fillRect(4,-7,5,5);
+
+    ctx.fillStyle="#632c35";
+
+    ctx.fillRect(
+      -20,
+      4,
+      40,
+      30
+    );
+
+  }
+
 }
 
 
 /* =========================================================
-   END
+   EFFECTS
 ========================================================= */
 
-function openEndScreen(){
+function drawEffects(){
 
-    const win =
-        wave>=10 &&
-        player.hp>0;
+  for(const p of particles){
 
-    alert(
-        win
-        ? "Dungeon complete! 🎉"
-        : "You died!"
+    const s=
+      worldToScreen(
+        p.x,
+        p.y
+      );
+
+    ctx.globalAlpha=
+      Math.max(
+        0,
+        p.life/p.maxLife
+      );
+
+    ctx.fillStyle=p.color;
+
+    ctx.beginPath();
+
+    ctx.arc(
+      s.x,
+      s.y,
+      p.size,
+      0,
+      Math.PI*2
     );
 
-    exitGame();
+    ctx.fill();
+
+  }
+
+  ctx.globalAlpha=1;
+
+  for(const n of numbers){
+
+    const s=
+      worldToScreen(
+        n.x,
+        n.y
+      );
+
+    ctx.globalAlpha=
+      Math.max(
+        0,
+        n.life/n.maxLife
+      );
+
+    ctx.fillStyle=n.color;
+
+    ctx.font=
+      "bold 15px Arial";
+
+    ctx.textAlign="center";
+
+    ctx.fillText(
+      n.text,
+      s.x,
+      s.y
+    );
+
+  }
+
+  for(const l of floatingLoot){
+
+    const s=
+      worldToScreen(
+        l.x,
+        l.y
+      );
+
+    ctx.globalAlpha=
+      Math.max(
+        0,
+        l.life/l.maxLife
+      );
+
+    ctx.fillStyle=l.color;
+
+    ctx.font=
+      "bold 14px Arial";
+
+    ctx.textAlign="center";
+
+    ctx.fillText(
+      l.text,
+      s.x,
+      s.y
+    );
+
+  }
+
+  ctx.globalAlpha=1;
+
 }
 
 
 /* =========================================================
-   EXIT GAME
+   GAME UPDATE
 ========================================================= */
 
-async function exitGame(){
+function update(dt){
 
-    gameRunning=false;
+  if(paused)return;
 
-    paused=false;
+  gameTime+=dt;
 
-    document
-        .getElementById(
-            "pauseOverlay"
-        )
-        .classList.add("hidden");
+  if(roomChannel && Math.floor(gameTime*12)!==Math.floor((gameTime-dt)*12)){
+    updateRoomPresence();
+    broadcastRoom({type:"player_state",id:playerId,name:playerName(),x:player.x,y:player.y,hp:player.hp,maxHp:player.maxHp,level:player.level,dungeon:currentDungeon,wave:currentWave});
+  }
 
-    document
-        .getElementById(
-            "inventoryOverlay"
-        )
-        .classList.add("hidden");
+  if(attackCooldown>0)
+    attackCooldown-=dt;
 
-    document
-        .getElementById(
-            "shopOverlay"
-        )
-        .classList.add("hidden");
+  if(attackAnimation>0)
+    attackAnimation-=dt;
+
+  if(!player.dead){
+
+    updatePlayer(dt);
 
 
-    if(!solo && roomCode){
+    updateMobs(dt);
 
-        await disconnectRealtime();
+  }
 
-        roomCode=null;
+  updateParticles(dt);
+
+  updateHUD();
+
+  if(toastTimer>0){
+
+    toastTimer-=dt;
+
+    if(toastTimer<=0){
+
+      document.getElementById("toast")
+        .style.opacity=0;
+
     }
 
+  }
 
-    backToMenu();
 }
 
 
 /* =========================================================
-   LEAVE ROOM
+   RENDER
 ========================================================= */
 
-async function leaveRoom(){
+function render(){
 
-    await disconnectRealtime();
+  ctx.clearRect(
+    0,
+    0,
+    W,
+    H
+  );
 
-    roomCode=null;
+  drawDungeon();
 
-    roomHost=false;
+  const sorted=
+    [...mobs].sort(
+      (a,b)=>a.y-b.y
+    );
 
-    solo=false;
+  for(
+    const mob of sorted
+  ){
 
-    backToMenu();
+    drawMob(mob);
+
+  }
+
+  // Multiplayer: desenha os amigos sem alterar o jogador original.
+  for(const p of Object.values(multiplayerPlayers)){
+    if(typeof p.x!=="number"||typeof p.y!=="number")continue;
+    const s=worldToScreen(p.x,p.y);
+    if(s.x<-80||s.x>W+80||s.y<-80||s.y>H+80)continue;
+    ctx.save();
+    ctx.translate(s.x,s.y);
+    ctx.globalAlpha=.95;
+    ctx.fillStyle="#55b8ff";
+    ctx.beginPath(); ctx.arc(0,0,18,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle="#dceeff"; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle="#fff"; ctx.font="bold 12px Arial"; ctx.textAlign="center";
+    ctx.fillText(p.name||"Player",0,-27);
+    ctx.fillStyle="#26303b"; ctx.fillRect(-22,-21,44,5);
+    ctx.fillStyle="#55d477"; ctx.fillRect(-22,-21,44*Math.max(0,Math.min(1,(p.hp||0)/(p.maxHp||100))),5);
+    ctx.restore();
+  }
+
+  drawPlayer();
+
+  drawEffects();
+
 }
 
 
 /* =========================================================
-   CONNECTION UI
+   INPUT
 ========================================================= */
 
-function setConnection(
-    text,
-    good
-){
-
-    const el =
-        document.getElementById(
-            "connectionText"
-        );
-
-    el.textContent=text;
-
-    el.className =
-        good
-        ? "connected"
-        : "disconnected";
-}
-
-
-function setRoomStatus(
-    text,
-    type
-){
-
-    const el =
-        document.getElementById(
-            "roomStatus"
-        );
-
-    el.textContent=text;
-
-    el.className =
-        "status " +
-        type;
-}
-
-
-function setLobbyConnection(
-    text,
-    type
-){
-
-    const el =
-        document.getElementById(
-            "lobbyConnection"
-        );
-
-    el.textContent=text;
-
-    el.className =
-        "status " +
-        type;
-}
-
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
-
-function escapeHTML(value){
-
-    return String(value)
-
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
-}
-
-
-/* =========================================================
-   MAIN GAME LOOP
-========================================================= */
-
-function gameLoop(now){
-
-    const dt =
-        Math.min(
-            (now-lastTime)/1000,
-            .05
-        );
-
-    lastTime=now;
-
+addEventListener(
+  "keydown",
+  e=>{
 
     if(
-        gameRunning &&
-        !paused
+      e.key==="Escape"
     ){
 
-        updatePlayer(dt);
+      e.preventDefault();
 
-        updateMonsters(dt);
+      if(
+        document.getElementById("inventory")
+          .style.display==="flex"
+      ){
 
-        updateRemotePlayers(dt);
+        toggleInventory();
 
-        updateHUD();
+        return;
 
-        draw();
+      }
+
+      togglePause();
+
+      return;
+
     }
 
+    keys[e.key]=true;
 
-    requestAnimationFrame(
-        gameLoop
-    );
-}
+    keys[e.key.toLowerCase()]=true;
+
+    if(e.code==="Space"){
+
+      e.preventDefault();
+
+      areaAttack();
+
+    }
+
+  }
+);
 
 
-requestAnimationFrame(
-    gameLoop
+addEventListener(
+  "keyup",
+  e=>{
+
+    keys[e.key]=false;
+
+    keys[e.key.toLowerCase()]=false;
+
+  }
 );
 
 
 /* =========================================================
-   DEFAULT NAME
+   CANVAS CLICK
 ========================================================= */
 
-player.name =
-    "Player" +
-    Math.floor(
-        Math.random()*9999
-    );
+canvas.addEventListener(
+  "pointerdown",
+  e=>{
+
+    if(
+      player.dead||
+      paused
+    )return;
+
+    const rect=
+      canvas.getBoundingClientRect();
+
+    const sx=
+      e.clientX-
+      rect.left;
+
+    const sy=
+      e.clientY-
+      rect.top;
+
+    const wx=
+      sx-
+      W/2+
+      player.x;
+
+    const wy=
+      sy-
+      H/2+
+      player.y;
+
+    let clicked=null;
+
+    let closest=80;
+
+    for(const mob of mobs){
+
+      if(mob.dead)continue;
+
+      const d=
+        Math.hypot(
+          wx-mob.x,
+          wy-mob.y
+        );
+
+      if(
+        d<
+        Math.max(
+          50,
+          mob.size+20
+        ) &&
+        d<closest
+      ){
+
+        closest=d;
+
+        clicked=mob;
+
+      }
+
+    }
+
+    if(clicked){
+
+      target=clicked;
+
+      destination=null;
+
+    }else{
+
+      target=null;
+
+      destination={
+        x:wx,
+        y:wy
+      };
+
+    }
+
+  }
+);
 
 
 /* =========================================================
-   CLEANUP
+   INITIAL LOAD
 ========================================================= */
 
-window.addEventListener(
-    "beforeunload",
-    ()=>{
-        disconnectRealtime();
-    }
+loadGame();
+
+const savedName=localStorage.getItem("runevale-name");
+if(savedName) document.getElementById("playerNameInput").value=savedName;
+renderParty();
+updateMenu();
+
+updateHUD();
+
+renderInventory();
+
+
+/* =========================================================
+   GAME LOOP
+========================================================= */
+
+requestAnimationFrame(
+  function loop(now){
+
+    const dt=
+      Math.min(
+        .033,
+        (now-lastTime)/1000
+      );
+
+    lastTime=now;
+
+    update(dt);
+
+    render();
+
+    requestAnimationFrame(loop);
+
+  }
 );
 
 </script>
